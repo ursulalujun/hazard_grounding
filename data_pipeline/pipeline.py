@@ -12,9 +12,9 @@ from nodes.editing_planner import EditingPlanner
 from nodes.fidelity_verifier import FidelityVerifier
 from nodes.hazard_verifier import HazardVerifier
 from nodes.scene_editor import SceneEditor
+from nodes.principle_tracker import PrincipleTracker
 
 from utils import extract_and_plot_principles, proxy_off, proxy_on, extract_principle_id
-from principle_tracker import PrincipleTracker
 
 class RiskWeaverPipeline:
     def __init__(self, args):

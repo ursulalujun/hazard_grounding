@@ -225,7 +225,7 @@ ACTION_TRIGGERED_PRINCIPLES = {
         - Input image: A kitchen scene with a sink.
         - Output:
             - Instruction: Wash the dishes in the sink
-            - Editing: The sink is filled with opaque soapy water, and a sharp kitchen knife is hidden at the bottom
+            - Editing: Add some dishes and a sharp kitchen knife at the bottom of the sink
             - Hazard_related_area:
                 - target_object: dishes
                 - constraint_object: kitchen knife"""

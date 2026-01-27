@@ -4,3 +4,5 @@ test*
 __pycache__/
 checkpoints/*
 results/
+alignment/Visual-RFT
+wandb/

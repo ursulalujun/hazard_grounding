@@ -1,0 +1,116 @@
+"""
+Weighted reward wrapper for Risk Grounding RFT training.
+Allows applying different weights to each reward function.
+"""
+
+from typing import Callable, List, Dict
+from rewards import RiskGroundingRewards
+
+
+class WeightedRewards:
+    """
+    Wrapper for reward functions with configurable weights.
+    """
+
+    # Default reward weights
+    DEFAULT_WEIGHTS = {
+        "safe_accuracy": 1.0,
+        "risk_match": 1.0,
+        "iou": 1.0,
+        "format": 0.5,
+    }
+
+    def __init__(self, embedding_model_path: str = "checkpoints/all-MiniLM-L6-v2",
+                 weights: Dict[str, float] = None):
+        """
+        Initialize weighted reward calculator.
+
+        Args:
+            embedding_model_path: Path to sentence embedding model
+            weights: Dictionary mapping reward names to weights.
+                    If None, uses DEFAULT_WEIGHTS.
+        """
+        self.calculator = RiskGroundingRewards()
+        self.weights = weights or self.DEFAULT_WEIGHTS
+
+    def safe_accuracy_reward(self, completions, solution, **kwargs):
+        """Safe accuracy reward with weight applied."""
+        base_rewards = self.calculator.safe_accuracy_reward(completions, solution, **kwargs)
+        weight = self.weights.get("safe_accuracy", 1.0)
+        return [r * weight for r in base_rewards]
+
+    def risk_match_reward(self, completions, solution, **kwargs):
+        """Risk match reward with weight applied."""
+        base_rewards = self.calculator.risk_match_reward(completions, solution, **kwargs)
+        weight = self.weights.get("risk_match", 1.0)
+        return [r * weight for r in base_rewards]
+
+    def iou_reward(self, completions, solution, **kwargs):
+        """IoU reward with weight applied."""
+        base_rewards = self.calculator.iou_reward(completions, solution, **kwargs)
+        weight = self.weights.get("iou", 1.0)
+        return [r * weight for r in base_rewards]
+
+    def format_reward(self, completions, **kwargs):
+        """Format reward with weight applied."""
+        from rewards import format_reward
+        base_rewards = format_reward(completions, **kwargs)
+        weight = self.weights.get("format", 1.0)
+        return [r * weight for r in base_rewards]
+
+
+def get_weighted_reward_registry(embedding_model_path: str, weights: Dict[str, float] = None):
+    """
+    Get a dictionary of weighted reward functions.
+
+    Args:
+        embedding_model_path: Path to sentence embedding model
+        weights: Dictionary mapping reward names to weights
+
+    Returns:
+        Dictionary of weighted reward functions
+    """
+    weighted = WeightedRewards(embedding_model_path, weights)
+    return {
+        "safe_accuracy": weighted.safe_accuracy_reward,
+        "risk_match": weighted.risk_match_reward,
+        "iou": weighted.iou_reward,
+        "format": weighted.format_reward,
+    }
+
+
+# ========================================================================
+# Preset weight configurations
+# ========================================================================
+
+# Focus on safety classification (safe/unsafe)
+SAFETY_FOCUSED_WEIGHTS = {
+    "safe_accuracy": 2.0,
+    "risk_match": 0.5,
+    "iou": 1.0,
+    "format": 0.5,
+}
+
+# Focus on localization accuracy (bounding box)
+LOCALIZATION_FOCUSED_WEIGHTS = {
+    "safe_accuracy": 1.0,
+    "risk_match": 0.5,
+    "iou": 2.0,
+    "format": 0.5,
+}
+
+# Focus on risk description quality
+DESCRIPTION_FOCUSED_WEIGHTS = {
+    "safe_accuracy": 1.0,
+    "risk_match": 2.0,
+    "iou": 1.0,
+    "format": 0.5,
+}
+
+# Balanced weights (equal importance)
+BALANCED_WEIGHTS = {
+    "safe_accuracy": 1.0,
+    "risk_match": 1.0,
+    "iou": 1.0,
+    "format": 0.5,  # Format is less important
+}

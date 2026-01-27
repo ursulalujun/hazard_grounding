@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
     try:
         for i, gt_data in enumerate(gt_dataset["details"]):
-            if gt_data["evaluation_metrics"]["safe_acc"] == 1 and gt_data["evaluation_metrics"]["risk_match"] == 1:
+            if gt_data["evaluation_metrics"]["safe_acc"] == 1: # and gt_data["evaluation_metrics"]["risk_match"] == 1:
                 pred_bbox_list = gt_data["evaluation_metrics"]["pred_bbox"]
                 gt_bbox_list = gt_data["evaluation_metrics"]["gt_bbox"]
                 iou = evaluator.compute_list_iou(gt_bbox_list, pred_bbox_list)

@@ -1,0 +1,22 @@
+cd /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding/data_pipeline
+
+conda activate agent
+
+# 生成planning前先统计已经生成的样本分布，更新principle_checkpoint.json
+
+TYPE=$1
+NUMP=$2
+FOLDER=$3
+
+python -m nodes.editing_planner --hazard_type $TYPE --max_per_principle $NUMP --root_folder $FOLDER
+
+# Qwen-Image-Edit生成数据的速度很慢，需要数据分片并行
+
+START=$4
+END=$5
+
+python -m nodes.scene_editor --hazard_type $TYPE --min_index $START --max_index $END
+
+python -m nodes.fidelity_verifier --hazard_type $TYPE --root_folder $FOLDER
+
+python -m nodes.hazard_verifier --hazard_type $TYPE --root_folder $FOLDER

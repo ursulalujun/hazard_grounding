@@ -2,7 +2,7 @@
 import argparse
 import base64
 import cv2
-from diffusers import QwenImageEditPipeline
+from diffusers import QwenImageEditPipeline, QwenImageEditPlusPipeline
 from io import BytesIO
 import json
 import openai
@@ -13,6 +13,7 @@ import random
 import re
 import requests
 import time
+import traceback
 from tqdm import tqdm
 import torch
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -20,11 +21,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from utils import calculate_diff_bbox, visualize_bbox, parse_base64_image, proxy_on
 
 additional_colors = [colorname for (colorname, colorcode) in ImageColor.colormap.items()]
-
-key = os.getenv("EDIT_API_KEY")
-url = os.getenv("EDIT_API_URL")
-
-client = openai.OpenAI(api_key=key, base_url=url)
 
 crucial_rules = """### Crucial Rules: ###
 1.  **Edit Within Bounding Box:** The red bounding box in the input image defines the inpainting mask. Perform edits within this area.
@@ -92,8 +88,12 @@ SIMPLE_TEMPLATE="""{editing_plan}
 class SceneEditor:
     def __init__(self, editor_model, local_model=False):
         self.local_model = local_model
+        self.editor = editor_model
         if local_model:
-            self.pipeline = QwenImageEditPipeline.from_pretrained(editor_model)
+            if '2511' in editor_model:
+                self.pipeline = QwenImageEditPlusPipeline.from_pretrained(editor_model)
+            else:
+                self.pipeline = QwenImageEditPipeline.from_pretrained(editor_model)
             print("pipeline loaded")
             self.pipeline.to(torch.bfloat16)
             self.pipeline.to("cuda")
@@ -103,9 +103,8 @@ class SceneEditor:
             key = os.getenv("PLAN_API_KEY")
             url = os.getenv("PLAN_API_URL")
             self.client = openai.OpenAI(api_key=key, base_url=url)
-            self.editor = editor_model
 
-    def edit_scene(self, edited_item, hazard_type, feedback, iter_num=0, max_retries=3):
+    def edit_scene(self, edited_item, hazard_type, feedback=None, iter_num=0, max_retries=3):
         risk = edited_item['safety_risk']
         safety_principle = risk['safety_principle']
         editing_plan = risk['editing_plan']
@@ -119,6 +118,9 @@ class SceneEditor:
         else:
             image_path = risk['pre_image_path']
             save_path = image_path.replace('check_image', 'edit_image')[:-4]+'__'+f'{iter_num}.png'
+            if os.path.exists(save_path):
+                risk['edit_image_path']=save_path
+                return edited_item
             feedback=""
         if not os.path.exists(image_path):
             print(f"[ERROR]: {image_path} not find image!")
@@ -190,7 +192,7 @@ class SceneEditor:
                     else:
                         raise e 
         else:
-            if feedback is None:
+            if feedback is None or len(feedback) == 0:
                 prompt = SIMPLE_TEMPLATE.format(editing_plan=editing_plan)
             else:
                 prompt = EDITION_TEMPLATE_WITH_FEEDBACK.format(feedback=feedback)
@@ -201,8 +203,12 @@ class SceneEditor:
                 "generator": torch.manual_seed(0),
                 "true_cfg_scale": 4.0,
                 "negative_prompt": " ",
-                "num_inference_steps": 50,
+                "num_inference_steps": 50
             }
+            if '2511' in self.editor:
+                # inputs["guidance_scale"] = 1.0
+                inputs["num_images_per_prompt"] = 1
+                # inputs["num_inference_steps"] = 40
 
             with torch.inference_mode():
                 output = self.pipeline(**inputs)
@@ -241,56 +247,89 @@ if __name__ == "__main__":
         help='Must be "action_triggered" or "environmental"'
     )
     parser.add_argument(
-        '--model_name', 
+        '--editor_model', 
         type=str, 
-        default='../checkpoints/Qwen-Image-Edit' # 'gemini-2.5-flash-image',
+        default='../checkpoints/Qwen-Image-Edit-2511' # 'gemini-2.5-flash-image',
     )
     parser.add_argument(
-        '--editor_model', 
+        '--min_index', 
+        type=int, 
+        default=0,
+    )
+    parser.add_argument(
+        '--max_index', 
+        type=int, 
+        default=-1,
+    )
+    parser.add_argument(
+        '--max_workers', 
         type=int, 
         default=1,
     )
     args = parser.parse_args()
 
-    with open(f'{args.hazard_type}/editing_plan.json', 'r') as f:
+    input_path = os.path.join('data', args.hazard_type, 'editing_plan.json')
+    output_path = os.path.join('data', args.hazard_type, 'editing_info.json')
+    with open(input_path, 'r') as f:
         editing_plan = json.load(f)
     
-    edit_folder = os.path.join(args.hazard_type, "edit_image")
+    edit_folder = os.path.join("data", args.hazard_type, "edit_image")
     if not os.path.exists(edit_folder):
         os.mkdir(edit_folder)
 
-    if os.path.exists(args.editor_model):
+    if 'qwen' in args.editor_model.lower():
         local_flag = True
     else:
         local_flag = False
     editor = SceneEditor(args.editor_model, local_flag)
     
-    import ipdb; ipdb.set_trace()
-    editor.edit_scene(editing_plan[0], args.hazard_type)
+    if args.max_index == -1:
+        editing_plan = editing_plan[args.min_index :]
+    else:
+        editing_plan = editing_plan[args.min_index : args.max_index]
+
+    # import ipdb; ipdb.set_trace()
+    # editor.edit_scene(editing_plan[0], args.hazard_type)
 
     results = [None] * len(editing_plan)
 
-    with ThreadPoolExecutor(max_workers=args.max_workers) as executor:
-        future_to_index = {
-            executor.submit(editor.edit_scene, plan, args.hazard_type): i 
-            for i, plan in enumerate(editing_plan)
-        }
+    if local_flag:
+        try:
+            with tqdm(total=len(editing_plan), desc="🖼️ Processing images") as pbar:
+                for plan in editing_plan:
+                    results.append(editor.edit_scene(plan, args.hazard_type))
+        except KeyboardInterrupt:
+            print("\nProcess interrupted by user. Saving current results...")
+        except Exception as e:
+            print(f"❌ {e}")
+            traceback.print_exc()
+        finally:
+            pbar.update(1)
+    else:
+        with ThreadPoolExecutor(max_workers=args.max_workers) as executor:
+            future_to_index = {
+                executor.submit(editor.edit_scene, plan, args.hazard_type): i 
+                for i, plan in enumerate(editing_plan)
+            }
 
-        with tqdm(total=len(editing_plan), desc="🖼️ Processing images") as pbar:
-            for future in as_completed(future_to_index):
-                idx = future_to_index[future] 
-                try:
-                    res = future.result()
-                    results[idx] = res 
-                except Exception as e:
-                    print(f"❌ Error processing index {idx}: {e}")
-                    # results[idx] = {"error": str(e), "status": "failed"} 
-                finally:
-                    pbar.update(1)
+            with tqdm(total=len(editing_plan), desc="🖼️ Processing images") as pbar:
+                for future in as_completed(future_to_index):
+                    idx = future_to_index[future] 
+                    try:
+                        res = future.result()
+                        results[idx] = res 
+                    except KeyboardInterrupt:
+                        print("\nProcess interrupted by user. Saving current results...")
+                    except Exception as e:
+                        print(f"❌ Error processing index {idx}: {e}")
+                        traceback.print_exc()
+                        # results[idx] = {"error": str(e), "status": "failed"} 
+                    finally:
+                        pbar.update(1)
 
     print("✅ All images edited!")
 
     results = [r for r in results if r is not None] 
-    with open(f'{args.hazard_type}/edition_info.json', 'w') as f:
+    with open(output_path, 'w') as f:
         json.dump(results, f, indent=2)
     

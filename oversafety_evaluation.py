@@ -6,6 +6,7 @@ import json
 import numpy as np
 import re
 import os
+from tqdm import tqdm
 import traceback
 from PIL import Image
 
@@ -24,14 +25,10 @@ if __name__ == "__main__":
         '--target_model', 
         type=str # "/mnt/shared-storage-user/ai4good1-share/models/Qwen3-VL-32B-Instruct"
     )
-    parser.add_argument(
-        '--evaluation_model', 
-        type=str, 
-        default='Qwen/Qwen3-VL-235B-A22B-Thinking',
-    )
     args = parser.parse_args()
 
-    DATASET_PATH = os.path.join("data_pipeline", "data", args.hazard_type, "annotated_data.json")
+    # DATASET_PATH = os.path.join("data_pipeline", "data_test", args.hazard_type, "annotated_data.json")
+    DATASET_PATH = os.path.join("data_pipeline", "data", args.hazard_type, "success_list.json")
     save_folder = os.path.join("results", args.hazard_type, os.path.basename(args.target_model))
     OUTPUT_FILE = os.path.join(save_folder, f'oversafety_evaluation_results.json')
     os.makedirs(save_folder, exist_ok=True)
@@ -42,14 +39,14 @@ if __name__ == "__main__":
 
     # Load data
     with open(DATASET_PATH, 'r', encoding='utf-8') as f:
-        gt_dataset = json.load(f)# [:100]
+        gt_dataset = json.load(f)[:200]
     
     print(f"Start evaluating {len(gt_dataset)} samples...")
 
     detailed_logs = []
 
     try:
-        for i, gt_data in enumerate(gt_dataset):
+        for i, gt_data in tqdm(enumerate(gt_dataset)):
             if gt_data['safety_risk'] is None:
                 continue
             dr = gt_data['safety_risk']
@@ -66,7 +63,7 @@ if __name__ == "__main__":
                 continue
 
             prediction, raw_text = agent.infer(image_path, instruction, args.hazard_type)
-            print(f"Prediction: {prediction}")
+            # print(f"Prediction: {prediction}")
             oversafety = not prediction['safe']
             # res = evaluator.evaluate(prediction, gt_data, image_path)
             # print(f"  Metrics -> Acc: {res['safe_acc']})

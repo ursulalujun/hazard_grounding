@@ -49,6 +49,7 @@ class FidelityVerifier:
                     "3. Unrealistic Scale: Are relative sizes of objects illogical (e.g., a giant cat)?\n"
                     "4. Bad Anatomy: Does the person have extra limbs, fused fingers, or broken joints?\n\n"
                     "5. Residual Bounding Boxes: Are there any unremoved red bounding boxes visible in the image?\n\n"
+                    "6. Scene-Inappropriate Objects: Are there any objects that should not logically appear in this scene (e.g., food, toys, or microwave in a bathroom)?\n\n"
                     "Output Format: For each issue found, provide: [Error Message] - [Suggestion (Point error categoty and give refinement suggestion)]. "
                     "If the image is physically consistent and has no issues, output only 'PASSED'."
                 )
@@ -107,8 +108,8 @@ def process_single_item(validator, item):
 
     if img_path and os.path.exists(img_path):
         result = validator.validate_image(img_path)
-        if result['status'] == 'REJECTED':
-            risk['fidelity_check'] = f"REJECTED: {result['detail']}"
+        if 'rejected' in result.lower():
+            risk['fidelity_check'] = result
         else:
             risk['fidelity_check'] = "ACCEPTED"
     else:
@@ -116,16 +117,22 @@ def process_single_item(validator, item):
     
     return item
 
-def verify_fidelity(meta_file_path, save_path, hazard_type, max_workers):
+def verify_fidelity(verifier_model, meta_file_path, save_path, hazard_type, max_workers):
     """
     Load JSON data, process images through the verifier, and save results.
     """
     proxy_off()
-    validator = FidelityVerifier()
+    validator = FidelityVerifier(verifier_model)
     
     with open(meta_file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
-
+    
+    # data = []
+    # for d in data_pre:
+    #     if d['scene_type'] == "bathroom":
+    #         data.append(d)
+    # data = data[:100]
+    
     print(f"Starting verification for {hazard_type}...")
 
     updated_data = []
@@ -167,12 +174,21 @@ if __name__ == "__main__":
     parser.add_argument(
         '--max_workers', 
         type=int, 
-        default=24,
+        default=24
     )
-
+    parser.add_argument(
+        '--verifier_model', 
+        type=str,
+        default="Qwen/Qwen3-VL-235B-A22B-Thinking"
+    )
+    parser.add_argument(
+        '--root_folder',
+        type=str,
+        default="data",
+    )
     args = parser.parse_args()
     
     # Define file paths based on the hazard type provided
-    meta_file_path = os.path.join(args.hazard_type, "edition_info.json")
-    save_path = os.path.join(args.hazard_type, "annotation_info.json")
-    verify_fidelity(meta_file_path, save_path, args.hazard_type, args.max_workers)
+    meta_file_path = os.path.join(args.root_folder, args.hazard_type, "editing_info.json")
+    save_path = os.path.join(args.root_folder, args.hazard_type, "annotation_info.json")
+    verify_fidelity(args.verifier_model, meta_file_path, save_path, args.hazard_type, args.max_workers)

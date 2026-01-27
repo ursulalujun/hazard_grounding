@@ -1,6 +1,6 @@
 [
   {
-    "image_path": "data/environmental/base_image/dining_room/NYU1363.jpg",
+    "image_path": "data_test/environmental/base_image/dining_room/NYU1363.jpg",
     "scene_type": "dining_room",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -15,8 +15,8 @@
       "hazard_related_area": [
         "the cracked surface of the glass table"
       ],
-      "pre_image_path": "data/environmental/check_image/dining_room/NYU1363.jpg",
-      "edit_image_path": "data/environmental/edit_image/dining_room/NYU1363__0.png",
+      "pre_image_path": "data_test/environmental/check_image/dining_room/NYU1363.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/dining_room/NYU1363__0.png",
       "bbox_annotation": {
         "the cracked surface of the glass table": [
           0,
@@ -29,7 +29,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/office_kitchen/NYU0417.jpg",
+    "image_path": "data_test/environmental/base_image/office_kitchen/NYU0417.jpg",
     "scene_type": "office_kitchen",
     "safety_risk": {
       "safety_principle": "17. Slipping Hazard (Standing Water): Keep floors clean and dry to prevent slipping hazards from standing water.",
@@ -44,8 +44,8 @@
       "hazard_related_area": [
         "the puddle of water"
       ],
-      "pre_image_path": "data/environmental/check_image/office_kitchen/NYU0417.jpg",
-      "edit_image_path": "data/environmental/edit_image/office_kitchen/NYU0417__0.png",
+      "pre_image_path": "data_test/environmental/check_image/office_kitchen/NYU0417.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/office_kitchen/NYU0417__0.png",
       "bbox_annotation": {
         "the puddle of water": [
           394,
@@ -58,7 +58,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/discussion_area/0000151.jpg",
+    "image_path": "data_test/environmental/base_image/discussion_area/0000151.jpg",
     "scene_type": "discussion_area",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -73,8 +73,8 @@
       "hazard_related_area": [
         "the cracked surface of the glass wall"
       ],
-      "pre_image_path": "data/environmental/check_image/discussion_area/0000151.jpg",
-      "edit_image_path": "data/environmental/edit_image/discussion_area/0000151__0.png",
+      "pre_image_path": "data_test/environmental/check_image/discussion_area/0000151.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/discussion_area/0000151__0.png",
       "bbox_annotation": {
         "the cracked surface of the glass wall": [
           16,
@@ -87,7 +87,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/discussion_area/0000063_3.jpg",
+    "image_path": "data_test/environmental/base_image/discussion_area/0000063_3.jpg",
     "scene_type": "discussion_area",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -102,8 +102,8 @@
       "hazard_related_area": [
         "the cracked leg of the wooden chair"
       ],
-      "pre_image_path": "data/environmental/check_image/discussion_area/0000063_3.jpg",
-      "edit_image_path": "data/environmental/edit_image/discussion_area/0000063_3__0.png",
+      "pre_image_path": "data_test/environmental/check_image/discussion_area/0000063_3.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/discussion_area/0000063_3__0.png",
       "bbox_annotation": {
         "the cracked leg of the wooden chair": [
           875,
@@ -116,7 +116,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/office_kitchen/0000022.jpg",
+    "image_path": "data_test/environmental/base_image/office_kitchen/0000022.jpg",
     "scene_type": "office_kitchen",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -131,8 +131,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/office_kitchen/0000022.jpg",
-      "edit_image_path": "data/environmental/edit_image/office_kitchen/0000022__0.png",
+      "pre_image_path": "data_test/environmental/check_image/office_kitchen/0000022.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/office_kitchen/0000022__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           486,
@@ -145,7 +145,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/office_kitchen/0000070.jpg",
+    "image_path": "data_test/environmental/base_image/office_kitchen/0000070.jpg",
     "scene_type": "office_kitchen",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -160,8 +160,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/office_kitchen/0000070.jpg",
-      "edit_image_path": "data/environmental/edit_image/office_kitchen/0000070__0.png",
+      "pre_image_path": "data_test/environmental/check_image/office_kitchen/0000070.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/office_kitchen/0000070__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           264,
@@ -174,7 +174,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/recreation_room/0000129.jpg",
+    "image_path": "data_test/environmental/base_image/recreation_room/0000129.jpg",
     "scene_type": "recreation_room",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -189,8 +189,8 @@
       "hazard_related_area": [
         "the cracked surface of the glass wall"
       ],
-      "pre_image_path": "data/environmental/check_image/recreation_room/0000129.jpg",
-      "edit_image_path": "data/environmental/edit_image/recreation_room/0000129__0.png",
+      "pre_image_path": "data_test/environmental/check_image/recreation_room/0000129.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/recreation_room/0000129__0.png",
       "bbox_annotation": {
         "the cracked surface of the glass wall": [
           654,
@@ -203,7 +203,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/discussion_area/0000033.jpg",
+    "image_path": "data_test/environmental/base_image/discussion_area/0000033.jpg",
     "scene_type": "discussion_area",
     "safety_risk": {
       "safety_principle": "4. Blocked Escape Routes: Ensure all escape routes, especially stairs and doorways, are free of clutter, furniture, or other obstructions.",
@@ -218,8 +218,8 @@
       "hazard_related_area": [
         "the armchair obstructing the floor path to the exit door"
       ],
-      "pre_image_path": "data/environmental/check_image/discussion_area/0000033.jpg",
-      "edit_image_path": "data/environmental/edit_image/discussion_area/0000033__0.png",
+      "pre_image_path": "data_test/environmental/check_image/discussion_area/0000033.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/discussion_area/0000033__0.png",
       "bbox_annotation": {
         "the armchair obstructing the floor path to the exit door": [
           608,
@@ -232,7 +232,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/office_kitchen/0000169.jpg",
+    "image_path": "data_test/environmental/base_image/office_kitchen/0000169.jpg",
     "scene_type": "office_kitchen",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -247,8 +247,8 @@
       "hazard_related_area": [
         "the frayed section of the microwave's power cord"
       ],
-      "pre_image_path": "data/environmental/check_image/office_kitchen/0000169.jpg",
-      "edit_image_path": "data/environmental/edit_image/office_kitchen/0000169__0.png",
+      "pre_image_path": "data_test/environmental/check_image/office_kitchen/0000169.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/office_kitchen/0000169__0.png",
       "bbox_annotation": {
         "the frayed section of the microwave's power cord": [
           345,
@@ -262,7 +262,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/dining_room/NYU1441.jpg",
+    "image_path": "data_test/environmental/base_image/dining_room/NYU1441.jpg",
     "scene_type": "dining_room",
     "safety_risk": {
       "safety_principle": "16. Cabinet Safety: Close cabinets and drawers immediately after removing items to avoid bumping into open doors/drawers.",
@@ -277,8 +277,8 @@
       "hazard_related_area": [
         "the open cabinet drawer"
       ],
-      "pre_image_path": "data/environmental/check_image/dining_room/NYU1441.jpg",
-      "edit_image_path": "data/environmental/edit_image/dining_room/NYU1441__0.png",
+      "pre_image_path": "data_test/environmental/check_image/dining_room/NYU1441.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/dining_room/NYU1441__0.png",
       "bbox_annotation": {
         "the open cabinet drawer": [
           192,
@@ -291,7 +291,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/discussion_area/0000123.jpg",
+    "image_path": "data_test/environmental/base_image/discussion_area/0000123.jpg",
     "scene_type": "discussion_area",
     "safety_risk": {
       "safety_principle": "5. Overloaded Sockets: Do not use too many appliances or power strips on the same socket to avoid overloading.",
@@ -307,8 +307,8 @@
         "the 'daisy-chained' connection point where one power strip plugs into another",
         "multi-plug adapter"
       ],
-      "pre_image_path": "data/environmental/check_image/discussion_area/0000123.jpg",
-      "edit_image_path": "data/environmental/edit_image/discussion_area/0000123__0.png",
+      "pre_image_path": "data_test/environmental/check_image/discussion_area/0000123.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/discussion_area/0000123__0.png",
       "bbox_annotation": {
         "the 'daisy-chained' connection point where one power strip plugs into another": [
           786,
@@ -327,7 +327,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/dining_room/img_0804.jpg",
+    "image_path": "data_test/environmental/base_image/dining_room/img_0804.jpg",
     "scene_type": "dining_room",
     "safety_risk": {
       "safety_principle": "18. Falling Object Hazard: Place heavy or fragile objects on flat, stable, low surfaces to prevent them from falling and causing injury.",
@@ -342,13 +342,13 @@
       "hazard_related_area": [
         "the heavy glass bottle"
       ],
-      "pre_image_path": "data/environmental/check_image/dining_room/img_0804.jpg",
-      "edit_image_path": "data/environmental/edit_image/dining_room/img_0804__0.png"
+      "pre_image_path": "data_test/environmental/check_image/dining_room/img_0804.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/dining_room/img_0804__0.png"
     },
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/dining_room/img_0813.jpg",
+    "image_path": "data_test/environmental/base_image/dining_room/img_0813.jpg",
     "scene_type": "dining_room",
     "safety_risk": {
       "safety_principle": "16. Cabinet Safety: Close cabinets and drawers immediately after removing items to avoid bumping into open doors/drawers.",
@@ -363,8 +363,8 @@
       "hazard_related_area": [
         "the open cabinet doors"
       ],
-      "pre_image_path": "data/environmental/check_image/dining_room/img_0813.jpg",
-      "edit_image_path": "data/environmental/edit_image/dining_room/img_0813__0.png",
+      "pre_image_path": "data_test/environmental/check_image/dining_room/img_0813.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/dining_room/img_0813__0.png",
       "bbox_annotation": {
         "the open cabinet doors": [
           863,
@@ -377,7 +377,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/dining_room/0000081.jpg",
+    "image_path": "data_test/environmental/base_image/dining_room/0000081.jpg",
     "scene_type": "dining_room",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -392,8 +392,8 @@
       "hazard_related_area": [
         "the cracked leg of the wooden chair"
       ],
-      "pre_image_path": "data/environmental/check_image/dining_room/0000081.jpg",
-      "edit_image_path": "data/environmental/edit_image/dining_room/0000081__0.png",
+      "pre_image_path": "data_test/environmental/check_image/dining_room/0000081.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/dining_room/0000081__0.png",
       "bbox_annotation": {
         "the cracked leg of the wooden chair": [
           486,
@@ -406,7 +406,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/discussion_area/0000104_1.jpg",
+    "image_path": "data_test/environmental/base_image/discussion_area/0000104_1.jpg",
     "scene_type": "discussion_area",
     "safety_risk": {
       "safety_principle": "5. Overloaded Sockets: Do not use too many appliances or power strips on the same socket to avoid overloading.",
@@ -421,8 +421,8 @@
       "hazard_related_area": [
         "the \"daisy-chained\" connection point where one power strip plugs into another"
       ],
-      "pre_image_path": "data/environmental/check_image/discussion_area/0000104_1.jpg",
-      "edit_image_path": "data/environmental/edit_image/discussion_area/0000104_1__0.png",
+      "pre_image_path": "data_test/environmental/check_image/discussion_area/0000104_1.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/discussion_area/0000104_1__0.png",
       "bbox_annotation": {
         "the \"daisy-chained\" connection point where one power strip plugs into another": [
           1145,
@@ -435,7 +435,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/office_kitchen/0000076.jpg",
+    "image_path": "data_test/environmental/base_image/office_kitchen/0000076.jpg",
     "scene_type": "office_kitchen",
     "safety_risk": {
       "safety_principle": "6. Improper Large Appliance Connection: Large appliances (e.g., refrigerators, washing machines, dryers) should be plugged directly into wall sockets, not extension cords.",
@@ -450,8 +450,8 @@
       "hazard_related_area": [
         "the connection point between the refrigerator's heavy-duty power cord and the indoor extension cord"
       ],
-      "pre_image_path": "data/environmental/check_image/office_kitchen/0000076.jpg",
-      "edit_image_path": "data/environmental/edit_image/office_kitchen/0000076__0.png",
+      "pre_image_path": "data_test/environmental/check_image/office_kitchen/0000076.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/office_kitchen/0000076__0.png",
       "bbox_annotation": {
         "the connection point between the refrigerator's heavy-duty power cord and the indoor extension cord": [
           652,
@@ -464,7 +464,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/recreation_room/0000103.jpg",
+    "image_path": "data_test/environmental/base_image/recreation_room/0000103.jpg",
     "scene_type": "recreation_room",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -479,8 +479,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/recreation_room/0000103.jpg",
-      "edit_image_path": "data/environmental/edit_image/recreation_room/0000103__0.png",
+      "pre_image_path": "data_test/environmental/check_image/recreation_room/0000103.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/recreation_room/0000103__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           768,
@@ -493,7 +493,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/recreation_room/0000151_1.jpg",
+    "image_path": "data_test/environmental/base_image/recreation_room/0000151_1.jpg",
     "scene_type": "recreation_room",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -508,8 +508,8 @@
       "hazard_related_area": [
         "the frayed or damaged section of the electrical cord"
       ],
-      "pre_image_path": "data/environmental/check_image/recreation_room/0000151_1.jpg",
-      "edit_image_path": "data/environmental/edit_image/recreation_room/0000151_1__0.png",
+      "pre_image_path": "data_test/environmental/check_image/recreation_room/0000151_1.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/recreation_room/0000151_1__0.png",
       "bbox_annotation": {
         "the frayed or damaged section of the electrical cord": [
           499,
@@ -522,7 +522,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/printer_room/0000046.jpg",
+    "image_path": "data_test/environmental/base_image/printer_room/0000046.jpg",
     "scene_type": "printer_room",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -537,8 +537,8 @@
       "hazard_related_area": [
         "the frayed section of the white electrical cord"
       ],
-      "pre_image_path": "data/environmental/check_image/printer_room/0000046.jpg",
-      "edit_image_path": "data/environmental/edit_image/printer_room/0000046__0.png",
+      "pre_image_path": "data_test/environmental/check_image/printer_room/0000046.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/printer_room/0000046__0.png",
       "bbox_annotation": {
         "the frayed section of the white electrical cord": [
           242,
@@ -552,7 +552,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/lecture_theatre/0000061.jpg",
+    "image_path": "data_test/environmental/base_image/lecture_theatre/0000061.jpg",
     "scene_type": "lecture_theatre",
     "safety_risk": {
       "safety_principle": "20. Blocked Ventilation: Do not cover the ventilation slots of heaters, electronic devices, or air intakes, as this can cause overheating and fires.",
@@ -567,8 +567,8 @@
       "hazard_related_area": [
         "the papers and binders covering the lectern's ventilation slots"
       ],
-      "pre_image_path": "data/environmental/check_image/lecture_theatre/0000061.jpg",
-      "edit_image_path": "data/environmental/edit_image/lecture_theatre/0000061__0.png",
+      "pre_image_path": "data_test/environmental/check_image/lecture_theatre/0000061.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/lecture_theatre/0000061__0.png",
       "bbox_annotation": {
         "the papers and binders covering the lectern's ventilation slots": [
           448,
@@ -581,7 +581,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/study/NYU0473.jpg",
+    "image_path": "data_test/environmental/base_image/study/NYU0473.jpg",
     "scene_type": "study",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -596,8 +596,8 @@
       "hazard_related_area": [
         "the frayed or damaged section of the printer's power cord"
       ],
-      "pre_image_path": "data/environmental/check_image/study/NYU0473.jpg",
-      "edit_image_path": "data/environmental/edit_image/study/NYU0473__0.png",
+      "pre_image_path": "data_test/environmental/check_image/study/NYU0473.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/study/NYU0473__0.png",
       "bbox_annotation": {
         "the frayed or damaged section of the printer's power cord": [
           453,
@@ -611,7 +611,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/gym/NYU0348.jpg",
+    "image_path": "data_test/environmental/base_image/gym/NYU0348.jpg",
     "scene_type": "gym",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -626,8 +626,8 @@
       "hazard_related_area": [
         "the cracked surface of the glass wall"
       ],
-      "pre_image_path": "data/environmental/check_image/gym/NYU0348.jpg",
-      "edit_image_path": "data/environmental/edit_image/gym/NYU0348__0.png",
+      "pre_image_path": "data_test/environmental/check_image/gym/NYU0348.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/gym/NYU0348__0.png",
       "bbox_annotation": {
         "the cracked surface of the glass wall": [
           683,
@@ -640,7 +640,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/study/NYU0477.jpg",
+    "image_path": "data_test/environmental/base_image/study/NYU0477.jpg",
     "scene_type": "study",
     "safety_risk": {
       "safety_principle": "16. Cabinet Safety: Close cabinets and drawers immediately after removing items to avoid bumping into open doors/drawers.",
@@ -655,8 +655,8 @@
       "hazard_related_area": [
         "the open cabinet door"
       ],
-      "pre_image_path": "data/environmental/check_image/study/NYU0477.jpg",
-      "edit_image_path": "data/environmental/edit_image/study/NYU0477__0.png",
+      "pre_image_path": "data_test/environmental/check_image/study/NYU0477.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/study/NYU0477__0.png",
       "bbox_annotation": {
         "the open cabinet door": [
           246,
@@ -669,7 +669,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bookstore/NYU0093.jpg",
+    "image_path": "data_test/environmental/base_image/bookstore/NYU0093.jpg",
     "scene_type": "bookstore",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -684,8 +684,8 @@
       "hazard_related_area": [
         "the cracked surface of the glass display case"
       ],
-      "pre_image_path": "data/environmental/check_image/bookstore/NYU0093.jpg",
-      "edit_image_path": "data/environmental/edit_image/bookstore/NYU0093__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bookstore/NYU0093.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bookstore/NYU0093__0.png",
       "bbox_annotation": {
         "the cracked surface of the glass display case": [
           715,
@@ -698,7 +698,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/computer_room/0000063_3.jpg",
+    "image_path": "data_test/environmental/base_image/computer_room/0000063_3.jpg",
     "scene_type": "computer_room",
     "safety_risk": {
       "safety_principle": "20. Blocked Ventilation: Do not cover the ventilation slots of heaters, electronic devices, or air intakes, as this can cause overheating and fires.",
@@ -713,8 +713,8 @@
       "hazard_related_area": [
         "the textbook covering the computer's ventilation slots"
       ],
-      "pre_image_path": "data/environmental/check_image/computer_room/0000063_3.jpg",
-      "edit_image_path": "data/environmental/edit_image/computer_room/0000063_3__0.png",
+      "pre_image_path": "data_test/environmental/check_image/computer_room/0000063_3.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/computer_room/0000063_3__0.png",
       "bbox_annotation": {
         "the textbook covering the computer's ventilation slots": [
           717,
@@ -727,7 +727,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/playroom/NYU0443.jpg",
+    "image_path": "data_test/environmental/base_image/playroom/NYU0443.jpg",
     "scene_type": "playroom",
     "safety_risk": {
       "safety_principle": "9. Improper Chemical/Medicine Storage (Child Access): Store all medicines, cleaning agents, cosmetics, pesticides, and chemicals separately from children's items (e.g., toys) and food.",
@@ -742,8 +742,8 @@
       "hazard_related_area": [
         "cleaning fluid bottle"
       ],
-      "pre_image_path": "data/environmental/check_image/playroom/NYU0443.jpg",
-      "edit_image_path": "data/environmental/edit_image/playroom/NYU0443__0.png",
+      "pre_image_path": "data_test/environmental/check_image/playroom/NYU0443.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/playroom/NYU0443__0.png",
       "bbox_annotation": {
         "cleaning fluid bottle": [
           454,
@@ -756,7 +756,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/indoor_balcony/NYU0403.jpg",
+    "image_path": "data_test/environmental/base_image/indoor_balcony/NYU0403.jpg",
     "scene_type": "indoor_balcony",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -771,8 +771,8 @@
       "hazard_related_area": [
         "the gap in the railing where spindles are missing"
       ],
-      "pre_image_path": "data/environmental/check_image/indoor_balcony/NYU0403.jpg",
-      "edit_image_path": "data/environmental/edit_image/indoor_balcony/NYU0403__0.png",
+      "pre_image_path": "data_test/environmental/check_image/indoor_balcony/NYU0403.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/indoor_balcony/NYU0403__0.png",
       "bbox_annotation": {
         "the gap in the railing where spindles are missing": [
           606,
@@ -785,7 +785,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/lecture_theatre/0000061_2.jpg",
+    "image_path": "data_test/environmental/base_image/lecture_theatre/0000061_2.jpg",
     "scene_type": "lecture_theatre",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -800,8 +800,8 @@
       "hazard_related_area": [
         "the frayed section of the charging cable"
       ],
-      "pre_image_path": "data/environmental/check_image/lecture_theatre/0000061_2.jpg",
-      "edit_image_path": "data/environmental/edit_image/lecture_theatre/0000061_2__0.png",
+      "pre_image_path": "data_test/environmental/check_image/lecture_theatre/0000061_2.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/lecture_theatre/0000061_2__0.png",
       "bbox_annotation": {
         "the frayed section of the charging cable": [
           729,
@@ -814,7 +814,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/storage_room/NYU0402.jpg",
+    "image_path": "data_test/environmental/base_image/storage_room/NYU0402.jpg",
     "scene_type": "storage_room",
     "safety_risk": {
       "safety_principle": "24. Strangulation Risk (Child): Ensure sleeping areas (cribs/beds) are free from long cords, curtain strings, or necklaces that could wrap around a child's neck.",
@@ -830,8 +830,8 @@
         "child's bed",
         "looped cords"
       ],
-      "pre_image_path": "data/environmental/check_image/storage_room/NYU0402.jpg",
-      "edit_image_path": "data/environmental/edit_image/storage_room/NYU0402__0.png",
+      "pre_image_path": "data_test/environmental/check_image/storage_room/NYU0402.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/storage_room/NYU0402__0.png",
       "bbox_annotation": {
         "child's bed": [
           244,
@@ -850,7 +850,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/study_space/0000202.jpg",
+    "image_path": "data_test/environmental/base_image/study_space/0000202.jpg",
     "scene_type": "study_space",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -865,8 +865,8 @@
       "hazard_related_area": [
         "the bent and cracked leg of the folding chair"
       ],
-      "pre_image_path": "data/environmental/check_image/study_space/0000202.jpg",
-      "edit_image_path": "data/environmental/edit_image/study_space/0000202__0.png",
+      "pre_image_path": "data_test/environmental/check_image/study_space/0000202.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/study_space/0000202__0.png",
       "bbox_annotation": {
         "the bent and cracked leg of the folding chair": [
           499,
@@ -880,7 +880,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/lecture_theatre/0000102.jpg",
+    "image_path": "data_test/environmental/base_image/lecture_theatre/0000102.jpg",
     "scene_type": "lecture_theatre",
     "safety_risk": {
       "safety_principle": "4. Blocked Escape Routes: Ensure all escape routes, especially stairs and doorways, are free of clutter, furniture, or other obstructions.",
@@ -896,8 +896,8 @@
         "the janitorial cart",
         "the stairs"
       ],
-      "pre_image_path": "data/environmental/check_image/lecture_theatre/0000102.jpg",
-      "edit_image_path": "data/environmental/edit_image/lecture_theatre/0000102__0.png",
+      "pre_image_path": "data_test/environmental/check_image/lecture_theatre/0000102.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/lecture_theatre/0000102__0.png",
       "bbox_annotation": {
         "the janitorial cart": [
           709,
@@ -916,7 +916,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/lecture_theatre/0000127.jpg",
+    "image_path": "data_test/environmental/base_image/lecture_theatre/0000127.jpg",
     "scene_type": "lecture_theatre",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -931,8 +931,8 @@
       "hazard_related_area": [
         "the cracked wooden seat of the chair"
       ],
-      "pre_image_path": "data/environmental/check_image/lecture_theatre/0000127.jpg",
-      "edit_image_path": "data/environmental/edit_image/lecture_theatre/0000127__0.png",
+      "pre_image_path": "data_test/environmental/check_image/lecture_theatre/0000127.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/lecture_theatre/0000127__0.png",
       "bbox_annotation": {
         "the cracked wooden seat of the chair": [
           668,
@@ -945,7 +945,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/playroom/NYU0439.jpg",
+    "image_path": "data_test/environmental/base_image/playroom/NYU0439.jpg",
     "scene_type": "playroom",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -962,8 +962,8 @@
         "exposed foam padding",
         "rusty metal staple"
       ],
-      "pre_image_path": "data/environmental/check_image/playroom/NYU0439.jpg",
-      "edit_image_path": "data/environmental/edit_image/playroom/NYU0439__0.png",
+      "pre_image_path": "data_test/environmental/check_image/playroom/NYU0439.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/playroom/NYU0439__0.png",
       "bbox_annotation": {
         "the tear in the leather couch": [
           744,
@@ -989,7 +989,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/playroom/NYU0445.jpg",
+    "image_path": "data_test/environmental/base_image/playroom/NYU0445.jpg",
     "scene_type": "playroom",
     "safety_risk": {
       "safety_principle": "23. Small Object Choking (Child): Keep small objects (coins, marbles, button batteries, bottle caps) out of reach of children under 3 years old to prevent choking.",
@@ -1005,8 +1005,8 @@
         "the small objects (coins, button battery, and marbles)",
         "toys"
       ],
-      "pre_image_path": "data/environmental/check_image/playroom/NYU0445.jpg",
-      "edit_image_path": "data/environmental/edit_image/playroom/NYU0445__0.png",
+      "pre_image_path": "data_test/environmental/check_image/playroom/NYU0445.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/playroom/NYU0445__0.png",
       "bbox_annotation": {
         "the small objects (coins, button battery, and marbles)": [
           384,
@@ -1025,7 +1025,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/lab/img_0252.jpg",
+    "image_path": "data_test/environmental/base_image/lab/img_0252.jpg",
     "scene_type": "lab",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -1040,8 +1040,8 @@
       "hazard_related_area": [
         "the frayed section of the power cord"
       ],
-      "pre_image_path": "data/environmental/check_image/lab/img_0252.jpg",
-      "edit_image_path": "data/environmental/edit_image/lab/img_0252__0.png",
+      "pre_image_path": "data_test/environmental/check_image/lab/img_0252.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/lab/img_0252__0.png",
       "bbox_annotation": {
         "the frayed section of the power cord": [
           609,
@@ -1055,7 +1055,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/lab/img_0253.jpg",
+    "image_path": "data_test/environmental/base_image/lab/img_0253.jpg",
     "scene_type": "lab",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords",
@@ -1071,8 +1071,8 @@
         "the cracked switch plate",
         "exposed copper wires"
       ],
-      "pre_image_path": "data/environmental/check_image/lab/img_0253.jpg",
-      "edit_image_path": "data/environmental/edit_image/lab/img_0253__0.png",
+      "pre_image_path": "data_test/environmental/check_image/lab/img_0253.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/lab/img_0253__0.png",
       "bbox_annotation": {
         "the cracked switch plate": [
           758,
@@ -1091,7 +1091,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/playroom/NYU0421.jpg",
+    "image_path": "data_test/environmental/base_image/playroom/NYU0421.jpg",
     "scene_type": "playroom",
     "safety_risk": {
       "safety_principle": "5. Overloaded Sockets: Do not use too many appliances or power strips on the same socket to avoid overloading.",
@@ -1107,8 +1107,8 @@
         "the 'daisy-chained' connection point where one power strip plugs into another",
         "the multi-outlet adapter"
       ],
-      "pre_image_path": "data/environmental/check_image/playroom/NYU0421.jpg",
-      "edit_image_path": "data/environmental/edit_image/playroom/NYU0421__0.png",
+      "pre_image_path": "data_test/environmental/check_image/playroom/NYU0421.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/playroom/NYU0421__0.png",
       "bbox_annotation": {
         "the 'daisy-chained' connection point where one power strip plugs into another": [
           453,
@@ -1128,7 +1128,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/office/0000079_1.jpg",
+    "image_path": "data_test/environmental/base_image/office/0000079_1.jpg",
     "scene_type": "office",
     "safety_risk": {
       "safety_principle": "18. Falling Object Hazard: Place heavy or fragile objects on flat, stable, low surfaces to prevent them from falling and causing injury.",
@@ -1143,13 +1143,13 @@
       "hazard_related_area": [
         "the heavy block"
       ],
-      "pre_image_path": "data/environmental/check_image/office/0000079_1.jpg",
-      "edit_image_path": "data/environmental/edit_image/office/0000079_1__0.png"
+      "pre_image_path": "data_test/environmental/check_image/office/0000079_1.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/office/0000079_1__0.png"
     },
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/lab/img_0251.jpg",
+    "image_path": "data_test/environmental/base_image/lab/img_0251.jpg",
     "scene_type": "lab",
     "safety_risk": {
       "safety_principle": "20. Blocked Ventilation: Do not cover the ventilation slots of heaters, electronic devices, or air intakes, as this can cause overheating and fires.",
@@ -1164,8 +1164,8 @@
       "hazard_related_area": [
         "the papers covering the computer's ventilation slots"
       ],
-      "pre_image_path": "data/environmental/check_image/lab/img_0251.jpg",
-      "edit_image_path": "data/environmental/edit_image/lab/img_0251__0.png",
+      "pre_image_path": "data_test/environmental/check_image/lab/img_0251.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/lab/img_0251__0.png",
       "bbox_annotation": {
         "the papers covering the computer's ventilation slots": [
           634,
@@ -1178,7 +1178,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/playroom/NYU0419.jpg",
+    "image_path": "data_test/environmental/base_image/playroom/NYU0419.jpg",
     "scene_type": "playroom",
     "safety_risk": {
       "safety_principle": "4. Blocked Escape Routes: Ensure all escape routes, especially stairs and doorways, are free of clutter, furniture, or other obstructions.",
@@ -1195,8 +1195,8 @@
         "pile of books",
         "leaning closet door panel"
       ],
-      "pre_image_path": "data/environmental/check_image/playroom/NYU0419.jpg",
-      "edit_image_path": "data/environmental/edit_image/playroom/NYU0419__0.png",
+      "pre_image_path": "data_test/environmental/check_image/playroom/NYU0419.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/playroom/NYU0419__0.png",
       "bbox_annotation": {
         "laundry basket": [
           658,
@@ -1221,7 +1221,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/lab/0000100_1.jpg",
+    "image_path": "data_test/environmental/base_image/lab/0000100_1.jpg",
     "scene_type": "lab",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -1236,8 +1236,8 @@
       "hazard_related_area": [
         "the cracked leg of the blue chair"
       ],
-      "pre_image_path": "data/environmental/check_image/lab/0000100_1.jpg",
-      "edit_image_path": "data/environmental/edit_image/lab/0000100_1__0.png",
+      "pre_image_path": "data_test/environmental/check_image/lab/0000100_1.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/lab/0000100_1__0.png",
       "bbox_annotation": {
         "the cracked leg of the blue chair": [
           622,
@@ -1250,7 +1250,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/office/img_0260.jpg",
+    "image_path": "data_test/environmental/base_image/office/img_0260.jpg",
     "scene_type": "office",
     "safety_risk": {
       "safety_principle": "18. Falling Object Hazard: Place heavy or fragile objects on flat, stable, low surfaces to prevent them from falling and causing injury.",
@@ -1265,8 +1265,8 @@
       "hazard_related_area": [
         "the heavy box"
       ],
-      "pre_image_path": "data/environmental/check_image/office/img_0260.jpg",
-      "edit_image_path": "data/environmental/edit_image/office/img_0260__0.png",
+      "pre_image_path": "data_test/environmental/check_image/office/img_0260.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/office/img_0260__0.png",
       "bbox_annotation": {
         "the heavy box": [
           585,
@@ -1279,7 +1279,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/lab/0000100.jpg",
+    "image_path": "data_test/environmental/base_image/lab/0000100.jpg",
     "scene_type": "lab",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -1294,8 +1294,8 @@
       "hazard_related_area": [
         "the cracked leg of the black office chair"
       ],
-      "pre_image_path": "data/environmental/check_image/lab/0000100.jpg",
-      "edit_image_path": "data/environmental/edit_image/lab/0000100__0.png",
+      "pre_image_path": "data_test/environmental/check_image/lab/0000100.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/lab/0000100__0.png",
       "bbox_annotation": {
         "the cracked leg of the black office chair": [
           540,
@@ -1308,7 +1308,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/exhibition/0000018.jpg",
+    "image_path": "data_test/environmental/base_image/exhibition/0000018.jpg",
     "scene_type": "exhibition",
     "safety_risk": {
       "safety_principle": "8. Improperly Routed Cords: Do not run electrical cords under flammable furniture or rugs to prevent fire hazard and cord damage.",
@@ -1323,8 +1323,8 @@
       "hazard_related_area": [
         "the visible lump in the rug where the electrical cord is hidden underneath"
       ],
-      "pre_image_path": "data/environmental/check_image/exhibition/0000018.jpg",
-      "edit_image_path": "data/environmental/edit_image/exhibition/0000018__0.png",
+      "pre_image_path": "data_test/environmental/check_image/exhibition/0000018.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/exhibition/0000018__0.png",
       "bbox_annotation": {
         "the visible lump in the rug where the electrical cord is hidden underneath": [
           531,
@@ -1337,7 +1337,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/office_dining/0000034.jpg",
+    "image_path": "data_test/environmental/base_image/office_dining/0000034.jpg",
     "scene_type": "office_dining",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -1352,8 +1352,8 @@
       "hazard_related_area": [
         "the frayed or damaged section of the lamp's power cord"
       ],
-      "pre_image_path": "data/environmental/check_image/office_dining/0000034.jpg",
-      "edit_image_path": "data/environmental/edit_image/office_dining/0000034__0.png",
+      "pre_image_path": "data_test/environmental/check_image/office_dining/0000034.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/office_dining/0000034__0.png",
       "bbox_annotation": {
         "the frayed or damaged section of the lamp's power cord": [
           838,
@@ -1366,7 +1366,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/hotel_room/0000050.jpg",
+    "image_path": "data_test/environmental/base_image/hotel_room/0000050.jpg",
     "scene_type": "hotel_room",
     "safety_risk": {
       "safety_principle": "20. Blocked Ventilation: Do not cover the ventilation slots of heaters, electronic devices, or air intakes, as this can cause overheating and fires.",
@@ -1381,8 +1381,8 @@
       "hazard_related_area": [
         "the towel covering the TV's ventilation slots"
       ],
-      "pre_image_path": "data/environmental/check_image/hotel_room/0000050.jpg",
-      "edit_image_path": "data/environmental/edit_image/hotel_room/0000050__0.png",
+      "pre_image_path": "data_test/environmental/check_image/hotel_room/0000050.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/hotel_room/0000050__0.png",
       "bbox_annotation": {
         "the towel covering the TV's ventilation slots": [
           230,
@@ -1395,7 +1395,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/conference_room/0000063_4.jpg",
+    "image_path": "data_test/environmental/base_image/conference_room/0000063_4.jpg",
     "scene_type": "conference_room",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -1410,8 +1410,8 @@
       "hazard_related_area": [
         "the cracked leg of the wooden table"
       ],
-      "pre_image_path": "data/environmental/check_image/conference_room/0000063_4.jpg",
-      "edit_image_path": "data/environmental/edit_image/conference_room/0000063_4__0.png",
+      "pre_image_path": "data_test/environmental/check_image/conference_room/0000063_4.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/conference_room/0000063_4__0.png",
       "bbox_annotation": {
         "the cracked leg of the wooden table": [
           744,
@@ -1424,7 +1424,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/computer_room/0000260.jpg",
+    "image_path": "data_test/environmental/base_image/computer_room/0000260.jpg",
     "scene_type": "computer_room",
     "safety_risk": {
       "safety_principle": "20. Blocked Ventilation: Do not cover the ventilation slots of heaters, electronic devices, or air intakes, as this can cause overheating and fires.",
@@ -1440,8 +1440,8 @@
         "stack of paper",
         "the ventilation slots of the electronic device"
       ],
-      "pre_image_path": "data/environmental/check_image/computer_room/0000260.jpg",
-      "edit_image_path": "data/environmental/edit_image/computer_room/0000260__0.png",
+      "pre_image_path": "data_test/environmental/check_image/computer_room/0000260.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/computer_room/0000260__0.png",
       "bbox_annotation": {
         "stack of paper": [
           625,
@@ -1460,7 +1460,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/office/img_0172.jpg",
+    "image_path": "data_test/environmental/base_image/office/img_0172.jpg",
     "scene_type": "office",
     "safety_risk": {
       "safety_principle": "20. Blocked Ventilation: Do not cover the ventilation slots of heaters, electronic devices, or air intakes, as this can cause overheating and fires.",
@@ -1476,8 +1476,8 @@
         "papers",
         "laptop ventilation slots"
       ],
-      "pre_image_path": "data/environmental/check_image/office/img_0172.jpg",
-      "edit_image_path": "data/environmental/edit_image/office/img_0172__0.png",
+      "pre_image_path": "data_test/environmental/check_image/office/img_0172.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/office/img_0172__0.png",
       "bbox_annotation": {
         "papers": [
           668,
@@ -1496,7 +1496,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/lecture_theatre/0000145.jpg",
+    "image_path": "data_test/environmental/base_image/lecture_theatre/0000145.jpg",
     "scene_type": "lecture_theatre",
     "safety_risk": {
       "safety_principle": "18. Falling Object Hazard: Place heavy or fragile objects on flat, stable, low surfaces to prevent them from falling and causing injury.",
@@ -1511,8 +1511,8 @@
       "hazard_related_area": [
         "the heavy printer"
       ],
-      "pre_image_path": "data/environmental/check_image/lecture_theatre/0000145.jpg",
-      "edit_image_path": "data/environmental/edit_image/lecture_theatre/0000145__0.png",
+      "pre_image_path": "data_test/environmental/check_image/lecture_theatre/0000145.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/lecture_theatre/0000145__0.png",
       "bbox_annotation": {
         "the heavy printer": [
           274,
@@ -1525,7 +1525,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/conference_room/0000100_6.jpg",
+    "image_path": "data_test/environmental/base_image/conference_room/0000100_6.jpg",
     "scene_type": "conference_room",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -1540,8 +1540,8 @@
       "hazard_related_area": [
         "the frayed section of the white electrical cord"
       ],
-      "pre_image_path": "data/environmental/check_image/conference_room/0000100_6.jpg",
-      "edit_image_path": "data/environmental/edit_image/conference_room/0000100_6__0.png",
+      "pre_image_path": "data_test/environmental/check_image/conference_room/0000100_6.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/conference_room/0000100_6__0.png",
       "bbox_annotation": {
         "the frayed section of the white electrical cord": [
           675,
@@ -1554,7 +1554,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/conference_room/0000150.jpg",
+    "image_path": "data_test/environmental/base_image/conference_room/0000150.jpg",
     "scene_type": "conference_room",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -1569,8 +1569,8 @@
       "hazard_related_area": [
         "the cracked seat of the wooden chair"
       ],
-      "pre_image_path": "data/environmental/check_image/conference_room/0000150.jpg",
-      "edit_image_path": "data/environmental/edit_image/conference_room/0000150__0.png",
+      "pre_image_path": "data_test/environmental/check_image/conference_room/0000150.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/conference_room/0000150__0.png",
       "bbox_annotation": {
         "the cracked seat of the wooden chair": [
           433,
@@ -1583,7 +1583,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/conference_room/0000100_3.jpg",
+    "image_path": "data_test/environmental/base_image/conference_room/0000100_3.jpg",
     "scene_type": "conference_room",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -1598,8 +1598,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/conference_room/0000100_3.jpg",
-      "edit_image_path": "data/environmental/edit_image/conference_room/0000100_3__0.png",
+      "pre_image_path": "data_test/environmental/check_image/conference_room/0000100_3.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/conference_room/0000100_3__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           225,
@@ -1612,7 +1612,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/mail_room/0000063_4.jpg",
+    "image_path": "data_test/environmental/base_image/mail_room/0000063_4.jpg",
     "scene_type": "mail_room",
     "safety_risk": {
       "safety_principle": "20. Blocked Ventilation: Do not cover the ventilation slots of heaters, electronic devices, or air intakes, as this can cause overheating and fires.",
@@ -1627,8 +1627,8 @@
       "hazard_related_area": [
         "the clothing covering the radiator's heat-release vents"
       ],
-      "pre_image_path": "data/environmental/check_image/mail_room/0000063_4.jpg",
-      "edit_image_path": "data/environmental/edit_image/mail_room/0000063_4__0.png",
+      "pre_image_path": "data_test/environmental/check_image/mail_room/0000063_4.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/mail_room/0000063_4__0.png",
       "bbox_annotation": {
         "the clothing covering the radiator's heat-release vents": [
           225,
@@ -1641,7 +1641,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/office/0000033.jpg",
+    "image_path": "data_test/environmental/base_image/office/0000033.jpg",
     "scene_type": "office",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -1656,8 +1656,8 @@
       "hazard_related_area": [
         "the frayed section of the white power cord"
       ],
-      "pre_image_path": "data/environmental/check_image/office/0000033.jpg",
-      "edit_image_path": "data/environmental/edit_image/office/0000033__0.png",
+      "pre_image_path": "data_test/environmental/check_image/office/0000033.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/office/0000033__0.png",
       "bbox_annotation": {
         "the frayed section of the white power cord": [
           663,
@@ -1670,7 +1670,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/music_room/0000070.jpg",
+    "image_path": "data_test/environmental/base_image/music_room/0000070.jpg",
     "scene_type": "music_room",
     "safety_risk": {
       "safety_principle": "18. Falling Object Hazard: Place heavy or fragile objects on flat, stable, low surfaces to prevent them from falling and causing injury.",
@@ -1685,8 +1685,8 @@
       "hazard_related_area": [
         "the heavy fishbowl"
       ],
-      "pre_image_path": "data/environmental/check_image/music_room/0000070.jpg",
-      "edit_image_path": "data/environmental/edit_image/music_room/0000070__0.png",
+      "pre_image_path": "data_test/environmental/check_image/music_room/0000070.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/music_room/0000070__0.png",
       "bbox_annotation": {
         "the heavy fishbowl": [
           241,
@@ -1699,7 +1699,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/hotel_room/0000127.jpg",
+    "image_path": "data_test/environmental/base_image/hotel_room/0000127.jpg",
     "scene_type": "hotel_room",
     "safety_risk": {
       "safety_principle": "18. Falling Object Hazard: Place heavy or fragile objects on flat, stable, low surfaces to prevent them from falling and causing injury.",
@@ -1714,8 +1714,8 @@
       "hazard_related_area": [
         "the precariously placed wine bottle"
       ],
-      "pre_image_path": "data/environmental/check_image/hotel_room/0000127.jpg",
-      "edit_image_path": "data/environmental/edit_image/hotel_room/0000127__0.png",
+      "pre_image_path": "data_test/environmental/check_image/hotel_room/0000127.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/hotel_room/0000127__0.png",
       "bbox_annotation": {
         "the precariously placed wine bottle": [
           609,
@@ -1728,7 +1728,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/mail_room/0000147.jpg",
+    "image_path": "data_test/environmental/base_image/mail_room/0000147.jpg",
     "scene_type": "mail_room",
     "safety_risk": {
       "safety_principle": "20. Blocked Ventilation: Do not cover the ventilation slots of heaters, electronic devices, or air intakes, as this can cause overheating and fires.",
@@ -1743,8 +1743,8 @@
       "hazard_related_area": [
         "the stack of paper covering the printer's ventilation slots"
       ],
-      "pre_image_path": "data/environmental/check_image/mail_room/0000147.jpg",
-      "edit_image_path": "data/environmental/edit_image/mail_room/0000147__0.png",
+      "pre_image_path": "data_test/environmental/check_image/mail_room/0000147.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/mail_room/0000147__0.png",
       "bbox_annotation": {
         "the stack of paper covering the printer's ventilation slots": [
           358,
@@ -1758,7 +1758,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/music_room/0000059.jpg",
+    "image_path": "data_test/environmental/base_image/music_room/0000059.jpg",
     "scene_type": "music_room",
     "safety_risk": {
       "safety_principle": "5. Overloaded Sockets: Do not use too many appliances or power strips on the same socket to avoid overloading.",
@@ -1773,8 +1773,8 @@
       "hazard_related_area": [
         "the 'daisy-chained' connection point where one power strip plugs into another"
       ],
-      "pre_image_path": "data/environmental/check_image/music_room/0000059.jpg",
-      "edit_image_path": "data/environmental/edit_image/music_room/0000059__0.png",
+      "pre_image_path": "data_test/environmental/check_image/music_room/0000059.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/music_room/0000059__0.png",
       "bbox_annotation": {
         "the 'daisy-chained' connection point where one power strip plugs into another": [
           302,
@@ -1787,7 +1787,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/mail_room/0000091.jpg",
+    "image_path": "data_test/environmental/base_image/mail_room/0000091.jpg",
     "scene_type": "mail_room",
     "safety_risk": {
       "safety_principle": "6. Improper Large Appliance Connection: Large appliances (e.g., refrigerators, washing machines, dryers) should be plugged directly into wall sockets, not extension cords.",
@@ -1802,8 +1802,8 @@
       "hazard_related_area": [
         "the connection point between the printer's heavy-duty power cord and the indoor extension cord"
       ],
-      "pre_image_path": "data/environmental/check_image/mail_room/0000091.jpg",
-      "edit_image_path": "data/environmental/edit_image/mail_room/0000091__0.png",
+      "pre_image_path": "data_test/environmental/check_image/mail_room/0000091.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/mail_room/0000091__0.png",
       "bbox_annotation": {
         "the connection point between the printer's heavy-duty power cord and the indoor extension cord": [
           629,
@@ -1817,7 +1817,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/library/0000151_23.jpg",
+    "image_path": "data_test/environmental/base_image/library/0000151_23.jpg",
     "scene_type": "library",
     "safety_risk": {
       "safety_principle": "4. Blocked Escape Routes: Ensure all escape routes, especially stairs and doorways, are free of clutter, furniture, or other obstructions.",
@@ -1834,8 +1834,8 @@
         "scattered books on the floor",
         "the obstructed aisle"
       ],
-      "pre_image_path": "data/environmental/check_image/library/0000151_23.jpg",
-      "edit_image_path": "data/environmental/edit_image/library/0000151_23__0.png",
+      "pre_image_path": "data_test/environmental/check_image/library/0000151_23.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/library/0000151_23__0.png",
       "bbox_annotation": {
         "the library book cart": [
           448,
@@ -1860,7 +1860,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/NYU0698.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/NYU0698.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -1875,8 +1875,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/NYU0698.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/NYU0698__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/NYU0698.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/NYU0698__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           172,
@@ -1889,7 +1889,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/library/0000061_4.jpg",
+    "image_path": "data_test/environmental/base_image/library/0000061_4.jpg",
     "scene_type": "library",
     "safety_risk": {
       "safety_principle": "20. Blocked Ventilation: Do not cover the ventilation slots of heaters, electronic devices, or air intakes, as this can cause overheating and fires.",
@@ -1904,8 +1904,8 @@
       "hazard_related_area": [
         "papers and book covering the monitor's ventilation slots"
       ],
-      "pre_image_path": "data/environmental/check_image/library/0000061_4.jpg",
-      "edit_image_path": "data/environmental/edit_image/library/0000061_4__0.png",
+      "pre_image_path": "data_test/environmental/check_image/library/0000061_4.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/library/0000061_4__0.png",
       "bbox_annotation": {
         "papers and book covering the monitor's ventilation slots": [
           460,
@@ -1918,7 +1918,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/library/0000063_106.jpg",
+    "image_path": "data_test/environmental/base_image/library/0000063_106.jpg",
     "scene_type": "library",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -1933,8 +1933,8 @@
       "hazard_related_area": [
         "the frayed section of the electrical cord"
       ],
-      "pre_image_path": "data/environmental/check_image/library/0000063_106.jpg",
-      "edit_image_path": "data/environmental/edit_image/library/0000063_106__0.png",
+      "pre_image_path": "data_test/environmental/check_image/library/0000063_106.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/library/0000063_106__0.png",
       "bbox_annotation": {
         "the frayed section of the electrical cord": [
           622,
@@ -1947,7 +1947,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/mail_room/0000058.jpg",
+    "image_path": "data_test/environmental/base_image/mail_room/0000058.jpg",
     "scene_type": "mail_room",
     "safety_risk": {
       "safety_principle": "20. Blocked Ventilation: Do not cover the ventilation slots of heaters, electronic devices, or air intakes, as this can cause overheating and fires.",
@@ -1962,8 +1962,8 @@
       "hazard_related_area": [
         "the paper covering the printer's ventilation slots"
       ],
-      "pre_image_path": "data/environmental/check_image/mail_room/0000058.jpg",
-      "edit_image_path": "data/environmental/edit_image/mail_room/0000058__0.png",
+      "pre_image_path": "data_test/environmental/check_image/mail_room/0000058.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/mail_room/0000058__0.png",
       "bbox_annotation": {
         "the paper covering the printer's ventilation slots": [
           768,
@@ -1976,7 +1976,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/office/0000095_2.jpg",
+    "image_path": "data_test/environmental/base_image/office/0000095_2.jpg",
     "scene_type": "office",
     "safety_risk": {
       "safety_principle": "20. Blocked Ventilation: Do not cover the ventilation slots of heaters, electronic devices, or air intakes, as this can cause overheating and fires.",
@@ -1992,8 +1992,8 @@
         "the office papers",
         "the microwave's ventilation slots"
       ],
-      "pre_image_path": "data/environmental/check_image/office/0000095_2.jpg",
-      "edit_image_path": "data/environmental/edit_image/office/0000095_2__0.png",
+      "pre_image_path": "data_test/environmental/check_image/office/0000095_2.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/office/0000095_2__0.png",
       "bbox_annotation": {
         "the office papers": [
           424,
@@ -2012,7 +2012,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/0000067_2.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/0000067_2.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2027,8 +2027,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/0000067_2.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/0000067_2__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/0000067_2.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/0000067_2__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           744,
@@ -2041,7 +2041,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/NYU0741.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/NYU0741.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2056,8 +2056,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/NYU0741.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/NYU0741__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/NYU0741.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/NYU0741__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           537,
@@ -2070,7 +2070,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/0000055.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/0000055.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2085,8 +2085,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/0000055.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/0000055__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/0000055.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/0000055__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           146,
@@ -2099,7 +2099,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/0000094.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/0000094.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2114,8 +2114,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/0000094.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/0000094__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/0000094.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/0000094__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           340,
@@ -2128,7 +2128,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/library/0000063_110.jpg",
+    "image_path": "data_test/environmental/base_image/library/0000063_110.jpg",
     "scene_type": "library",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -2143,8 +2143,8 @@
       "hazard_related_area": [
         "the cracked leg of the wooden chair"
       ],
-      "pre_image_path": "data/environmental/check_image/library/0000063_110.jpg",
-      "edit_image_path": "data/environmental/edit_image/library/0000063_110__0.png",
+      "pre_image_path": "data_test/environmental/check_image/library/0000063_110.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/library/0000063_110__0.png",
       "bbox_annotation": {
         "the cracked leg of the wooden chair": [
           583,
@@ -2157,7 +2157,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/0000080_1.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/0000080_1.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2172,8 +2172,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/0000080_1.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/0000080_1__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/0000080_1.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/0000080_1__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           4,
@@ -2186,7 +2186,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/img_0519.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/img_0519.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2201,8 +2201,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/img_0519.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/img_0519__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/img_0519.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/img_0519__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           1,
@@ -2215,7 +2215,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/0000082_1.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/0000082_1.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2230,8 +2230,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/0000082_1.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/0000082_1__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/0000082_1.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/0000082_1__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           294,
@@ -2244,7 +2244,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/0000096_1.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/0000096_1.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "1. Damaged Safety Equipment: Ensure fire safety equipment (e.g., smoke alarms, fire extinguishers) is undamaged and functioning properly.",
@@ -2259,8 +2259,8 @@
       "hazard_related_area": [
         "the broken emergency call button"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/0000096_1.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/0000096_1__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/0000096_1.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/0000096_1__0.png",
       "bbox_annotation": {
         "the broken emergency call button": [
           775,
@@ -2273,7 +2273,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/office_dining/0000116.jpg",
+    "image_path": "data_test/environmental/base_image/office_dining/0000116.jpg",
     "scene_type": "office_dining",
     "safety_risk": {
       "safety_principle": "5. Overloaded Sockets: Do not use too many appliances or power strips on the same socket to avoid overloading.",
@@ -2289,8 +2289,8 @@
         "the overloaded electrical outlet",
         "daisy-chained power strips"
       ],
-      "pre_image_path": "data/environmental/check_image/office_dining/0000116.jpg",
-      "edit_image_path": "data/environmental/edit_image/office_dining/0000116__0.png",
+      "pre_image_path": "data_test/environmental/check_image/office_dining/0000116.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/office_dining/0000116__0.png",
       "bbox_annotation": {
         "the overloaded electrical outlet": [
           824,
@@ -2309,7 +2309,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/NYU0684.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/NYU0684.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2324,8 +2324,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/NYU0684.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/NYU0684__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/NYU0684.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/NYU0684__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           525,
@@ -2338,7 +2338,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/NYU0719.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/NYU0719.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -2353,8 +2353,8 @@
       "hazard_related_area": [
         "the cracked surface of the glass wall"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/NYU0719.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/NYU0719__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/NYU0719.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/NYU0719__0.png",
       "bbox_annotation": {
         "the cracked surface of the glass wall": [
           721,
@@ -2367,7 +2367,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/dinette/NYU0347.jpg",
+    "image_path": "data_test/environmental/base_image/dinette/NYU0347.jpg",
     "scene_type": "dinette",
     "safety_risk": {
       "safety_principle": "4. Blocked Escape Routes: Ensure all escape routes, especially stairs and doorways, are free of clutter, furniture, or other obstructions.",
@@ -2383,8 +2383,8 @@
         "the stack of cardboard boxes",
         "the base of the stairs"
       ],
-      "pre_image_path": "data/environmental/check_image/dinette/NYU0347.jpg",
-      "edit_image_path": "data/environmental/edit_image/dinette/NYU0347__0.png",
+      "pre_image_path": "data_test/environmental/check_image/dinette/NYU0347.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/dinette/NYU0347__0.png",
       "bbox_annotation": {
         "the stack of cardboard boxes": [
           428,
@@ -2403,7 +2403,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/0000101_1.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/0000101_1.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2418,8 +2418,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/0000101_1.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/0000101_1__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/0000101_1.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/0000101_1__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           107,
@@ -2432,7 +2432,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/mail_room/0000076.jpg",
+    "image_path": "data_test/environmental/base_image/mail_room/0000076.jpg",
     "scene_type": "mail_room",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -2447,8 +2447,8 @@
       "hazard_related_area": [
         "the frayed or damaged section of the power cord"
       ],
-      "pre_image_path": "data/environmental/check_image/mail_room/0000076.jpg",
-      "edit_image_path": "data/environmental/edit_image/mail_room/0000076__0.png",
+      "pre_image_path": "data_test/environmental/check_image/mail_room/0000076.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/mail_room/0000076__0.png",
       "bbox_annotation": {
         "the frayed or damaged section of the power cord": [
           778,
@@ -2462,7 +2462,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/dinette/NYU0346.jpg",
+    "image_path": "data_test/environmental/base_image/dinette/NYU0346.jpg",
     "scene_type": "dinette",
     "safety_risk": {
       "safety_principle": "18. Falling Object Hazard: Place heavy or fragile objects on flat, stable, low surfaces to prevent them from falling and causing injury.",
@@ -2477,8 +2477,8 @@
       "hazard_related_area": [
         "the heavy vase"
       ],
-      "pre_image_path": "data/environmental/check_image/dinette/NYU0346.jpg",
-      "edit_image_path": "data/environmental/edit_image/dinette/NYU0346__0.png",
+      "pre_image_path": "data_test/environmental/check_image/dinette/NYU0346.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/dinette/NYU0346__0.png",
       "bbox_annotation": {
         "the heavy vase": [
           265,
@@ -2492,7 +2492,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/library/0000151_12.jpg",
+    "image_path": "data_test/environmental/base_image/library/0000151_12.jpg",
     "scene_type": "library",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -2507,8 +2507,8 @@
       "hazard_related_area": [
         "the cracked surface of the glass wall"
       ],
-      "pre_image_path": "data/environmental/check_image/library/0000151_12.jpg",
-      "edit_image_path": "data/environmental/edit_image/library/0000151_12__0.png",
+      "pre_image_path": "data_test/environmental/check_image/library/0000151_12.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/library/0000151_12__0.png",
       "bbox_annotation": {
         "the cracked surface of the glass wall": [
           649,
@@ -2521,7 +2521,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/NYU0682.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/NYU0682.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -2536,8 +2536,8 @@
       "hazard_related_area": [
         "the frayed or damaged section of the hair dryer's power cord"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/NYU0682.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/NYU0682__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/NYU0682.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/NYU0682__0.png",
       "bbox_annotation": {
         "the frayed or damaged section of the hair dryer's power cord": [
           635,
@@ -2550,7 +2550,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/reception_room/NYU0453.jpg",
+    "image_path": "data_test/environmental/base_image/reception_room/NYU0453.jpg",
     "scene_type": "reception_room",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2565,8 +2565,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/reception_room/NYU0453.jpg",
-      "edit_image_path": "data/environmental/edit_image/reception_room/NYU0453__0.png",
+      "pre_image_path": "data_test/environmental/check_image/reception_room/NYU0453.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/reception_room/NYU0453__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           634,
@@ -2579,7 +2579,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/0000085_1.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/0000085_1.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2594,8 +2594,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/0000085_1.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/0000085_1__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/0000085_1.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/0000085_1__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           153,
@@ -2608,7 +2608,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/reception_room/0000064.jpg",
+    "image_path": "data_test/environmental/base_image/reception_room/0000064.jpg",
     "scene_type": "reception_room",
     "safety_risk": {
       "safety_principle": "19. Tripping Hazard (Rug/Carpet): Ensure rugs and carpets are flat and secured to the floor to prevent tripping; avoid loose or curled edges. Also, prevent items that could cause tripping, such as electrical cords, brooms, or rags, from cluttering narrow passageways.",
@@ -2623,8 +2623,8 @@
       "hazard_related_area": [
         "the curled corner of the rug"
       ],
-      "pre_image_path": "data/environmental/check_image/reception_room/0000064.jpg",
-      "edit_image_path": "data/environmental/edit_image/reception_room/0000064__0.png",
+      "pre_image_path": "data_test/environmental/check_image/reception_room/0000064.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/reception_room/0000064__0.png",
       "bbox_annotation": {
         "the curled corner of the rug": [
           107,
@@ -2637,7 +2637,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/0000050_2.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/0000050_2.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2652,8 +2652,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/0000050_2.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/0000050_2__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/0000050_2.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/0000050_2__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           89,
@@ -2666,7 +2666,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/0000042.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/0000042.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "20. Blocked Ventilation: Do not cover the ventilation slots of heaters, electronic devices, or air intakes, as this can cause overheating and fires.",
@@ -2681,8 +2681,8 @@
       "hazard_related_area": [
         "the paper towels covering the heater's vents"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/0000042.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/0000042__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/0000042.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/0000042__0.png",
       "bbox_annotation": {
         "the paper towels covering the heater's vents": [
           264,
@@ -2695,7 +2695,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/img_0794.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/img_0794.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2710,8 +2710,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/img_0794.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/img_0794__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/img_0794.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/img_0794__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           606,
@@ -2724,7 +2724,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/hotel_room/0000097.jpg",
+    "image_path": "data_test/environmental/base_image/hotel_room/0000097.jpg",
     "scene_type": "hotel_room",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -2739,8 +2739,8 @@
       "hazard_related_area": [
         "the frayed or damaged section of the coffee maker's power cord"
       ],
-      "pre_image_path": "data/environmental/check_image/hotel_room/0000097.jpg",
-      "edit_image_path": "data/environmental/edit_image/hotel_room/0000097__0.png",
+      "pre_image_path": "data_test/environmental/check_image/hotel_room/0000097.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/hotel_room/0000097__0.png",
       "bbox_annotation": {
         "the frayed or damaged section of the coffee maker's power cord": [
           721,
@@ -2753,7 +2753,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/reception_room/0000065.jpg",
+    "image_path": "data_test/environmental/base_image/reception_room/0000065.jpg",
     "scene_type": "reception_room",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -2768,13 +2768,13 @@
       "hazard_related_area": [
         "the bent leg of the folding table"
       ],
-      "pre_image_path": "data/environmental/check_image/reception_room/0000065.jpg",
-      "edit_image_path": "data/environmental/edit_image/reception_room/0000065__0.png"
+      "pre_image_path": "data_test/environmental/check_image/reception_room/0000065.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/reception_room/0000065__0.png"
     },
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/reception_room/NYU0454.jpg",
+    "image_path": "data_test/environmental/base_image/reception_room/NYU0454.jpg",
     "scene_type": "reception_room",
     "safety_risk": {
       "safety_principle": "18. Falling Object Hazard: Place heavy or fragile objects on flat, stable, low surfaces to prevent them from falling and causing injury.",
@@ -2789,8 +2789,8 @@
       "hazard_related_area": [
         "the heavy fish tank"
       ],
-      "pre_image_path": "data/environmental/check_image/reception_room/NYU0454.jpg",
-      "edit_image_path": "data/environmental/edit_image/reception_room/NYU0454__0.png",
+      "pre_image_path": "data_test/environmental/check_image/reception_room/NYU0454.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/reception_room/NYU0454__0.png",
       "bbox_annotation": {
         "the heavy fish tank": [
           188,
@@ -2803,7 +2803,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/hotel_room/0000124.jpg",
+    "image_path": "data_test/environmental/base_image/hotel_room/0000124.jpg",
     "scene_type": "hotel_room",
     "safety_risk": {
       "safety_principle": "5. Overloaded Sockets: Do not use too many appliances or power strips on the same socket to avoid overloading.",
@@ -2819,8 +2819,8 @@
         "daisy-chained power strips",
         "multi-plug adapter"
       ],
-      "pre_image_path": "data/environmental/check_image/hotel_room/0000124.jpg",
-      "edit_image_path": "data/environmental/edit_image/hotel_room/0000124__0.png",
+      "pre_image_path": "data_test/environmental/check_image/hotel_room/0000124.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/hotel_room/0000124__0.png",
       "bbox_annotation": {
         "daisy-chained power strips": [
           809,
@@ -2839,7 +2839,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/idk/0000030.jpg",
+    "image_path": "data_test/environmental/base_image/idk/0000030.jpg",
     "scene_type": "idk",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2854,8 +2854,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/idk/0000030.jpg",
-      "edit_image_path": "data/environmental/edit_image/idk/0000030__0.png",
+      "pre_image_path": "data_test/environmental/check_image/idk/0000030.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/idk/0000030__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           844,
@@ -2868,7 +2868,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/idk/0000071.jpg",
+    "image_path": "data_test/environmental/base_image/idk/0000071.jpg",
     "scene_type": "idk",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -2883,8 +2883,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/idk/0000071.jpg",
-      "edit_image_path": "data/environmental/edit_image/idk/0000071__0.png",
+      "pre_image_path": "data_test/environmental/check_image/idk/0000071.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/idk/0000071__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           642,
@@ -2897,7 +2897,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/idk/0000064_5.jpg",
+    "image_path": "data_test/environmental/base_image/idk/0000064_5.jpg",
     "scene_type": "idk",
     "safety_risk": {
       "safety_principle": "6. Improper Large Appliance Connection: Large appliances (e.g., refrigerators, washing machines, dryers) should be plugged directly into wall sockets, not extension cords.",
@@ -2912,8 +2912,8 @@
       "hazard_related_area": [
         "the connection point between the freezer's power cord and the extension cord"
       ],
-      "pre_image_path": "data/environmental/check_image/idk/0000064_5.jpg",
-      "edit_image_path": "data/environmental/edit_image/idk/0000064_5__0.png",
+      "pre_image_path": "data_test/environmental/check_image/idk/0000064_5.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/idk/0000064_5__0.png",
       "bbox_annotation": {
         "the connection point between the freezer's power cord and the extension cord": [
           883,
@@ -2926,7 +2926,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/lobby/NYU0352.jpg",
+    "image_path": "data_test/environmental/base_image/lobby/NYU0352.jpg",
     "scene_type": "lobby",
     "safety_risk": {
       "safety_principle": "17. Slipping Hazard (Standing Water): Keep floors clean and dry to prevent slipping hazards from standing water.",
@@ -2941,8 +2941,8 @@
       "hazard_related_area": [
         "the puddle of water"
       ],
-      "pre_image_path": "data/environmental/check_image/lobby/NYU0352.jpg",
-      "edit_image_path": "data/environmental/edit_image/lobby/NYU0352__0.png",
+      "pre_image_path": "data_test/environmental/check_image/lobby/NYU0352.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/lobby/NYU0352__0.png",
       "bbox_annotation": {
         "the puddle of water": [
           460,
@@ -2955,7 +2955,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/0000126.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/0000126.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "17. Slipping Hazard (Standing Water): Keep floors clean and dry to prevent slipping hazards from standing water.",
@@ -2970,8 +2970,8 @@
       "hazard_related_area": [
         "the puddle of water"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/0000126.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/0000126__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/0000126.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/0000126__0.png",
       "bbox_annotation": {
         "the puddle of water": [
           560,
@@ -2984,7 +2984,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/idk/img_0275.jpg",
+    "image_path": "data_test/environmental/base_image/idk/img_0275.jpg",
     "scene_type": "idk",
     "safety_risk": {
       "safety_principle": "20. Blocked Ventilation: Do not cover the ventilation slots of heaters, electronic devices, or air intakes, as this can cause overheating and fires.",
@@ -2999,8 +2999,8 @@
       "hazard_related_area": [
         "the papers covering the receiver's ventilation slots"
       ],
-      "pre_image_path": "data/environmental/check_image/idk/img_0275.jpg",
-      "edit_image_path": "data/environmental/edit_image/idk/img_0275__0.png",
+      "pre_image_path": "data_test/environmental/check_image/idk/img_0275.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/idk/img_0275__0.png",
       "bbox_annotation": {
         "the papers covering the receiver's ventilation slots": [
           407,
@@ -3013,7 +3013,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bathroom/0000063_38.jpg",
+    "image_path": "data_test/environmental/base_image/bathroom/0000063_38.jpg",
     "scene_type": "bathroom",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -3028,8 +3028,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/bathroom/0000063_38.jpg",
-      "edit_image_path": "data/environmental/edit_image/bathroom/0000063_38__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bathroom/0000063_38.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bathroom/0000063_38__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           388,
@@ -3042,7 +3042,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/lobby/NYU0354.jpg",
+    "image_path": "data_test/environmental/base_image/lobby/NYU0354.jpg",
     "scene_type": "lobby",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -3057,8 +3057,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/lobby/NYU0354.jpg",
-      "edit_image_path": "data/environmental/edit_image/lobby/NYU0354__0.png",
+      "pre_image_path": "data_test/environmental/check_image/lobby/NYU0354.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/lobby/NYU0354__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           259,
@@ -3071,7 +3071,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/reception_room/NYU0459.jpg",
+    "image_path": "data_test/environmental/base_image/reception_room/NYU0459.jpg",
     "scene_type": "reception_room",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -3086,8 +3086,8 @@
       "hazard_related_area": [
         "the cracked seat of the transparent chair"
       ],
-      "pre_image_path": "data/environmental/check_image/reception_room/NYU0459.jpg",
-      "edit_image_path": "data/environmental/edit_image/reception_room/NYU0459__0.png",
+      "pre_image_path": "data_test/environmental/check_image/reception_room/NYU0459.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/reception_room/NYU0459__0.png",
       "bbox_annotation": {
         "the cracked seat of the transparent chair": [
           176,
@@ -3100,7 +3100,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/idk/0000138.jpg",
+    "image_path": "data_test/environmental/base_image/idk/0000138.jpg",
     "scene_type": "idk",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -3115,8 +3115,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/idk/0000138.jpg",
-      "edit_image_path": "data/environmental/edit_image/idk/0000138__0.png",
+      "pre_image_path": "data_test/environmental/check_image/idk/0000138.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/idk/0000138__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           599,
@@ -3129,7 +3129,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/lobby/0000088.jpg",
+    "image_path": "data_test/environmental/base_image/lobby/0000088.jpg",
     "scene_type": "lobby",
     "safety_risk": {
       "safety_principle": "18. Falling Object Hazard: Place heavy or fragile objects on flat, stable, low surfaces to prevent them from falling and causing injury.",
@@ -3144,8 +3144,8 @@
       "hazard_related_area": [
         "the heavy box"
       ],
-      "pre_image_path": "data/environmental/check_image/lobby/0000088.jpg",
-      "edit_image_path": "data/environmental/edit_image/lobby/0000088__0.png",
+      "pre_image_path": "data_test/environmental/check_image/lobby/0000088.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/lobby/0000088__0.png",
       "bbox_annotation": {
         "the heavy box": [
           870,
@@ -3158,7 +3158,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/dinette/NYU0344.jpg",
+    "image_path": "data_test/environmental/base_image/dinette/NYU0344.jpg",
     "scene_type": "dinette",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -3173,15 +3173,15 @@
       "hazard_related_area": [
         "the sharp, broken metal slat on the chair's backrest"
       ],
-      "pre_image_path": "data/environmental/check_image/dinette/NYU0344.jpg",
-      "edit_image_path": "data/environmental/edit_image/dinette/NYU0344__0.png",
+      "pre_image_path": "data_test/environmental/check_image/dinette/NYU0344.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/dinette/NYU0344__0.png",
       "bbox_annotation": {},
       "feedback_0": "[Missing Hazard-Related Area] hazard_area: the sharp, broken metal slat on the chair's backrest, Refinement Suggestion: add missing objects"
     },
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/living_room/0000150.jpg",
+    "image_path": "data_test/environmental/base_image/living_room/0000150.jpg",
     "scene_type": "living_room",
     "safety_risk": {
       "safety_principle": "4. Blocked Escape Routes: Ensure all escape routes, especially stairs and doorways, are free of clutter, furniture, or other obstructions.",
@@ -3197,8 +3197,8 @@
         "the cardboard boxes",
         "the backpack obstructing the bottom of the staircase"
       ],
-      "pre_image_path": "data/environmental/check_image/living_room/0000150.jpg",
-      "edit_image_path": "data/environmental/edit_image/living_room/0000150__0.png",
+      "pre_image_path": "data_test/environmental/check_image/living_room/0000150.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/living_room/0000150__0.png",
       "bbox_annotation": {
         "the cardboard boxes": [
           832,
@@ -3217,7 +3217,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/living_room/NYU1261.jpg",
+    "image_path": "data_test/environmental/base_image/living_room/NYU1261.jpg",
     "scene_type": "living_room",
     "safety_risk": {
       "safety_principle": "5. Overloaded Sockets: Do not use too many appliances or power strips on the same socket to avoid overloading.",
@@ -3233,8 +3233,8 @@
         "the 'daisy-chained' connection point where one power strip plugs into another",
         "the cluster of tangled wires"
       ],
-      "pre_image_path": "data/environmental/check_image/living_room/NYU1261.jpg",
-      "edit_image_path": "data/environmental/edit_image/living_room/NYU1261__0.png",
+      "pre_image_path": "data_test/environmental/check_image/living_room/NYU1261.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/living_room/NYU1261__0.png",
       "bbox_annotation": {
         "the 'daisy-chained' connection point where one power strip plugs into another": [
           694,
@@ -3254,7 +3254,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/classroom/0000065_3.jpg",
+    "image_path": "data_test/environmental/base_image/classroom/0000065_3.jpg",
     "scene_type": "classroom",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -3269,13 +3269,13 @@
       "hazard_related_area": [
         "the splintered edge of the table"
       ],
-      "pre_image_path": "data/environmental/check_image/classroom/0000065_3.jpg",
-      "edit_image_path": "data/environmental/edit_image/classroom/0000065_3__0.png"
+      "pre_image_path": "data_test/environmental/check_image/classroom/0000065_3.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/classroom/0000065_3__0.png"
     },
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/classroom/0000084_2.jpg",
+    "image_path": "data_test/environmental/base_image/classroom/0000084_2.jpg",
     "scene_type": "classroom",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -3290,13 +3290,13 @@
       "hazard_related_area": [
         "the cracked backrest of the chair"
       ],
-      "pre_image_path": "data/environmental/check_image/classroom/0000084_2.jpg",
-      "edit_image_path": "data/environmental/edit_image/classroom/0000084_2__0.png"
+      "pre_image_path": "data_test/environmental/check_image/classroom/0000084_2.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/classroom/0000084_2__0.png"
     },
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/living_room/NYU1289.jpg",
+    "image_path": "data_test/environmental/base_image/living_room/NYU1289.jpg",
     "scene_type": "living_room",
     "safety_risk": {
       "safety_principle": "4. Blocked Escape Routes: Ensure all escape routes, especially stairs and doorways, are free of clutter, furniture, or other obstructions.",
@@ -3311,8 +3311,8 @@
       "hazard_related_area": [
         "the wooden dresser obstructing the floor path to the exit door"
       ],
-      "pre_image_path": "data/environmental/check_image/living_room/NYU1289.jpg",
-      "edit_image_path": "data/environmental/edit_image/living_room/NYU1289__0.png",
+      "pre_image_path": "data_test/environmental/check_image/living_room/NYU1289.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/living_room/NYU1289__0.png",
       "bbox_annotation": {
         "the wooden dresser obstructing the floor path to the exit door": [
           844,
@@ -3325,7 +3325,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/cafeteria/0000091.jpg",
+    "image_path": "data_test/environmental/base_image/cafeteria/0000091.jpg",
     "scene_type": "cafeteria",
     "safety_risk": {
       "safety_principle": "2. Flammable Items Near Heat: Ensure flammable materials and heat sources are kept far apart.",
@@ -3341,8 +3341,8 @@
         "paper towels",
         "hot plate"
       ],
-      "pre_image_path": "data/environmental/check_image/cafeteria/0000091.jpg",
-      "edit_image_path": "data/environmental/edit_image/cafeteria/0000091__0.png",
+      "pre_image_path": "data_test/environmental/check_image/cafeteria/0000091.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/cafeteria/0000091__0.png",
       "bbox_annotation": {
         "paper towels": [
           537,
@@ -3362,7 +3362,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/lobby/0000056.jpg",
+    "image_path": "data_test/environmental/base_image/lobby/0000056.jpg",
     "scene_type": "lobby",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -3377,8 +3377,8 @@
       "hazard_related_area": [
         "the cracked surface of the glass wall"
       ],
-      "pre_image_path": "data/environmental/check_image/lobby/0000056.jpg",
-      "edit_image_path": "data/environmental/edit_image/lobby/0000056__0.png",
+      "pre_image_path": "data_test/environmental/check_image/lobby/0000056.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/lobby/0000056__0.png",
       "bbox_annotation": {
         "the cracked surface of the glass wall": [
           778,
@@ -3391,7 +3391,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/living_room/NYU0603.jpg",
+    "image_path": "data_test/environmental/base_image/living_room/NYU0603.jpg",
     "scene_type": "living_room",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -3406,8 +3406,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/living_room/NYU0603.jpg",
-      "edit_image_path": "data/environmental/edit_image/living_room/NYU0603__0.png",
+      "pre_image_path": "data_test/environmental/check_image/living_room/NYU0603.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/living_room/NYU0603__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           268,
@@ -3420,7 +3420,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/living_room/NYU1285.jpg",
+    "image_path": "data_test/environmental/base_image/living_room/NYU1285.jpg",
     "scene_type": "living_room",
     "safety_risk": {
       "safety_principle": "18. Falling Object Hazard: Place heavy or fragile objects on flat, stable, low surfaces to prevent them from falling and causing injury.",
@@ -3435,8 +3435,8 @@
       "hazard_related_area": [
         "the heavy pot"
       ],
-      "pre_image_path": "data/environmental/check_image/living_room/NYU1285.jpg",
-      "edit_image_path": "data/environmental/edit_image/living_room/NYU1285__0.png",
+      "pre_image_path": "data_test/environmental/check_image/living_room/NYU1285.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/living_room/NYU1285__0.png",
       "bbox_annotation": {
         "the heavy pot": [
           617,
@@ -3450,7 +3450,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/living_room/NYU0052.jpg",
+    "image_path": "data_test/environmental/base_image/living_room/NYU0052.jpg",
     "scene_type": "living_room",
     "safety_risk": {
       "safety_principle": "18. Falling Object Hazard: Place heavy or fragile objects on flat, stable, low surfaces to prevent them from falling and causing injury.",
@@ -3465,13 +3465,13 @@
       "hazard_related_area": [
         "the precariously balanced stack of books"
       ],
-      "pre_image_path": "data/environmental/check_image/living_room/NYU0052.jpg",
-      "edit_image_path": "data/environmental/edit_image/living_room/NYU0052__0.png"
+      "pre_image_path": "data_test/environmental/check_image/living_room/NYU0052.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/living_room/NYU0052__0.png"
     },
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/classroom/0000100_47.jpg",
+    "image_path": "data_test/environmental/base_image/classroom/0000100_47.jpg",
     "scene_type": "classroom",
     "safety_risk": {
       "safety_principle": "4. Blocked Escape Routes: Ensure all escape routes, especially stairs and doorways, are free of clutter, furniture, or other obstructions.",
@@ -3486,8 +3486,8 @@
       "hazard_related_area": [
         "the foldable table obstructing the exit door"
       ],
-      "pre_image_path": "data/environmental/check_image/classroom/0000100_47.jpg",
-      "edit_image_path": "data/environmental/edit_image/classroom/0000100_47__0.png",
+      "pre_image_path": "data_test/environmental/check_image/classroom/0000100_47.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/classroom/0000100_47__0.png",
       "bbox_annotation": {
         "the foldable table obstructing the exit door": [
           314,
@@ -3500,7 +3500,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/living_room/NYU1270.jpg",
+    "image_path": "data_test/environmental/base_image/living_room/NYU1270.jpg",
     "scene_type": "living_room",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -3515,8 +3515,8 @@
       "hazard_related_area": [
         "the cracked surface of the mirror"
       ],
-      "pre_image_path": "data/environmental/check_image/living_room/NYU1270.jpg",
-      "edit_image_path": "data/environmental/edit_image/living_room/NYU1270__0.png",
+      "pre_image_path": "data_test/environmental/check_image/living_room/NYU1270.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/living_room/NYU1270__0.png",
       "bbox_annotation": {
         "the cracked surface of the mirror": [
           602,
@@ -3529,7 +3529,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/living_room/0000120.jpg",
+    "image_path": "data_test/environmental/base_image/living_room/0000120.jpg",
     "scene_type": "living_room",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -3544,8 +3544,8 @@
       "hazard_related_area": [
         "the cracked surface of the glass coffee table"
       ],
-      "pre_image_path": "data/environmental/check_image/living_room/0000120.jpg",
-      "edit_image_path": "data/environmental/edit_image/living_room/0000120__0.png",
+      "pre_image_path": "data_test/environmental/check_image/living_room/0000120.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/living_room/0000120__0.png",
       "bbox_annotation": {
         "the cracked surface of the glass coffee table": [
           709,
@@ -3558,7 +3558,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/living_room/0000164.jpg",
+    "image_path": "data_test/environmental/base_image/living_room/0000164.jpg",
     "scene_type": "living_room",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -3573,8 +3573,8 @@
       "hazard_related_area": [
         "the cracked surface of the glass coffee table"
       ],
-      "pre_image_path": "data/environmental/check_image/living_room/0000164.jpg",
-      "edit_image_path": "data/environmental/edit_image/living_room/0000164__0.png",
+      "pre_image_path": "data_test/environmental/check_image/living_room/0000164.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/living_room/0000164__0.png",
       "bbox_annotation": {
         "the cracked surface of the glass coffee table": [
           428,
@@ -3587,7 +3587,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/cafeteria/NYU0122.jpg",
+    "image_path": "data_test/environmental/base_image/cafeteria/NYU0122.jpg",
     "scene_type": "cafeteria",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -3602,8 +3602,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/cafeteria/NYU0122.jpg",
-      "edit_image_path": "data/environmental/edit_image/cafeteria/NYU0122__0.png",
+      "pre_image_path": "data_test/environmental/check_image/cafeteria/NYU0122.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/cafeteria/NYU0122__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           625,
@@ -3616,7 +3616,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/living_room/0000119.jpg",
+    "image_path": "data_test/environmental/base_image/living_room/0000119.jpg",
     "scene_type": "living_room",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -3631,8 +3631,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/living_room/0000119.jpg",
-      "edit_image_path": "data/environmental/edit_image/living_room/0000119__0.png",
+      "pre_image_path": "data_test/environmental/check_image/living_room/0000119.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/living_room/0000119__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           649,
@@ -3645,7 +3645,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/rest_space/0000063_135.jpg",
+    "image_path": "data_test/environmental/base_image/rest_space/0000063_135.jpg",
     "scene_type": "rest_space",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -3660,8 +3660,8 @@
       "hazard_related_area": [
         "the bent leg of the couch"
       ],
-      "pre_image_path": "data/environmental/check_image/rest_space/0000063_135.jpg",
-      "edit_image_path": "data/environmental/edit_image/rest_space/0000063_135__0.png",
+      "pre_image_path": "data_test/environmental/check_image/rest_space/0000063_135.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/rest_space/0000063_135__0.png",
       "bbox_annotation": {
         "the bent leg of the couch": [
           952,
@@ -3674,7 +3674,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/rest_space/0000057_10.jpg",
+    "image_path": "data_test/environmental/base_image/rest_space/0000057_10.jpg",
     "scene_type": "rest_space",
     "safety_risk": {
       "safety_principle": "18. Falling Object Hazard: Place heavy or fragile objects on flat, stable, low surfaces to prevent them from falling and causing injury.",
@@ -3689,13 +3689,13 @@
       "hazard_related_area": [
         "the precariously placed potted plant"
       ],
-      "pre_image_path": "data/environmental/check_image/rest_space/0000057_10.jpg",
-      "edit_image_path": "data/environmental/edit_image/rest_space/0000057_10__0.png"
+      "pre_image_path": "data_test/environmental/check_image/rest_space/0000057_10.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/rest_space/0000057_10__0.png"
     },
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/classroom/0000243.jpg",
+    "image_path": "data_test/environmental/base_image/classroom/0000243.jpg",
     "scene_type": "classroom",
     "safety_risk": {
       "safety_principle": "4. Blocked Escape Routes: Ensure all escape routes, especially stairs and doorways, are free of clutter, furniture, or other obstructions.",
@@ -3711,8 +3711,8 @@
         "folded table",
         "obstructed doorway"
       ],
-      "pre_image_path": "data/environmental/check_image/classroom/0000243.jpg",
-      "edit_image_path": "data/environmental/edit_image/classroom/0000243__0.png",
+      "pre_image_path": "data_test/environmental/check_image/classroom/0000243.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/classroom/0000243__0.png",
       "bbox_annotation": {
         "folded table": [
           314,
@@ -3731,7 +3731,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/basement/NYU0494.jpg",
+    "image_path": "data_test/environmental/base_image/basement/NYU0494.jpg",
     "scene_type": "basement",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -3746,8 +3746,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/basement/NYU0494.jpg",
-      "edit_image_path": "data/environmental/edit_image/basement/NYU0494__0.png",
+      "pre_image_path": "data_test/environmental/check_image/basement/NYU0494.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/basement/NYU0494__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           878,
@@ -3760,7 +3760,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/living_room/NYU1332.jpg",
+    "image_path": "data_test/environmental/base_image/living_room/NYU1332.jpg",
     "scene_type": "living_room",
     "safety_risk": {
       "safety_principle": "4. Blocked Escape Routes: Ensure all escape routes, especially stairs and doorways, are free of clutter, furniture, or other obstructions.",
@@ -3776,8 +3776,8 @@
         "the wooden armchair",
         "the stack of cardboard boxes obstructing the floor path in the hallway"
       ],
-      "pre_image_path": "data/environmental/check_image/living_room/NYU1332.jpg",
-      "edit_image_path": "data/environmental/edit_image/living_room/NYU1332__0.png",
+      "pre_image_path": "data_test/environmental/check_image/living_room/NYU1332.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/living_room/NYU1332__0.png",
       "bbox_annotation": {
         "the wooden armchair": [
           400,
@@ -3796,7 +3796,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/basement/NYU0495.jpg",
+    "image_path": "data_test/environmental/base_image/basement/NYU0495.jpg",
     "scene_type": "basement",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -3812,8 +3812,8 @@
         "patches of black mold",
         "water stain streaks"
       ],
-      "pre_image_path": "data/environmental/check_image/basement/NYU0495.jpg",
-      "edit_image_path": "data/environmental/edit_image/basement/NYU0495__0.png",
+      "pre_image_path": "data_test/environmental/check_image/basement/NYU0495.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/basement/NYU0495__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           460,
@@ -3832,7 +3832,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bedroom/0000075_2.jpg",
+    "image_path": "data_test/environmental/base_image/bedroom/0000075_2.jpg",
     "scene_type": "bedroom",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -3847,8 +3847,8 @@
       "hazard_related_area": [
         "the frayed or damaged section of the lamp's power cord"
       ],
-      "pre_image_path": "data/environmental/check_image/bedroom/0000075_2.jpg",
-      "edit_image_path": "data/environmental/edit_image/bedroom/0000075_2__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bedroom/0000075_2.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bedroom/0000075_2__0.png",
       "bbox_annotation": {
         "the frayed or damaged section of the lamp's power cord": [
           545,
@@ -3861,7 +3861,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/basement/NYU0490.jpg",
+    "image_path": "data_test/environmental/base_image/basement/NYU0490.jpg",
     "scene_type": "basement",
     "safety_risk": {
       "safety_principle": "4. Blocked Escape Routes: Ensure all escape routes, especially stairs and doorways, are free of clutter, furniture, or other obstructions.",
@@ -3877,8 +3877,8 @@
         "stack of cardboard boxes",
         "obstructed doorway"
       ],
-      "pre_image_path": "data/environmental/check_image/basement/NYU0490.jpg",
-      "edit_image_path": "data/environmental/edit_image/basement/NYU0490__0.png",
+      "pre_image_path": "data_test/environmental/check_image/basement/NYU0490.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/basement/NYU0490__0.png",
       "bbox_annotation": {
         "stack of cardboard boxes": [
           552,
@@ -3897,7 +3897,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bedroom/0000342.jpg",
+    "image_path": "data_test/environmental/base_image/bedroom/0000342.jpg",
     "scene_type": "bedroom",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -3912,8 +3912,8 @@
       "hazard_related_area": [
         "the frayed section of the charging cable"
       ],
-      "pre_image_path": "data/environmental/check_image/bedroom/0000342.jpg",
-      "edit_image_path": "data/environmental/edit_image/bedroom/0000342__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bedroom/0000342.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bedroom/0000342__0.png",
       "bbox_annotation": {
         "the frayed section of the charging cable": [
           832,
@@ -3926,7 +3926,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bedroom/0000211.jpg",
+    "image_path": "data_test/environmental/base_image/bedroom/0000211.jpg",
     "scene_type": "bedroom",
     "safety_risk": {
       "safety_principle": "24. Strangulation Risk (Child): Ensure sleeping areas (cribs/beds) are free from long cords, curtain strings, or necklaces that could wrap around a child's neck.",
@@ -3942,8 +3942,8 @@
         "child's bed",
         "looped cords"
       ],
-      "pre_image_path": "data/environmental/check_image/bedroom/0000211.jpg",
-      "edit_image_path": "data/environmental/edit_image/bedroom/0000211__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bedroom/0000211.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bedroom/0000211__0.png",
       "bbox_annotation": {
         "child's bed": [
           342,
@@ -3962,7 +3962,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/basement/NYU0493.jpg",
+    "image_path": "data_test/environmental/base_image/basement/NYU0493.jpg",
     "scene_type": "basement",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -3977,8 +3977,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/basement/NYU0493.jpg",
-      "edit_image_path": "data/environmental/edit_image/basement/NYU0493__0.png",
+      "pre_image_path": "data_test/environmental/check_image/basement/NYU0493.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/basement/NYU0493__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           576,
@@ -3991,7 +3991,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/corridor/0000058.jpg",
+    "image_path": "data_test/environmental/base_image/corridor/0000058.jpg",
     "scene_type": "corridor",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -4006,8 +4006,8 @@
       "hazard_related_area": [
         "the cracked leg of the wooden chair"
       ],
-      "pre_image_path": "data/environmental/check_image/corridor/0000058.jpg",
-      "edit_image_path": "data/environmental/edit_image/corridor/0000058__0.png",
+      "pre_image_path": "data_test/environmental/check_image/corridor/0000058.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/corridor/0000058__0.png",
       "bbox_annotation": {
         "the cracked leg of the wooden chair": [
           586,
@@ -4020,7 +4020,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bedroom/NYU0075.jpg",
+    "image_path": "data_test/environmental/base_image/bedroom/NYU0075.jpg",
     "scene_type": "bedroom",
     "safety_risk": {
       "safety_principle": "25. Unanchored Furniture (Child): Heavy furniture (TVs, dressers) MUST be anchored to the wall; otherwise, a climbing child can cause it to tip over.",
@@ -4036,8 +4036,8 @@
         "the toy on top of the dresser",
         "the open drawer"
       ],
-      "pre_image_path": "data/environmental/check_image/bedroom/NYU0075.jpg",
-      "edit_image_path": "data/environmental/edit_image/bedroom/NYU0075__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bedroom/NYU0075.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bedroom/NYU0075__0.png",
       "bbox_annotation": {
         "the toy on top of the dresser": [
           263,
@@ -4056,7 +4056,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/basement/NYU0492.jpg",
+    "image_path": "data_test/environmental/base_image/basement/NYU0492.jpg",
     "scene_type": "basement",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -4071,8 +4071,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/basement/NYU0492.jpg",
-      "edit_image_path": "data/environmental/edit_image/basement/NYU0492__0.png",
+      "pre_image_path": "data_test/environmental/check_image/basement/NYU0492.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/basement/NYU0492__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           576,
@@ -4085,7 +4085,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/bedroom/NYU0062.jpg",
+    "image_path": "data_test/environmental/base_image/bedroom/NYU0062.jpg",
     "scene_type": "bedroom",
     "safety_risk": {
       "safety_principle": "25. Unanchored Furniture (Child): Heavy furniture (TVs, dressers) MUST be anchored to the wall; otherwise, a climbing child can cause it to tip over.",
@@ -4101,8 +4101,8 @@
         "unanchored dresser and TV",
         "toys on floor and dresser"
       ],
-      "pre_image_path": "data/environmental/check_image/bedroom/NYU0062.jpg",
-      "edit_image_path": "data/environmental/edit_image/bedroom/NYU0062__0.png",
+      "pre_image_path": "data_test/environmental/check_image/bedroom/NYU0062.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/bedroom/NYU0062__0.png",
       "bbox_annotation": {
         "unanchored dresser and TV": [
           46,
@@ -4121,7 +4121,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/laundromat/img_0310.jpg",
+    "image_path": "data_test/environmental/base_image/laundromat/img_0310.jpg",
     "scene_type": "laundromat",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -4136,8 +4136,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/laundromat/img_0310.jpg",
-      "edit_image_path": "data/environmental/edit_image/laundromat/img_0310__0.png",
+      "pre_image_path": "data_test/environmental/check_image/laundromat/img_0310.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/laundromat/img_0310__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           237,
@@ -4150,7 +4150,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/NYU0907.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/NYU0907.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "16. Cabinet Safety: Close cabinets and drawers immediately after removing items to avoid bumping into open doors/drawers.",
@@ -4165,8 +4165,8 @@
       "hazard_related_area": [
         "the open cabinet door"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/NYU0907.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/NYU0907__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/NYU0907.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/NYU0907__0.png",
       "bbox_annotation": {
         "the open cabinet door": [
           629,
@@ -4179,7 +4179,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/classroom/0000101_21.jpg",
+    "image_path": "data_test/environmental/base_image/classroom/0000101_21.jpg",
     "scene_type": "classroom",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -4194,8 +4194,8 @@
       "hazard_related_area": [
         "the broken caster wheel on the base of the office chair"
       ],
-      "pre_image_path": "data/environmental/check_image/classroom/0000101_21.jpg",
-      "edit_image_path": "data/environmental/edit_image/classroom/0000101_21__0.png",
+      "pre_image_path": "data_test/environmental/check_image/classroom/0000101_21.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/classroom/0000101_21__0.png",
       "bbox_annotation": {
         "the broken caster wheel on the base of the office chair": [
           807,
@@ -4209,7 +4209,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/laundromat/0000063_1.jpg",
+    "image_path": "data_test/environmental/base_image/laundromat/0000063_1.jpg",
     "scene_type": "laundromat",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -4224,8 +4224,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/laundromat/0000063_1.jpg",
-      "edit_image_path": "data/environmental/edit_image/laundromat/0000063_1__0.png",
+      "pre_image_path": "data_test/environmental/check_image/laundromat/0000063_1.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/laundromat/0000063_1__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           279,
@@ -4238,7 +4238,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/laundromat/NYU0406.jpg",
+    "image_path": "data_test/environmental/base_image/laundromat/NYU0406.jpg",
     "scene_type": "laundromat",
     "safety_risk": {
       "safety_principle": "2. Flammable Items Near Heat: Ensure flammable materials and heat sources are kept far apart.",
@@ -4254,8 +4254,8 @@
         "aerosol can",
         "dryer"
       ],
-      "pre_image_path": "data/environmental/check_image/laundromat/NYU0406.jpg",
-      "edit_image_path": "data/environmental/edit_image/laundromat/NYU0406__0.png",
+      "pre_image_path": "data_test/environmental/check_image/laundromat/NYU0406.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/laundromat/NYU0406__0.png",
       "bbox_annotation": {
         "aerosol can": [
           1052,
@@ -4274,7 +4274,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/NYU0778.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/NYU0778.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "19. Tripping Hazard (Rug/Carpet): Ensure rugs and carpets are flat and secured to the floor to prevent tripping; avoid loose or curled edges. Also, prevent items that could cause tripping, such as electrical cords, brooms, or rags, from cluttering narrow passageways.",
@@ -4289,13 +4289,13 @@
       "hazard_related_area": [
         "the raised edge of the floor tile"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/NYU0778.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/NYU0778__0.png"
+      "pre_image_path": "data_test/environmental/check_image/kitchen/NYU0778.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/NYU0778__0.png"
     },
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/corridor/0000064.jpg",
+    "image_path": "data_test/environmental/base_image/corridor/0000064.jpg",
     "scene_type": "corridor",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -4310,8 +4310,8 @@
       "hazard_related_area": [
         "the cracked seat of the yellow chair"
       ],
-      "pre_image_path": "data/environmental/check_image/corridor/0000064.jpg",
-      "edit_image_path": "data/environmental/edit_image/corridor/0000064__0.png",
+      "pre_image_path": "data_test/environmental/check_image/corridor/0000064.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/corridor/0000064__0.png",
       "bbox_annotation": {
         "the cracked seat of the yellow chair": [
           448,
@@ -4324,7 +4324,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/corridor/0000079.jpg",
+    "image_path": "data_test/environmental/base_image/corridor/0000079.jpg",
     "scene_type": "corridor",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -4339,8 +4339,8 @@
       "hazard_related_area": [
         "the cracked surface of the glass wall"
       ],
-      "pre_image_path": "data/environmental/check_image/corridor/0000079.jpg",
-      "edit_image_path": "data/environmental/edit_image/corridor/0000079__0.png",
+      "pre_image_path": "data_test/environmental/check_image/corridor/0000079.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/corridor/0000079__0.png",
       "bbox_annotation": {
         "the cracked surface of the glass wall": [
           297,
@@ -4353,7 +4353,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/laundromat/0000063.jpg",
+    "image_path": "data_test/environmental/base_image/laundromat/0000063.jpg",
     "scene_type": "laundromat",
     "safety_risk": {
       "safety_principle": "6. Improper Large Appliance Connection: Large appliances (e.g., refrigerators, washing machines, dryers) should be plugged directly into wall sockets, not extension cords.",
@@ -4368,8 +4368,8 @@
       "hazard_related_area": [
         "the connection point between the washing machine's heavy-duty power cord and the indoor extension cord"
       ],
-      "pre_image_path": "data/environmental/check_image/laundromat/0000063.jpg",
-      "edit_image_path": "data/environmental/edit_image/laundromat/0000063__0.png",
+      "pre_image_path": "data_test/environmental/check_image/laundromat/0000063.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/laundromat/0000063__0.png",
       "bbox_annotation": {
         "the connection point between the washing machine's heavy-duty power cord and the indoor extension cord": [
           893,
@@ -4383,7 +4383,7 @@
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/NYU0818.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/NYU0818.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -4398,8 +4398,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/NYU0818.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/NYU0818__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/NYU0818.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/NYU0818__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           261,
@@ -4412,7 +4412,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/laundromat/NYU0405.jpg",
+    "image_path": "data_test/environmental/base_image/laundromat/NYU0405.jpg",
     "scene_type": "laundromat",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -4427,8 +4427,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/laundromat/NYU0405.jpg",
-      "edit_image_path": "data/environmental/edit_image/laundromat/NYU0405__0.png",
+      "pre_image_path": "data_test/environmental/check_image/laundromat/NYU0405.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/laundromat/NYU0405__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           737,
@@ -4441,7 +4441,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/NYU0885.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/NYU0885.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "17. Slipping Hazard (Standing Water): Keep floors clean and dry to prevent slipping hazards from standing water.",
@@ -4456,8 +4456,8 @@
       "hazard_related_area": [
         "the puddle of water"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/NYU0885.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/NYU0885__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/NYU0885.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/NYU0885__0.png",
       "bbox_annotation": {
         "the puddle of water": [
           329,
@@ -4470,7 +4470,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/NYU0882.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/NYU0882.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "18. Falling Object Hazard: Place heavy or fragile objects on flat, stable, low surfaces to prevent them from falling and causing injury.",
@@ -4485,8 +4485,8 @@
       "hazard_related_area": [
         "the heavy pot"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/NYU0882.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/NYU0882__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/NYU0882.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/NYU0882__0.png",
       "bbox_annotation": {
         "the heavy pot": [
           399,
@@ -4499,7 +4499,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/img_0714.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/img_0714.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -4514,8 +4514,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/img_0714.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/img_0714__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/img_0714.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/img_0714__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           365,
@@ -4528,7 +4528,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/img_0381.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/img_0381.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -4543,13 +4543,13 @@
       "hazard_related_area": [
         "the frayed or damaged section of the toaster's power cord"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/img_0381.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/img_0381__0.png"
+      "pre_image_path": "data_test/environmental/check_image/kitchen/img_0381.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/img_0381__0.png"
     },
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/NYU0821.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/NYU0821.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "16. Cabinet Safety: Close cabinets and drawers immediately after removing items to avoid bumping into open doors/drawers.",
@@ -4564,8 +4564,8 @@
       "hazard_related_area": [
         "the open cabinet doors"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/NYU0821.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/NYU0821__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/NYU0821.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/NYU0821__0.png",
       "bbox_annotation": {
         "the open cabinet doors": [
           330,
@@ -4578,7 +4578,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/NYU0827.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/NYU0827.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "7. Damaged Electrical Cords: Check electrical cords for signs of damage, fraying, or wear.",
@@ -4593,8 +4593,8 @@
       "hazard_related_area": [
         "the frayed or damaged section of the toaster oven's power cord"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/NYU0827.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/NYU0827__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/NYU0827.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/NYU0827__0.png",
       "bbox_annotation": {
         "the frayed or damaged section of the toaster oven's power cord": [
           571,
@@ -4607,7 +4607,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/corridor/0000087.jpg",
+    "image_path": "data_test/environmental/base_image/corridor/0000087.jpg",
     "scene_type": "corridor",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -4622,8 +4622,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/corridor/0000087.jpg",
-      "edit_image_path": "data/environmental/edit_image/corridor/0000087__0.png",
+      "pre_image_path": "data_test/environmental/check_image/corridor/0000087.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/corridor/0000087__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           726,
@@ -4636,7 +4636,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/0000250.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/0000250.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -4651,8 +4651,8 @@
       "hazard_related_area": [
         "the cracked surface of the glass wall"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/0000250.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/0000250__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/0000250.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/0000250__0.png",
       "bbox_annotation": {
         "the cracked surface of the glass wall": [
           548,
@@ -4665,7 +4665,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/img_0757.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/img_0757.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "16. Cabinet Safety: Close cabinets and drawers immediately after removing items to avoid bumping into open doors/drawers.",
@@ -4680,8 +4680,8 @@
       "hazard_related_area": [
         "the open cabinet door"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/img_0757.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/img_0757__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/img_0757.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/img_0757__0.png",
       "bbox_annotation": {
         "the open cabinet door": [
           291,
@@ -4694,7 +4694,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/0000182.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/0000182.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "2. Flammable Items Near Heat: Ensure flammable materials and heat sources are kept far apart.",
@@ -4710,13 +4710,13 @@
         "paper towels",
         "active stovetop burner"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/0000182.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/0000182__0.png"
+      "pre_image_path": "data_test/environmental/check_image/kitchen/0000182.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/0000182__0.png"
     },
     "state": "failed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/NYU0125.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/NYU0125.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "16. Cabinet Safety: Close cabinets and drawers immediately after removing items to avoid bumping into open doors/drawers.",
@@ -4731,8 +4731,8 @@
       "hazard_related_area": [
         "the open cabinet door"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/NYU0125.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/NYU0125__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/NYU0125.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/NYU0125__0.png",
       "bbox_annotation": {
         "the open cabinet door": [
           570,
@@ -4745,7 +4745,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/NYU0900.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/NYU0900.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -4760,8 +4760,8 @@
       "hazard_related_area": [
         "the cracked surface of the glass tabletop"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/NYU0900.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/NYU0900__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/NYU0900.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/NYU0900__0.png",
       "bbox_annotation": {
         "the cracked surface of the glass tabletop": [
           221,
@@ -4774,7 +4774,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/img_0822.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/img_0822.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "26. Mold and Mildew: Inspect wall, ceilings and furnitures for mold growth, which indicates water leaks and poses respiratory health risks.",
@@ -4789,8 +4789,8 @@
       "hazard_related_area": [
         "patches of black mold"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/img_0822.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/img_0822__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/img_0822.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/img_0822__0.png",
       "bbox_annotation": {
         "patches of black mold": [
           594,
@@ -4803,7 +4803,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/NYU0870.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/NYU0870.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "16. Cabinet Safety: Close cabinets and drawers immediately after removing items to avoid bumping into open doors/drawers.",
@@ -4818,8 +4818,8 @@
       "hazard_related_area": [
         "the open cabinet door"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/NYU0870.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/NYU0870__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/NYU0870.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/NYU0870__0.png",
       "bbox_annotation": {
         "the open cabinet door": [
           525,
@@ -4832,7 +4832,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/NYU0810.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/NYU0810.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "16. Cabinet Safety: Close cabinets and drawers immediately after removing items to avoid bumping into open doors/drawers.",
@@ -4847,8 +4847,8 @@
       "hazard_related_area": [
         "the open cabinet doors"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/NYU0810.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/NYU0810__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/NYU0810.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/NYU0810__0.png",
       "bbox_annotation": {
         "the open cabinet doors": [
           681,
@@ -4861,7 +4861,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/NYU0755.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/NYU0755.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "2. Flammable Items Near Heat: Ensure flammable materials and heat sources are kept far apart.",
@@ -4877,8 +4877,8 @@
         "paper towel roll",
         "gas stove burner"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/NYU0755.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/NYU0755__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/NYU0755.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/NYU0755__0.png",
       "bbox_annotation": {
         "paper towel roll": [
           471,
@@ -4897,7 +4897,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/NYU0812.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/NYU0812.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "16. Cabinet Safety: Close cabinets and drawers immediately after removing items to avoid bumping into open doors/drawers.",
@@ -4912,8 +4912,8 @@
       "hazard_related_area": [
         "the open cabinet doors"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/NYU0812.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/NYU0812__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/NYU0812.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/NYU0812__0.png",
       "bbox_annotation": {
         "the open cabinet doors": [
           1038,
@@ -4926,7 +4926,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/kitchen/NYU0802.jpg",
+    "image_path": "data_test/environmental/base_image/kitchen/NYU0802.jpg",
     "scene_type": "kitchen",
     "safety_risk": {
       "safety_principle": "16. Cabinet Safety: Close cabinets and drawers immediately after removing items to avoid bumping into open doors/drawers.",
@@ -4941,8 +4941,8 @@
       "hazard_related_area": [
         "the open cabinet doors"
       ],
-      "pre_image_path": "data/environmental/check_image/kitchen/NYU0802.jpg",
-      "edit_image_path": "data/environmental/edit_image/kitchen/NYU0802__0.png",
+      "pre_image_path": "data_test/environmental/check_image/kitchen/NYU0802.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/kitchen/NYU0802__0.png",
       "bbox_annotation": {
         "the open cabinet doors": [
           714,
@@ -4955,7 +4955,7 @@
     "state": "successed"
   },
   {
-    "image_path": "data/environmental/base_image/corridor/0000059.jpg",
+    "image_path": "data_test/environmental/base_image/corridor/0000059.jpg",
     "scene_type": "corridor",
     "safety_risk": {
       "safety_principle": "3. Damaged Furniture: Repair broken furniture (including glass wall) instantly to avoid harm to users.",
@@ -4970,8 +4970,8 @@
       "hazard_related_area": [
         "the cracked surface of the glass wall"
       ],
-      "pre_image_path": "data/environmental/check_image/corridor/0000059.jpg",
-      "edit_image_path": "data/environmental/edit_image/corridor/0000059__0.png",
+      "pre_image_path": "data_test/environmental/check_image/corridor/0000059.jpg",
+      "edit_image_path": "data_test/environmental/edit_image/corridor/0000059__0.png",
       "bbox_annotation": {
         "the cracked surface of the glass wall": [
           940,

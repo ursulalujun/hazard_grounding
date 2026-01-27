@@ -32,7 +32,6 @@ def proxy_on():
     os.environ['https_proxy']=PROXY_URL
     os.environ['HTTP_PROXY']=PROXY_URL
     os.environ['HTTPS_PROXY']=PROXY_URL
-    os.environ['no_proxy']="10.0.0.0/8,100.96.0.0/12,172.16.0.0/12,192.168.0.0/16,127.0.0.1/,100.99.182.15/,localhost,.pjlab.org.cn,.h.pjlab.org.cn"
 
 def parse_base64_image(response):
     pattern = r'base64,([a-zA-Z0-9+/=]+)'

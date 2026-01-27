@@ -7,10 +7,12 @@ from PIL import Image, ImageDraw, ImageFont
 from PIL import ImageColor
 from tqdm import tqdm
 import time
+import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from utils import parse_json, visualize_bbox, extract_and_plot_principles, bbox_norm_to_pixel, proxy_on, proxy_off, extract_principle_id
 from typing import Optional, Dict, Any
+from nodes.principle_tracker import PrincipleTracker
 
 ACTION_TRIGGERED_HZARD_TEMPLATE = """
 You are an expert AI assistant specializing in domestic safety and robotic planning. Your task is to analyze an input image of an indoor scene and propose several realistic edits that introduce a specific **Action-Triggered Safety Hazard**.
@@ -86,7 +88,7 @@ For `hazard-related object`:
 Your input:
     - scene_type: {scene_type}
 
-Just give your output in **JSON format (```json ... ```)**, do not include other information.
+Just give your output in **JSON format (```json ... ```)**, do not include other information. If no logical hazard can be added, please output `null`. DO NOT add objects that do not match the `scene_type`.
 """
 
 ENVIRONMENTAL_HAZARD_TEMPLATE = """You are an expert AI assistant specializing in domestic safety and data generation. Your task is to analyze an input image of an indoor scene and propose several realistic edits that introduce a specific **environmental safety hazard**.
@@ -135,12 +137,12 @@ Provide your response in a single JSON block.
 Your input:
     - scene_type: {scene_type}
 
-Just give your output in **JSON format (```json ... ```)**, do not include other information.
+Just give your output in **JSON format (```json ... ```)**. If no logical hazard can be added, please output `null`. DO NOT add objects that do not match the `scene_type`.
 """
 
 
 class EditingPlanner:
-    def __init__(self, planner_model: str, principle_tracker=None):
+    def __init__(self, planner_model: str, save_folder: str, principle_tracker=None):
         """
         Initialize the EditingPlanner.
 
@@ -157,8 +159,11 @@ class EditingPlanner:
         self.client = openai.OpenAI(api_key=key, base_url=url)
         self.planner = planner_model
         self.principle_tracker = principle_tracker
+        self.save_folder = save_folder
+        if not os.path.exists(save_folder):
+            os.mkdir(save_folder)
 
-    def generate_edit_plan(self, image_path: str, hazard_type: str, meta_info: Dict[str, str],
+    def generate_edit_plan(self, image_path: str, hazard_type: str, scene_type: str,
                           min_pixels=64 * 32 * 32, max_pixels=9800* 32 * 32, max_retries=3) -> Optional[Dict[str, Any]]:
         """
         Generate an editing plan for the given image.
@@ -174,7 +179,6 @@ class EditingPlanner:
         Returns:
             Dictionary containing the editing plan, or None if generation failed
         """
-        scene_type = meta_info[image_path]
 
         if os.path.exists(image_path):
             with open(image_path, "rb") as image_file:
@@ -196,7 +200,7 @@ class EditingPlanner:
                 }
         else:
             # Use default full principles text (backward compatibility)
-            from principle_tracker import ACTION_TRIGGERED_PRINCIPLES, ENVIRONMENTAL_PRINCIPLES
+            from risk_grounding.data_pipeline.nodes.principle_tracker import ACTION_TRIGGERED_PRINCIPLES, ENVIRONMENTAL_PRINCIPLES
             if hazard_type.lower() == "action_triggered":
                 principles_dict = ACTION_TRIGGERED_PRINCIPLES
             else:
@@ -239,7 +243,7 @@ class EditingPlanner:
             try:
                 response = self.client.chat.completions.create(
                     model=self.planner,
-                    messages=messages,
+                    messages=messages
                 ).choices[0].message.content
 
                 image = Image.open(image_path)
@@ -259,11 +263,20 @@ class EditingPlanner:
                     bbox_list = [{"bounding_box": safety_risk['pre_bbox_2d'], "label": None}]
                     img = visualize_bbox(image, bbox_list)
                     file_name = os.path.basename(image_path)
-                    save_path = os.path.join('data', hazard_type, 'check_image', scene_type, file_name)
+                    save_path = os.path.join(self.save_folder, scene_type, file_name)
                     safety_risk['pre_image_path'] = save_path
                     if not os.path.exists(os.path.dirname(save_path)):
                         os.mkdir(os.path.dirname(save_path))
                     img.save(save_path)
+
+                    # Increment principle counter after successful generation
+                    if self.principle_tracker is not None:
+                        safety_principle_text = safety_risk.get("safety_principle", "")
+                        principle_id = extract_principle_id(safety_principle_text)
+                        if principle_id is not None:
+                            self.principle_tracker.increment(hazard_type, principle_id)
+                            # print(f"✓ Principle {principle_id} count: {self.principle_tracker.get_count(hazard_type, principle_id)}/{self.principle_tracker.max_per_principle}")
+
                 return res
             except Exception as e:
                 print(f"⚠️ [Attempt {attempt}/{max_retries}] Plan generation failed {os.path.basename(image_path)} | Error: {e}")
@@ -294,61 +307,92 @@ if __name__ == "__main__":
         type=int,
         default=24,
     )
+    parser.add_argument(
+        '--max_per_principle',
+        type=int,
+        default=50,
+        help='Maximum samples per safety principle'
+    )
+    parser.add_argument(
+        '--root_folder',
+        type=str,
+        default="data",
+    )
     args = parser.parse_args()
 
     edit_list = []
-    root_folder = os.path.join(args.hazard_type, "base_image")
-    with open(os.path.join(args.hazard_type, "meta_info.json")) as f:
+    meta_path = os.path.join(args.root_folder, "meta_info.json")
+    output_path = os.path.join(args.root_folder, args.hazard_type, "editing_plan.json")
+    save_folder = os.path.join(args.root_folder, args.hazard_type, "check_image")
+
+    with open(meta_path, 'r') as f:
         meta_dict = json.load(f)
 
-    check_folder = os.path.join(args.hazard_type, "check_image")
-    if not os.path.exists(check_folder):
-        os.mkdir(check_folder)
-
-    image_paths = []
-    print("🔍 Scanning files...")
-    for dirpath, dirnames, filenames in os.walk(root_folder):
-        for filename in filenames:
-            if filename.lower().endswith(('.jpg', '.png')):
-                full_path = os.path.join(dirpath, filename)
-                image_paths.append(full_path)
-
-    image_paths = image_paths[:100]
+    image_paths = list(meta_dict.keys())
+    image_paths = image_paths[5000:]
     total_files = len(image_paths)
 
-    print(f"🚀 Starting concurrent processing of {total_files} images...")
+    # Initialize PrincipleTracker with checkpoint
+    checkpoint_path = os.path.join(args.root_folder, args.hazard_type, "principle_checkpoint.json")
+    principle_tracker = PrincipleTracker(
+        max_per_principle=args.max_per_principle,
+        checkpoint_path=checkpoint_path
+    )
 
-    planner = EditingPlanner(args.planner_name)
-    ## DEBUG ##
-    import ipdb; ipdb.set_trace()
-    planner.generate_edit_plan(image_paths[0], args.hazard_type, meta_dict)
+    print(f"🚀 Starting concurrent processing of {total_files} images...")
+    print(f"📊 Maximum {args.max_per_principle} samples per safety principle")
+
+    planner = EditingPlanner(args.planner_name, save_folder, principle_tracker=principle_tracker)
 
     failed_indices = []
+    stop_flag = False  # Flag to stop processing when all principles reach quota
+
+    import ipdb; ipdb.set_trace()
+    planner.generate_edit_plan(image_paths[0], args.hazard_type, meta_dict[image_paths[0]])
+
     with ThreadPoolExecutor(max_workers=args.max_workers) as executor:
         future_to_index = {
             executor.submit(
                 planner.generate_edit_plan,
                 path,
                 args.hazard_type,
-                meta_dict
+                meta_dict[path]
             ): (i, path)
             for i, path in enumerate(image_paths)
         }
         with tqdm(total=total_files, desc="🖼️ Processing images") as pbar:
             for future in as_completed(future_to_index):
+                # Check if we should stop processing
+                if stop_flag:
+                    print("🛑 All principles reached quota, cancelling remaining tasks...")
+                    for f in future_to_index:
+                        if not f.done():
+                            f.cancel()
+                    break
+
                 idx, path = future_to_index[future]
 
                 try:
                     result = future.result()
                     if result is not None and result.get("safety_risk") is not None:
                         edit_list.append(result)
+
+                        # Check if all principles have reached quota
+                        if not principle_tracker.is_principle_available(args.hazard_type):
+                            print(f"\n✅ All safety principles have reached the maximum quota ({args.max_per_principle})")
+                            print("Stopping planning phase...")
+                            stop_flag = True
+                except KeyboardInterrupt:
+                    print("\nProcess interrupted by user. Saving current results...")
                 except Exception as e:
                     failed_indices.append({"index": idx, "path": path, "error": str(e)})
+                    traceback.print_exc()
                 finally:
                     pbar.update(1)
 
     print("✅ All files processed!")
     print(f"Failed cases: {failed_indices}")
-    with open(f'{args.hazard_type}/editing_plan.json', 'w') as f:
+    with open(output_path, 'w') as f:
         json.dump(edit_list, f, indent=2)
-    extract_and_plot_principles(args.hazard_type, edit_list)
+
+    extract_and_plot_principles(os.path.join("data", args.hazard_type), edit_list)

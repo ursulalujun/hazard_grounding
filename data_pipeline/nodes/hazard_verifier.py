@@ -240,7 +240,7 @@ def process_single_item(item, verifier, hazard_type):
     if risk is None or 'rejected' in risk['fidelity_check'].lower():
         return item, "Skipped (Fidelity)"
 
-    image_path = os.path.join("data", risk["edit_image_path"])
+    image_path = risk["edit_image_path"]
     if not image_path or not os.path.exists(image_path):
         raise FileNotFoundError(f"Skipped (File not found: {image_path}")
 
@@ -296,7 +296,7 @@ def verify_hazard(meta_file_path, save_path, detector_name, hazard_type, max_wor
     failed_items = []
 
     import ipdb; ipdb.set_trace()
-    process_single_item(data[10], verifier, hazard_type)
+    process_single_item(data[2], verifier, hazard_type)
     
     print(f"🚀 Starting parallel processing with {max_workers} workers...")
 
@@ -325,6 +325,7 @@ def verify_hazard(meta_file_path, save_path, detector_name, hazard_type, max_wor
         print(f"⚠️ Totally {len(failed_items)} failure cases.")
 
     # Save results
+    import ipdb; ipdb.set_trace() 
     with open(save_path, "w", encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
@@ -349,10 +350,16 @@ if __name__ == "__main__":
         type=int,
         default=24,
     )
+    parser.add_argument(
+        '--root_folder',
+        type=str,
+        default="data",
+    )
     args = parser.parse_args()
-    meta_file_path = os.path.join("data", args.hazard_type, "annotation_info_pre.json")
-    save_path = os.path.join("data", args.hazard_type, "annotation_info.json")
-    save_folder = os.path.join("data", args.hazard_type, "annotate_image")
+
+    meta_file_path = os.path.join(args.root_folder, args.hazard_type, "annotation_info.json")
+    save_path = os.path.join(args.root_folder, args.hazard_type, "annotation_info.json")
+    save_folder = os.path.join(args.root_folder, args.hazard_type, "annotate_image")
     if not os.path.exists(save_folder):
         os.mkdir(save_folder)
     verify_hazard(meta_file_path, save_path, args.detector_name, args.hazard_type, args.max_workers)
