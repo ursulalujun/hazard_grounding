@@ -46,12 +46,12 @@ Your input:
 # ### Inputs: ###
 # - **Image:** The source image containing the red bounding box annotation.
 # - **Safety Principle:** The specific safety standard to be violated, provided as "[ID]. [Description]".
-# - **Editing Plan:** A precise instruction detailing the visual modification required.
+# - **Editing Plan:** A precise action detailing the visual modification required.
 # - **Risk-related Area:** The specific area where a safety risk exists, or the visual cue identifying a risk in the environment.{feedback_param_info}
 
 ACTION_TRIGGERED_EDITION_TEMPLATE="""You are an expert AI image editor specializing in realistic scene manipulation and simulating **Action-Triggered Safety Risks**.
 
-You are provided with an input image containing a **red bounding box**, along with a specific safety principle, an edition plan, and an risk-related area. Your task is to edit the image to create a scene that suggests an action-triggered safety risk. This means the generated scene might appear benign passively, but becomes actively dangerous when a human attempts to perform the specific action defined in the **Instruction** input.
+You are provided with an input image containing a **red bounding box**, along with a specific safety principle, an edition plan, and an risk-related area. Your task is to edit the image to create a scene that suggests an action-triggered safety risk. This means the generated scene might appear benign passively, but becomes actively dangerous when a human attempts to perform the specific action defined in the **Action** input.
 
 {crucial_rules}
 
@@ -60,15 +60,15 @@ Return only the final edited image.
 
 Your input:
 - Safety Principle: {safety_principle}
-- Instruction: {instruction}
+- Action: {action}
 - Editing Plan: {editing_plan}
 - Risk-related Area {hazard_related_area}"""
 
 # ### Inputs: ###
 # - **Image:** The source image containing the red bounding box annotation.
 # - **Safety Principle:** The specific safety standard to be violated, provided as "[ID]. [Description]".
-# - **Instruction:** The specific human task or action that makes the generated situation dangerous.
-# - **Editing Plan:** A precise instruction detailing the visual modification required.
+# - **Action:** The specific human task or action that makes the generated situation dangerous.
+# - **Editing Plan:** A precise action detailing the visual modification required.
 # - **Risk-related Area:** The specific area where a safety risk exists, or the visual cue identifying a risk in the environment.
 # - **Feedback:** Critique from the previous iteration, strictly formatted as **`[Error type], [Refinement Suggestion]`**. **This is the highest authority.** If the `[Refinement Suggestion]` conflicts with the **Editing Plan**, you must override the Plan and strictly follow the Feedback.
 
@@ -136,10 +136,10 @@ class SceneEditor:
             image_base64 = base64.b64encode(image_file.read()).decode("utf-8")
         
         if hazard_type.lower()=="action_triggered":
-            instruction = risk['instruction']
+            action = risk['action']
             prompt = ACTION_TRIGGERED_EDITION_TEMPLATE.format(safety_principle=safety_principle, 
                                                         editing_plan=editing_plan,
-                                                        instruction=instruction, 
+                                                        action=action, 
                                                         hazard_related_area=hazard_related_area,
                                                         crucial_rules=crucial_rules) 
         else:
