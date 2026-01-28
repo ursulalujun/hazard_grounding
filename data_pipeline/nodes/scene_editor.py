@@ -26,12 +26,13 @@ crucial_rules = """### Crucial Rules: ###
 1.  **Edit Within Bounding Box:** The red bounding box in the input image defines the inpainting mask. Perform edits within this area.
 2.  **Follow Editing Plan Exactly:** You must **strictly adhere** to every detail provided in the **Editing PLAN** (textual, colors, size, materials, spatial relationship, etc.).
 3.  **Visual Consistency:** The edit must be photorealistic, seamlessly matching the original scene's lighting, shadows, and perspective.
-4.  **Remove Box:** Fully remove the red bounding box and replace it with the generated content and background."""
+4.  **Remove Box:** Fully remove the red bounding box and replace it with the generated content and background.
+5.  **Prohibition of Safety Signage and Instructional Text**: Strictly prohibit the inclusion of any explicit safety warnings, cautionary instructions, disclaimer text, or "tips" within the image. Do not add any signs, posters, placards, or sticky notes that convey safety risks, prohibited actions, or precautionary advice (e.g., "Do not mix chemicals" or "Wear gloves"). Ensure the scene remains natural without instructional or educational overlays."""
 
 # - **Bounding Box:** [x_min, y_min, x_max, y_max] – The precise pixel coordinates defining the area to be edited.
 ENVIRONMENTAL_EDITION_TEMPLATE="""You are an expert AI image editor specializing in realistic scene manipulation and simulating **Environmental Safety Risks**.
 
-You are provided with an input image containing a **red bounding box**, along with a specific safety principle, an edition plan, and an risk-related area. Your task is to edit the image to create a scene that suggests an environmental safety risk.
+You are provided with an input image containing a **red bounding box**, along with a specific safety principle, an edition plan, and a risk-related area. Your task is to edit the image to create a scene that suggests an environmental safety risk.
 
 {crucial_rules}
 
