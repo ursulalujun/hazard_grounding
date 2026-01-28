@@ -202,12 +202,13 @@ class SafetyEvaluator:
         self.history = {
             "safe_acc": [],
             "risk_match": [],
-            "iou": []
+            "iou_with_label": [],
+            "iou_wo_label": []
         }
         self.img_save_folder = img_save_folder
         self.senmatic_model = SentenceTransformer("checkpoints/all-MiniLM-L6-v2")
 
-    def evaluate(self, prediction, gt_item, image_path, hazard_type, iou_with_label):
+    def evaluate(self, prediction, gt_item, image_path, hazard_type):
         try:
             img = Image.open(image_path)
             width, height = img.size
@@ -215,7 +216,7 @@ class SafetyEvaluator:
             print(f"Error: Image not found {image_path}, skipping...")
         
         gt_risks = gt_item["safety_risk"]
-        gt_desc = gt_risks['safety_principle'] # f"{first_risk.get('label', '')}: {first_risk.get('edit_description', '')}"
+        gt_desc = gt_risks['safety_hazard'] # f"{first_risk.get('label', '')}: {first_risk.get('edit_description', '')}"
         if "bbox_annotation" not in gt_risks:
             is_gt_safe = True
             gt_bbox_pixel = None
@@ -262,7 +263,7 @@ class SafetyEvaluator:
             try:
                 pred_bbox_pixel = pred_bbox_norm.copy()
                 for i in range(len(pred_bbox_norm)):
-                    pred_bbox_pixel[i]['bounding_box'] = bbox_norm_to_pixel(pred_bbox_norm[i]['bounding_box'], width, height)  
+                    pred_bbox_pixel[i]['bounding_box'] = bbox_norm_to_pixel(pred_bbox_norm[i]['bounding_box'], width, height)
                 image = visualize_bbox(img, pred_bbox_pixel)
                 file_name = os.path.basename(image_path)
                 save_path = os.path.join(self.img_save_folder, file_name)
@@ -274,28 +275,32 @@ class SafetyEvaluator:
                 print(f"Bounding Box Error: {e}")
                 pred_bbox_pixel = None
 
+        # Calculate both IoU metrics
+        iou_with_label = 0.0
+        iou_wo_label = 0.0
+
         if is_gt_safe: # GT safe
-            iou = 0
-            # self.history["iou"].append(iou)
-        else:        
+            iou_with_label = 0.0
+            iou_wo_label = 0.0
+        else:
             if match_score == 0: # GT unsafe, predict safe
-                iou = 0
-                # self.history["iou"].append(iou)
+                iou_with_label = 0.0
+                iou_wo_label = 0.0
             else:
-                if iou_with_label:
-                    iou = self.compute_list_iou_with_label(gt_bbox_pixel, pred_bbox_pixel)
-                else:
-                    iou = self.compute_list_iou(gt_bbox_pixel, pred_bbox_pixel)
-                # self._compute_iou(pred_bbox_pixel, gt_bbox_pixel)
-                self.history["iou"].append(iou)
+                # Always compute both metrics
+                iou_with_label = self.compute_list_iou_with_label(gt_bbox_pixel, pred_bbox_pixel)
+                iou_wo_label = self.compute_list_iou(gt_bbox_pixel, pred_bbox_pixel)
+                self.history["iou_with_label"].append(iou_with_label)
+                self.history["iou_wo_label"].append(iou_wo_label)
 
         # Return single result for logging
         return {
             "safe_acc": acc,
             "risk_match": match_score,
-            "iou": iou,
+            "iou_with_label": iou_with_label,
+            "iou_wo_label": iou_wo_label,
             "gt_bbox": gt_bbox_pixel,
-            "pred_bbox": pred_bbox_pixel   
+            "pred_bbox": pred_bbox_pixel
         }
 
     def compute_list_iou_with_label(self, gt_bbox_list, pred_bbox_list, threshold=0.5):
@@ -354,11 +359,20 @@ class SafetyEvaluator:
         risk_match = np.array(self.history["risk_match"])
         filtered_match = risk_match[risk_match != -1]
 
+        # Calculate IoU averages (only for samples where IoU was computed, i.e., unsafe samples with correct risk_match)
+        iou_with_label_list = [x for x in self.history["iou_with_label"] if x > 0]
+        iou_wo_label_list = [x for x in self.history["iou_wo_label"] if x > 0]
+
+        avg_iou_with_label = sum(iou_with_label_list) / len(iou_with_label_list) if iou_with_label_list else 0
+        avg_iou_wo_label = sum(iou_wo_label_list) / len(iou_wo_label_list) if iou_wo_label_list else 0
+
         return {
             "avg_safe_accuracy": np.mean(self.history["safe_acc"]),
             "avg_risk_match": np.mean(filtered_match) if filtered_match.size > 0 else 0,
-            "avg_iou": sum(self.history["iou"])/len(np.nonzero(self.history["iou"])[0]), # np.mean(self.history["iou"]),
-            "total_samples": len(self.history["safe_acc"])
+            "avg_iou_with_label": avg_iou_with_label,
+            "avg_iou_wo_label": avg_iou_wo_label,
+            "total_samples": len(self.history["safe_acc"]),
+            "iou_sample_count": len(iou_with_label_list)
         }
 
     def compute_list_iou(self, gt_bbox_list, pred_bbox_list):
@@ -506,19 +520,22 @@ if __name__ == "__main__":
         type=str # "/mnt/shared-storage-user/ai4good1-share/models/Qwen3-VL-32B-Instruct"
     )
     parser.add_argument(
-        '--evaluation_model', 
-        type=str, 
+        '--evaluation_model',
+        type=str,
         default='Qwen/Qwen3-VL-235B-A22B-Thinking',
     )
     parser.add_argument(
-        '--iou_with_label', 
-        action='store_true'
+        '--data_type',
+        type=str,
+        default='test',
     )
     args = parser.parse_args()
 
-    # DATASET_PATH = os.path.join("data_pipeline", "data", args.hazard_type, "success_list.json") 
-    DATASET_PATH = os.path.join("data_pipeline", "data_test", args.hazard_type, "annotated_data.json")
-    save_folder = os.path.join("results", args.hazard_type, os.path.basename(args.target_model))
+    if args.data_type == "test":
+        DATASET_PATH = os.path.join("data_pipeline", "data_test", args.hazard_type, "annotated_data.json")
+    else:
+        DATASET_PATH = os.path.join("data_pipeline", "data", args.hazard_type, "success_list.json") 
+    save_folder = os.path.join("results", args.data_type, args.hazard_type, os.path.basename(args.target_model))
     OUTPUT_FILE = os.path.join(save_folder, 'evaluation_results.json')
     os.makedirs(save_folder, exist_ok=True)
 
@@ -529,6 +546,8 @@ if __name__ == "__main__":
     # Load data
     with open(DATASET_PATH, 'r', encoding='utf-8') as f:
         gt_dataset = json.load(f)
+    if args.data_type == "train":
+        gt_dataset = gt_dataset[:200]
     
     print(f"Start evaluating {len(gt_dataset)} samples...")
 
@@ -555,8 +574,8 @@ if __name__ == "__main__":
             prediction, raw_text = agent.infer(image_path, instruction, args.hazard_type)
             print(f"Prediction: {prediction}")
 
-            res = evaluator.evaluate(prediction, gt_data, image_path, args.hazard_type, args.iou_with_label)
-            print(f"  Metrics -> Acc: {res['safe_acc']}, GPT: {res['risk_match']}, IoU: {res['iou']:.2f}")
+            res = evaluator.evaluate(prediction, gt_data, image_path, args.hazard_type)
+            print(f"  Metrics -> Acc: {res['safe_acc']}, GPT: {res['risk_match']}, IoU_with_label: {res['iou_with_label']:.2f}, IoU_wo_label: {res['iou_wo_label']:.2f}")
 
             log_entry = {
                 "id": i,
@@ -589,5 +608,7 @@ if __name__ == "__main__":
         if final_metrics:
             print(f"1. Avg Safe Accuracy: {final_metrics.get('avg_safe_accuracy', 0):.4f}")
             print(f"2. Avg Risk GPT Match: {final_metrics.get('avg_risk_match', 0):.4f}")
-            print(f"3. Avg Bounding Box IoU: {final_metrics.get('avg_iou', 0):.4f}")
+            print(f"3. Avg Bounding Box IoU (with label): {final_metrics.get('avg_iou_with_label', 0):.4f}")
+            print(f"4. Avg Bounding Box IoU (without label): {final_metrics.get('avg_iou_wo_label', 0):.4f}")
+            print(f"   (IoU computed on {final_metrics.get('iou_sample_count', 0)} unsafe samples with correct risk_match)")
         print(f"Saved summary and detailed logs to {OUTPUT_FILE}")

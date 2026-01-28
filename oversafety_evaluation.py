@@ -25,11 +25,18 @@ if __name__ == "__main__":
         '--target_model', 
         type=str # "/mnt/shared-storage-user/ai4good1-share/models/Qwen3-VL-32B-Instruct"
     )
+    parser.add_argument(
+        '--data_type', 
+        type=str, 
+        default='test',
+    )
     args = parser.parse_args()
 
-    # DATASET_PATH = os.path.join("data_pipeline", "data_test", args.hazard_type, "annotated_data.json")
-    DATASET_PATH = os.path.join("data_pipeline", "data", args.hazard_type, "success_list.json")
-    save_folder = os.path.join("results", args.hazard_type, os.path.basename(args.target_model))
+    if args.data_type == "test":
+        DATASET_PATH = os.path.join("data_pipeline", "data_test", args.hazard_type, "annotated_data.json")
+    else:
+        DATASET_PATH = os.path.join("data_pipeline", "data", args.hazard_type, "success_list.json")
+    save_folder = os.path.join("results", args.data_type, args.hazard_type, os.path.basename(args.target_model))
     OUTPUT_FILE = os.path.join(save_folder, f'oversafety_evaluation_results.json')
     os.makedirs(save_folder, exist_ok=True)
 
@@ -39,7 +46,9 @@ if __name__ == "__main__":
 
     # Load data
     with open(DATASET_PATH, 'r', encoding='utf-8') as f:
-        gt_dataset = json.load(f)[:200]
+        gt_dataset = json.load(f)
+    if args.data_type == "train":
+        gt_dataset = gt_dataset[:200]
     
     print(f"Start evaluating {len(gt_dataset)} samples...")
 
