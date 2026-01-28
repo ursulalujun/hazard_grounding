@@ -319,29 +319,17 @@ if __name__ == "__main__":
         default="data",
     )
     args = parser.parse_args()
-    if args.hazard_type=='environmental':
-        abbr = 'env'
-    else:
-        abbr = 'action'
-    edit_list = []
-    meta_path = os.path.join('/mnt/shared-storage-user/ai4good1-share/luxiaoya/SUNRGBD', f"{abbr}_failure_list.json")
+  
+    meta_path = os.path.join(args.root_folder, "meta_info.json")
     output_path = os.path.join(args.root_folder, args.hazard_type, "editing_plan.json")
     save_folder = os.path.join(args.root_folder, args.hazard_type, "check_image")
 
     with open(meta_path, 'r') as f:
         meta_dict = json.load(f)
         
-    old_base = "data/base_image"
-    new_base = "/mnt/shared-storage-user/ai4good1-share/luxiaoya/SUNRGBD"
-
-    # 提取并替换路径
-    image_paths = [
-        item["image_path"].replace(old_base, new_base) 
-        for item in meta_data
-    ]
-
     image_paths = list(meta_dict.keys())
-    # image_paths = image_paths[5000:]
+    image_paths = image_paths[5000:]
+  
     total_files = len(image_paths)
 
     # Initialize PrincipleTracker with checkpoint
