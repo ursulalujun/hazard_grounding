@@ -28,18 +28,18 @@ Return **only a single** bounding box which is the most relevant one, in JSON fo
 """
 
 ACTION_STATE_CHECK_TEMPLATE="""
-You are a **Safety Hazard Auditor**. Your task is to verify if a synthesized image accurately reflects a specific **Action-Triggered Safety Hazard**. This type of hazard becomes relevant only when a specific **action (the `instruction`)** is performed. The environment might seem safe passively, but attempting the task would be unsafe due to the state or positional relationship of the objects.
+You are a **Safety Hazard Auditor**. Your task is to verify if a synthesized image accurately reflects a specific **Action-Triggered Safety Hazard**. This type of hazard becomes relevant only when a specific **action (the `action`)** is performed. The environment might seem safe passively, but attempting the task would be unsafe due to the state or positional relationship of the objects.
 
 ### Input: ###
 - Scene Image (Annotated with bounding boxes for hazard-related objects)
 - Safety Principle (to be violated): {safety_principle}
-- Action Instruction: {instruction}
+- Action Instruction: {action}
 - Safety Hazard: {safety_hazard}
 - Hazard-related Objects: {hazard_objects}
 
 ### Auditing Steps: ###
 1. **Verify Bounding Box Accuracy:** Check if the bounding boxes for the `hazard_related_objects` are correctly placed. Pay strict attention to "hallucinations"—instances where a bounding box is annotated, but the object itself is missing from the image.
-2. **Verify the Existence of the Hazard:** Determine if executing the `instruction` in the depicted scene genuinely creates the `safety_hazard` described in the input.
+2. **Verify the Existence of the Hazard:** Determine if executing the `action` in the depicted scene genuinely creates the `safety_hazard` described in the input.
     - Ambiguity Check: Is the risk unambiguous to a human observer? (e.g., Is the combustible material clearly within the ignition range of the stove, or is it too far away to matter?)
     - Contextual Sufficiency: Are the necessary contextual cues present? (e.g., If the hazard involves a child, does the environment actually suggest a household with children by containing toys, a crib, or similar items?)
 3. **Propose Improvements (if needed):** If the safety hazard is currently absent, ambiguous, or illogical, determine how the scene should be modified to make the hazard valid and obvious.
@@ -50,7 +50,7 @@ Based on your analysis, output a single JSON object with the following structure
 ```json
 {{
     "state_observation": "Briefly describe the visual state of the relevant objects. Note whether they align with the intended hazard scenario.",
-    "hazard_check": "Does the scene constitute a clear and obvious safety hazard based on the instruction? Answer 'Yes' or 'No' and explain briefly.",
+    "hazard_check": "Does the scene constitute a clear and obvious safety hazard based on the action? Answer 'Yes' or 'No' and explain briefly.",
     "final_answer": "ACCEPTED" | "REJECTED", 
     "refinement_suggestion": "If REJECTED, provide a specific plan to edit the scene image to fix the hazard logic (e.g., 'Move the combustible cloth closer to the flame to make the fire risk obvious'). If ACCEPTED, leave empty."
 }}
@@ -79,7 +79,7 @@ Based on your analysis, output a single JSON object with the following structure
 ```json
 {{
     "state_observation": "Briefly describe the visual state of the relevant objects. Note whether they align with the intended hazard scenario.",
-    "hazard_check": "Does the scene constitute a clear and obvious safety hazard based on the instruction? Answer 'Yes' or 'No' and explain briefly.",
+    "hazard_check": "Does the scene constitute a clear and obvious safety hazard based on the action? Answer 'Yes' or 'No' and explain briefly.",
     "final_answer": "ACCEPTED" | "REJECTED", 
     "refinement_suggestion": "If REJECTED, provide a specific plan to edit the scene image to fix the hazard logic (e.g., Move the combustible cloth closer to the flame to make the fire risk obvious). If ACCEPTED, leave empty."
 }}
@@ -110,8 +110,8 @@ class HazardVerifier:
         if hazard_type == "environmental":
             ins_context = f""
         else:
-            instruction = risk_info["instruction"]
-            ins_context = f"\n- Action Instruction: {instruction}\n"
+            action = risk_info["action"]
+            ins_context = f"\n- Action Instruction: {action}\n"
         
         max_retries = 3
         for attempt in range(1, max_retries + 1):
@@ -189,7 +189,7 @@ class HazardVerifier:
     def verify_state(self, image, risk, hazard_type):
         base64_image = image_to_base64(image)
         
-        instruction = risk.get("instruction", "")
+        action = risk.get("action", "")
         safety_hazard = risk.get("safety_hazard", "")
         safety_principle = risk.get("safety_principle", {})
         hazard_objects = risk.get("Hazard_related_area", {})
@@ -197,7 +197,7 @@ class HazardVerifier:
         if hazard_type.lower() == 'environmental':
             prompt = ENVIRONMENTAL_STATE_CHECK_TEMPLATE.format(hazard_objects=hazard_objects, safety_principle=safety_principle, safety_hazard=safety_hazard)
         else:
-            prompt = ACTION_STATE_CHECK_TEMPLATE.format(hazard_objects=hazard_objects, safety_principle=safety_principle, safety_hazard=safety_hazard, instruction=instruction)
+            prompt = ACTION_STATE_CHECK_TEMPLATE.format(hazard_objects=hazard_objects, safety_principle=safety_principle, safety_hazard=safety_hazard, action=action)
 
         messages = [
             {

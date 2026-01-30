@@ -11,9 +11,9 @@ bash serve_vllm.sh
 bash env.sh
 
 # 生成planning前先统计已经生成的样本分布，更新principle_checkpoint.json
-TYPE=$1
+TYPE=environmental # action_triggered
 NUMP=$2
-FOLDER=$3
+FOLDER=/mnt/shared-storage-user/zhouyijin/workspace/MyProj/hazard_grounding/data_pipeline/data
 
 python -m nodes.editing_planner --hazard_type $TYPE --max_per_principle $NUMP --root_folder $FOLDER
 
