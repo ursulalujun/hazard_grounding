@@ -121,7 +121,7 @@ UNIFIED_ITEM_REPLACEMENT_COT_TEMPLATE = """
 You are a Safety Hazard Data Augmentation Specialist. Your task is to perform intelligent object replacement in safety hazard scenes while maintaining logical consistency and realism.
 
 **Context:**
-- Original Instruction: "{instruction}"
+- Original Action Instruction: "{action}"
 - Original Editing Plan: "{editing_plan}"
 - Safety Principle: {safety_principle}
 - Scene Type: {scene_type}
@@ -156,7 +156,7 @@ Analyze whether replacing the selected object with "{replacement_object}" is val
 - Examples of invalid: kitchen -> bathroom items, electric warmer; bathroom -> power tools
 
 **2.2 Action Plausibility Check:**
-- Keep the instruction realistic! Don't change "Heat food in bowl" to "Heat the metal spoon"
+- Keep the action instruction realistic! Don't change "Heat food in bowl" to "Heat the metal spoon"
 - Instead, modify the editing_plan to accommodate the new object while keeping the instruction realistic
 - Example: If replacing "metal bowl" with "metal spoon", keep instruction as "Heat food in bowl" but change editing_plan to "Place a ceramic bowl containing food with a metal spoon inside in the microwave"
 
@@ -166,14 +166,14 @@ Analyze whether replacing the selected object with "{replacement_object}" is val
 
 ### Step 3: Generate Revised Content
 Based on your analysis, generate:
-1. **Revised Instruction**: Keep original instruction if possible, only modify if necessary for realism
+1. **Revised Action Instruction**: Keep original instruction if possible, only modify if necessary for realism
 2. **Revised Editing Plan**: Incorporate the replacement object with visual details. May need to add container objects to maintain action plausibility.
 3. **Updated Hazard Related Area**: Update target_object and constraint_object lists appropriately
 
 **Example Transformation:**
 - Selected object: "metal bowl", replacement: "metal soup spoon"
-- Original: instruction="Heat food in bowl"
-- Revised: instruction="Heat food in bowl" (unchanged - realistic action)
+- Original: action="Heat food in bowl"
+- Revised: action="Heat food in bowl" (unchanged - realistic action)
 - Revised Plan: "Place a white ceramic bowl containing pasta with a stainless steel soup spoon resting inside in the microwave. The metal spoon will cause arcing when microwave operates."
 - Updated hazard_related_area:
   - target_object: ["microwave", "ceramic bowl"]
@@ -467,7 +467,7 @@ class ItemReplacer:
         return category, obj
 
     def _unified_replacement_cot(self, editing_plan: str, safety_principle: str,
-                                  instruction: str, hazard_related_area: Any,
+                                  action: str, hazard_related_area: Any,
                                   scene_type: str, principle_id: str,
                                   replacement_object: str,
                                   replacement_category: str) -> Optional[Dict]:
@@ -477,7 +477,7 @@ class ItemReplacer:
         Args:
             editing_plan: Original editing plan
             safety_principle: Safety principle description
-            instruction: User instruction
+            action: User instruction
             hazard_related_area: hazard_related_area data
             scene_type: Scene type
             principle_id: Principle ID
@@ -490,7 +490,7 @@ class ItemReplacer:
         hazard_area_str = json.dumps(hazard_related_area, ensure_ascii=False)
 
         prompt = UNIFIED_ITEM_REPLACEMENT_COT_TEMPLATE.format(
-            instruction=instruction,
+            action=action,
             editing_plan=editing_plan,
             safety_principle=safety_principle,
             scene_type=scene_type,
@@ -553,7 +553,7 @@ class ItemReplacer:
 
         original_plan = risk_data.get("editing_plan", "")
         safety_principle = risk_data.get("safety_principle", "")
-        instruction = risk_data.get("instruction", "")
+        action = risk_data.get("action", "")
         scene_type = sample.get("scene_type", "unknown")
         hazard_related_area = risk_data.get("hazard_related_area", {})
         safety_hazard = risk_data.get("safety_hazard", "")
@@ -581,7 +581,7 @@ class ItemReplacer:
 
         # Use unified CoT approach - single VLM call
         cot_result = self._unified_replacement_cot(
-            original_plan, safety_principle, instruction,
+            original_plan, safety_principle, action,
             hazard_related_area, scene_type, principle_id,
             replacement_object, replacement_category
         )
@@ -609,20 +609,20 @@ class ItemReplacer:
 
         if final_answer == "ACCEPT" and all(step2.get(k, False) for k in ["scene_compatible", "action_plausible", "hazard_valid", "plan_consistent"]):
             # Apply revised content from CoT
-            revised_instruction = step3.get("instruction", instruction)
+            revised_action = step3.get("action", action)
             revised_editing_plan = step3.get("editing_plan", original_plan)
             revised_hazard_area = step3.get("hazard_related_area", hazard_related_area)
             revised_safety_hazard = step3.get("safety_hazard", safety_hazard)
 
             # Update risk data with revised content
-            risk_data["instruction"] = revised_instruction
+            risk_data["action"] = revised_action
             risk_data["editing_plan"] = revised_editing_plan
             risk_data["hazard_related_area"] = revised_hazard_area
             risk_data["safety_hazard"] = revised_safety_hazard
 
             replacement_meta["replaced"] = True
             replacement_meta["original_plan"] = original_plan
-            replacement_meta["original_instruction"] = instruction
+            replacement_meta["original_action"] = action
             # print(f"  ✓ Replaced '{original_object}' with '{replacement_object}' (category: {replacement_category})")
         else:
             replacement_meta["skipped"] = cot_result.get("final_reasoning", "Replacement rejected by CoT")
