@@ -268,7 +268,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    input_path = os.path.join('data', args.hazard_type, 'editing_plan.json')
+    input_path = os.path.join('data', args.hazard_type, 'aug_editing_plan.json') # 'editing_plan.json'
     output_path = os.path.join('data', args.hazard_type, 'editing_info.json')
     with open(input_path, 'r') as f:
         editing_plan = json.load(f)

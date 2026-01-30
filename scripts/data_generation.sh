@@ -17,6 +17,9 @@ FOLDER=$3
 
 python -m nodes.editing_planner --hazard_type $TYPE --max_per_principle $NUMP --root_folder $FOLDER
 
+# 加了一个阶段 object augmentation
+python -m nodes.item_replacement --mode replace --hazard_type $TYPE --replace_model Qwen/Qwen3-VL-235B-A22B-Thinking
+
 # Qwen-Image-Edit生成数据的速度很慢，需要数据分片并行，需要1*H200
 START=$4
 END=$5

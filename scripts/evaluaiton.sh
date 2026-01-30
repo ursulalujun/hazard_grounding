@@ -4,8 +4,6 @@
 # export HTTP_PROXY="$http_proxy"
 # export HTTPS_PROXY="$http_proxy"
 
-conda activate agent
-
 cd /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding
 
 export TARGET_API_URL="https://api.boyuerichdata.opensphereai.com/v1"
@@ -14,16 +12,16 @@ export TARGET_API_KEY="sk-jZMbdRTTbzZdabBYS74dOgvV6FWs1tkwZY6K8iCCi4aSjqdN"
 export EVALUATION_API_URL="https://api.boyuerichdata.opensphereai.com/v1"
 export EVALUATION_API_KEY="sk-jZMbdRTTbzZdabBYS74dOgvV6FWs1tkwZY6K8iCCi4aSjqdN"
 
-python oversafety_evaluation.py --hazard_type action_triggered --target_model /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding/checkpoints/Qwen3-VL-8B-Instruct-RFT-action_triggered --data_type train
+python oversafety_evaluation.py --hazard_type action_triggered --target_model /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding/checkpoints/Qwen3-VL-8B-Instruct-RFT-action_triggered-mixed --data_type train
 
 sleep 20s
 
-python oversafety_evaluation.py --hazard_type action_triggered --target_model /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding/checkpoints/Qwen3-VL-8B-Instruct-RFT-action_triggered
+python oversafety_evaluation.py --hazard_type action_triggered --target_model /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding/checkpoints/Qwen3-VL-8B-Instruct-RFT-action_triggered-mixed
 
-sleep 20s
+# sleep 20s
 
-python evaluation.py --hazard_type action_triggered --target_model checkpoints/Qwen3-VL-8B-Instruct-RFT-action_triggered-mixed --data_type train
+# python evaluation.py --hazard_type action_triggered --target_model checkpoints/Qwen3-VL-8B-Instruct-RFT-action_triggered-mixed --data_type train
 
-sleep 20s
+# sleep 20s
 
-python evaluation.py --hazard_type action_triggered --target_model checkpoints/Qwen3-VL-8B-Instruct-RFT-action_triggered-mixed
+# python evaluation.py --hazard_type action_triggered --target_model checkpoints/Qwen3-VL-8B-Instruct-RFT-action_triggered-mixed

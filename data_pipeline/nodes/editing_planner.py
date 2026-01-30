@@ -243,7 +243,8 @@ class EditingPlanner:
             try:
                 response = self.client.chat.completions.create(
                     model=self.planner,
-                    messages=messages
+                    messages=messages,
+                    temperature=0.7
                 ).choices[0].message.content
 
                 image = Image.open(image_path)

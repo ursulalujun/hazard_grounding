@@ -190,7 +190,7 @@ class SafetyAgent:
 # 2. Evaluation Class (logic unchanged)
 # ==========================================
 class SafetyEvaluator:
-    def __init__(self, model_name, img_save_folder):
+    def __init__(self, model_name, save_folder):
         key = os.getenv("EVALUATION_API_KEY")
         url = os.getenv("EVALUATION_API_URL")
         self.model_name = model_name
@@ -205,7 +205,8 @@ class SafetyEvaluator:
             "iou_with_label": [],
             "iou_wo_label": []
         }
-        self.img_save_folder = img_save_folder
+        self.img_save_folder = os.path.join(save_folder, "image_with_bbox")
+        os.makedirs(self.img_save_folder, exist_ok=True)
         self.senmatic_model = SentenceTransformer("checkpoints/all-MiniLM-L6-v2")
 
     def evaluate(self, prediction, gt_item, image_path, hazard_type):
