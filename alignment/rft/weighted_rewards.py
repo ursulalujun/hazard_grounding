@@ -17,6 +17,8 @@ class WeightedRewards:
         "safe_accuracy": 1.0,
         "risk_match": 1.0,
         "iou": 1.0,
+        "iou_target_object": 1.0,
+        "iou_constraint_object": 1.0,
         "format": 0.5,
     }
 
@@ -51,6 +53,18 @@ class WeightedRewards:
         weight = self.weights.get("iou", 1.0)
         return [r * weight for r in base_rewards]
 
+    def iou_target_object_reward(self, completions, solution, **kwargs):
+        """Target object IoU reward with weight applied."""
+        base_rewards = self.calculator.iou_target_object_reward(completions, solution, **kwargs)
+        weight = self.weights.get("iou_target_object", 1.0)
+        return [r * weight for r in base_rewards]
+
+    def iou_constraint_object_reward(self, completions, solution, **kwargs):
+        """Constraint object IoU reward with weight applied."""
+        base_rewards = self.calculator.iou_constraint_object_reward(completions, solution, **kwargs)
+        weight = self.weights.get("iou_constraint_object", 1.0)
+        return [r * weight for r in base_rewards]
+
     def format_reward(self, completions, **kwargs):
         """Format reward with weight applied."""
         from rewards import format_reward
@@ -75,6 +89,8 @@ def get_weighted_reward_registry(embedding_model_path: str, weights: Dict[str, f
         "safe_accuracy": weighted.safe_accuracy_reward,
         "risk_match": weighted.risk_match_reward,
         "iou": weighted.iou_reward,
+        "iou_target_object": weighted.iou_target_object_reward,
+        "iou_constraint_object": weighted.iou_constraint_object_reward,
         "format": weighted.format_reward,
     }
 
@@ -88,6 +104,8 @@ SAFETY_FOCUSED_WEIGHTS = {
     "safe_accuracy": 2.0,
     "risk_match": 0.5,
     "iou": 1.0,
+    "iou_target_object": 1.0,
+    "iou_constraint_object": 1.0,
     "format": 0.5,
 }
 
@@ -96,6 +114,8 @@ LOCALIZATION_FOCUSED_WEIGHTS = {
     "safe_accuracy": 1.0,
     "risk_match": 0.5,
     "iou": 2.0,
+    "iou_target_object": 2.0,
+    "iou_constraint_object": 2.0,
     "format": 0.5,
 }
 
@@ -104,6 +124,8 @@ DESCRIPTION_FOCUSED_WEIGHTS = {
     "safe_accuracy": 1.0,
     "risk_match": 2.0,
     "iou": 1.0,
+    "iou_target_object": 1.0,
+    "iou_constraint_object": 1.0,
     "format": 0.5,
 }
 
@@ -112,5 +134,27 @@ BALANCED_WEIGHTS = {
     "safe_accuracy": 1.0,
     "risk_match": 1.0,
     "iou": 1.0,
+    "iou_target_object": 1.0,
+    "iou_constraint_object": 1.0,
     "format": 0.5,  # Format is less important
+}
+
+# Focus on target object localization (action_triggered)
+TARGET_OBJECT_FOCUSED_WEIGHTS = {
+    "safe_accuracy": 1.0,
+    "risk_match": 0.5,
+    "iou": 1.0,
+    "iou_target_object": 2.0,
+    "iou_constraint_object": 1.0,
+    "format": 0.5,
+}
+
+# Focus on constraint object localization (action_triggered)
+CONSTRAINT_OBJECT_FOCUSED_WEIGHTS = {
+    "safe_accuracy": 1.0,
+    "risk_match": 0.5,
+    "iou": 1.0,
+    "iou_target_object": 1.0,
+    "iou_constraint_object": 2.0,
+    "format": 0.5,
 }

@@ -181,7 +181,7 @@ def get_launcher(args) -> List[str]:
 def prepare_envs(num_gpus: int) -> Tuple[Dict[str, str], List[int]]:
     os.environ['NCCL_SOCKET_IFNAME']='eth0'
     os.environ['HF_HOME']="/home/luxiaoya/.cache/huggingface"
-    os.environ['HF_HUB_OFFLINE']=1
+    os.environ['HF_HUB_OFFLINE']='1'
     env = os.environ.copy()
 
     # set visible gpus

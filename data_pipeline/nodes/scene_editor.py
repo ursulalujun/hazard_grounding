@@ -275,8 +275,7 @@ if __name__ == "__main__":
         editing_plan = json.load(f)
     
     edit_folder = os.path.join("data", args.hazard_type, "edit_image")
-    if not os.path.exists(edit_folder):
-        os.mkdir(edit_folder)
+    os.makedirs(edit_folder, exist_ok=True)
 
     if 'qwen' in args.editor_model.lower():
         local_flag = True

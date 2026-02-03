@@ -89,12 +89,12 @@ Based on your analysis, output a single JSON object with the following structure
 
 class HazardVerifier:
     def __init__(self, detector_model):
-        if 'qwen' in detector_model.lower():
-            proxy_off()
-        else:
-            proxy_on()
         key = os.getenv("ANNOTATION_API_KEY")
         url = os.getenv("ANNOTATION_API_URL")
+        if 'boyuerichdata' in url.lower():
+            proxy_on()
+        else:
+            proxy_off()
         self.client = openai.OpenAI(api_key=key, base_url=url)
         self.detector = detector_model
 
@@ -242,7 +242,8 @@ def process_single_item(item, verifier, hazard_type):
 
     image_path = risk["edit_image_path"]
     if not image_path or not os.path.exists(image_path):
-        raise FileNotFoundError(f"Skipped (File not found: {image_path}")
+        # raise FileNotFoundError(f"Skipped (File not found: {image_path}")
+        return item, "File Not Found"
 
     # Process image
     pil_image = Image.open(image_path).convert("RGB")

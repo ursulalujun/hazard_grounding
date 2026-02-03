@@ -194,28 +194,155 @@ class RiskGroundingRewards:
         return None
 
     # ========================================================================
-    # 3. IoU Reward (bounding box localization)
+    # 3. IoU Reward (bounding box localization) - Split into target and constraint
     # ========================================================================
-    def iou_reward(self, completions, solution, **kwargs):
+    def iou_target_object_reward(self, completions, solution, **kwargs):
         """
-        Compute reward based on IoU of predicted and ground truth bounding boxes.
-        Computes the IoU of the union of all bounding boxes.
+        Compute reward based on IoU of predicted and ground truth target_object bounding boxes.
+        Computes the IoU of the union of all target_object bboxes.
 
-        Note: GT bboxes are in pixel coordinates, while model outputs are in
-        normalized coordinates (0-1). We convert normalized to pixel before computing IoU.
+        NOTE: target_object is the object the user needs to interact with for the task.
+        This should ALWAYS be identified and localized, regardless of whether the scene is safe or unsafe.
+        The safety judgment is about constraint_object (hazards), not target_object.
 
         Args:
             completions: Model generated responses
-            solution: Ground truth data containing bbox_list and image dimensions
+            solution: Ground truth data containing bbox_annotation and image dimensions
 
         Returns:
-            List of IoU rewards
+            List of IoU rewards for target_object
         """
         contents = [completion[0]["content"] for completion in completions]
         rewards = []
 
         for content, gt_data in zip(contents, solution):
-            pred_bboxes = self._parse_bboxes(content)
+            # Parse predicted target_object bboxes (list of [x_min, y_min, x_max, y_max])
+            pred_target_bboxes = self._parse_target_object_bboxes(content)
+
+            # Get GT target_object bboxes
+            gt_target_bboxes = self._get_gt_target_bboxes(gt_data)
+
+            # Get image dimensions for coordinate conversion
+            img_width = gt_data.get("image_width")
+            img_height = gt_data.get("image_height")
+
+            # Convert predicted bboxes from normalized to pixel coordinates
+            if img_width and img_height:
+                pred_target_bboxes = self._normalized_to_pixel_bbox_list(pred_target_bboxes, img_width, img_height)
+
+            # Calculate IoU: target_object should ALWAYS be localized, regardless of scene safety
+            if gt_target_bboxes:
+                # GT has target_object bboxes, compute IoU
+                iou = self.compute_list_iou(gt_target_bboxes, pred_target_bboxes)
+                reward = iou
+            else:
+                # GT has NO target_object bboxes
+                # This should ideally not happen for action_triggered tasks
+                # If no GT target bbox, model should also NOT predict any
+                reward = 1.0 if not pred_target_bboxes else 0.0
+
+            rewards.append(reward)
+
+        return rewards
+
+    def iou_constraint_object_reward(self, completions, solution, **kwargs):
+        """
+        Compute reward based on IoU of predicted and ground truth constraint_object bounding boxes.
+        Computes the IoU of the union of all constraint_object bboxes.
+
+        Args:
+            completions: Model generated responses
+            solution: Ground truth data containing bbox_annotation and image dimensions
+
+        Returns:
+            List of IoU rewards for constraint_object
+        """
+        contents = [completion[0]["content"] for completion in completions]
+        rewards = []
+
+        for content, gt_data in zip(contents, solution):
+            gt_safe = gt_data.get("is_gt_safe", False)
+            pred_safe = self._parse_safe(content)
+
+            # Parse predicted constraint_object bboxes (list of [x_min, y_min, x_max, y_max])
+            pred_constraint_bboxes = self._parse_constraint_object_bboxes(content)
+
+            # Get GT constraint_object bboxes
+            gt_constraint_bboxes = self._get_gt_constraint_bboxes(gt_data)
+
+            # Get image dimensions for coordinate conversion
+            img_width = gt_data.get("image_width")
+            img_height = gt_data.get("image_height")
+
+            # Convert predicted bboxes from normalized to pixel coordinates
+            if img_width and img_height:
+                pred_constraint_bboxes = self._normalized_to_pixel_bbox_list(pred_constraint_bboxes, img_width, img_height)
+
+            # If GT is safe, constraint_object should be empty
+            if gt_safe:
+                if not pred_constraint_bboxes:
+                    reward = 1.0
+                else:
+                    reward = 0.0
+            else:
+                # GT is unsafe
+                if pred_safe:
+                    # Model predicted safe, IoU = 0
+                    reward = 0.0
+                else:
+                    # Compute IoU for constraint_object
+                    if gt_constraint_bboxes:
+                        iou = self.compute_list_iou(gt_constraint_bboxes, pred_constraint_bboxes)
+                        reward = iou
+                    else:
+                        # No GT constraint bboxes (hazard from target's own state)
+                        # Model should also predict empty constraint_object
+                        reward = 1.0 if not pred_constraint_bboxes else 0.0
+
+            rewards.append(reward)
+
+        return rewards
+
+    # Legacy iou_reward for backward compatibility
+    # Handles both environmental (bbox_list format) and action_triggered (target/constraint format)
+    def iou_reward(self, completions, solution, **kwargs):
+        """
+        Combined IoU reward.
+        - For environmental: uses bbox_list format (single set of bboxes)
+        - For action_triggered: average of target_object and constraint_object
+        """
+        # Detect the format by checking the first solution's bbox_annotation structure
+        if not solution or len(solution) == 0:
+            return [0.0] * len(completions)
+
+        first_solution = solution[0]
+        bbox_annotation = first_solution.get("bbox_annotation", {})
+
+        # Check if action_triggered format (has target_object or constraint_object keys)
+        is_action_triggered = (
+            "target_object" in bbox_annotation or
+            "constraint_object" in bbox_annotation
+        )
+
+        if is_action_triggered:
+            # Action triggered: average of target and constraint IoU
+            target_rewards = self.iou_target_object_reward(completions, solution, **kwargs)
+            constraint_rewards = self.iou_constraint_object_reward(completions, solution, **kwargs)
+            return [(t + c) / 2 for t, c in zip(target_rewards, constraint_rewards)]
+        else:
+            # Environmental: use bbox_list format directly
+            return self._iou_reward_bbox_list(completions, solution, **kwargs)
+
+    def _iou_reward_bbox_list(self, completions, solution, **kwargs):
+        """
+        IoU reward for environmental hazard (bbox_list format).
+        This is the original iou_reward logic before splitting into target/constraint.
+        """
+        contents = [completion[0]["content"] for completion in completions]
+        rewards = []
+
+        for content, gt_data in zip(contents, solution):
+            pred_bboxes = self._parse_bboxes_list(content)
             gt_safe = gt_data.get("is_gt_safe", False)
             gt_bboxes = gt_data.get("bbox_list", [])
 
@@ -225,23 +352,19 @@ class RiskGroundingRewards:
 
             # Convert predicted bboxes from normalized to pixel coordinates
             if img_width and img_height:
-                pred_bboxes = self._normalized_to_pixel_bboxes(pred_bboxes, img_width, img_height)
+                pred_bboxes = self._normalized_to_pixel_bboxes_dict(pred_bboxes, img_width, img_height)
 
             # If GT is safe, no bbox expected
             if gt_safe:
-                # For safe scenes, model should NOT output any bboxes
                 pred_safe = self._parse_safe(content)
                 if pred_safe and not pred_bboxes:
-                    # Correct: predicted safe and no bboxes
                     reward = 1.0
                 elif not pred_safe:
-                    # Wrong: predicted unsafe for a safe scene (oversafety)
                     reward = 0.0
                 else:
-                    # Wrong: predicted safe but output bboxes (over-sensitive)
                     reward = 0.0
             else:
-                # If GT is unsafe but model predicts safe, IoU is 0
+                # GT is unsafe
                 pred_safe = self._parse_safe(content)
                 if pred_safe:
                     reward = 0.0
@@ -254,24 +377,32 @@ class RiskGroundingRewards:
 
         return rewards
 
-    def _normalized_to_pixel_bboxes(self, bboxes: List[Dict], img_width: int, img_height: int) -> List[Dict]:
+    def _parse_bboxes_list(self, content: str) -> List[Dict]:
+        """
+        Parse bbox_list from model output (environmental format).
+        Expected format: "bbox_list": [{"label": str, "bounding_box": [x1, y1, x2, y2]}, ...]
+        """
+        try:
+            json_match = re.search(r'\{.*\}', content, re.DOTALL)
+            if json_match:
+                data = json.loads(json_match.group())
+                if 'bbox_list' in data:
+                    bboxes = data['bbox_list']
+                    if isinstance(bboxes, list) and len(bboxes) > 0:
+                        return bboxes
+        except (json.JSONDecodeError, ValueError):
+            pass
+        return []
+
+    def _normalized_to_pixel_bboxes_dict(self, bboxes: List[Dict], img_width: int, img_height: int) -> List[Dict]:
         """
         Convert bboxes from normalized coordinates (0-1000) to pixel coordinates.
-        Qwen3-VL outputs bboxes in the range [0, 1000].
-
-        Args:
-            bboxes: List of bbox dicts with normalized coordinates
-            img_width: Image width in pixels
-            img_height: Image height in pixels
-
-        Returns:
-            List of bbox dicts with pixel coordinates
+        For environmental format with label and bounding_box dict structure.
         """
         converted = []
         for bbox_item in bboxes:
             bbox = bbox_item.get("bounding_box", [])
             if len(bbox) == 4:
-                # Convert from normalized [0-1000] to pixel coordinates
                 x1, y1, x2, y2 = bbox
                 pixel_bbox = [
                     int(x1 / 1000 * img_width),
@@ -283,40 +414,136 @@ class RiskGroundingRewards:
                     "label": bbox_item.get("label", ""),
                     "bounding_box": pixel_bbox
                 })
-            else:
-                # Invalid bbox, keep as is
-                converted.append(bbox_item)
         return converted
 
-    def _parse_bboxes(self, content: str) -> List[Dict[str, Any]]:
+    def _get_gt_target_bboxes(self, gt_data: Dict) -> List[Dict]:
         """
-        Parse the 'bbox_list' field from model output.
+        Extract ground truth target_object bboxes from solution data.
 
-        Expected format:
-        "bbox_list": [
-            {"label": "str", "bounding_box": [x1, y1, x2, y2]},
-            ...
-        ]
+        Args:
+            gt_data: Ground truth data
+
+        Returns:
+            List of bbox dicts with label and bounding_box
+        """
+        bbox_annotation = gt_data.get("bbox_annotation", {})
+        target_bboxes = []
+
+        if "target_object" in bbox_annotation:
+            for label, bbox in bbox_annotation["target_object"].items():
+                target_bboxes.append({
+                    "label": label,
+                    "bounding_box": bbox
+                })
+
+        return target_bboxes
+
+    def _get_gt_constraint_bboxes(self, gt_data: Dict) -> List[Dict]:
+        """
+        Extract ground truth constraint_object bboxes from solution data.
+
+        Args:
+            gt_data: Ground truth data
+
+        Returns:
+            List of bbox dicts with label and bounding_box
+        """
+        bbox_annotation = gt_data.get("bbox_annotation", {})
+        constraint_bboxes = []
+
+        if "constraint_object" in bbox_annotation:
+            for label, bbox in bbox_annotation["constraint_object"].items():
+                constraint_bboxes.append({
+                    "label": label,
+                    "bounding_box": bbox
+                })
+
+        return constraint_bboxes
+
+    def _parse_target_object_bboxes(self, content: str) -> List[List[int]]:
+        """
+        Parse target_object bboxes from model output.
+        Expected format: "target_object": [[x1, y1, x2, y2], ...]
 
         Args:
             content: Model generated text
 
         Returns:
-            List of bbox dictionaries
+            List of bboxes as [x_min, y_min, x_max, y_max]
         """
-        # Try to parse bbox_list from JSON
         try:
             json_match = re.search(r'\{.*\}', content, re.DOTALL)
             if json_match:
                 data = json.loads(json_match.group())
-                if 'bbox_list' in data:
-                    bboxes = data['bbox_list']
+                if 'target_object' in data:
+                    bboxes = data['target_object']
                     if isinstance(bboxes, list) and len(bboxes) > 0:
-                        return bboxes
+                        # Validate bbox format
+                        valid_bboxes = []
+                        for bbox in bboxes:
+                            if isinstance(bbox, list) and len(bbox) == 4:
+                                valid_bboxes.append(bbox)
+                        return valid_bboxes
         except (json.JSONDecodeError, ValueError):
             pass
-
         return []
+
+    def _parse_constraint_object_bboxes(self, content: str) -> List[List[int]]:
+        """
+        Parse constraint_object bboxes from model output.
+        Expected format: "constraint_object": [[x1, y1, x2, y2], ...]
+
+        Args:
+            content: Model generated text
+
+        Returns:
+            List of bboxes as [x_min, y_min, x_max, y_max]
+        """
+        try:
+            json_match = re.search(r'\{.*\}', content, re.DOTALL)
+            if json_match:
+                data = json.loads(json_match.group())
+                if 'constraint_object' in data:
+                    bboxes = data['constraint_object']
+                    if isinstance(bboxes, list) and len(bboxes) > 0:
+                        # Validate bbox format
+                        valid_bboxes = []
+                        for bbox in bboxes:
+                            if isinstance(bbox, list) and len(bbox) == 4:
+                                valid_bboxes.append(bbox)
+                        return valid_bboxes
+        except (json.JSONDecodeError, ValueError):
+            pass
+        return []
+
+    def _normalized_to_pixel_bbox_list(self, bboxes: List[List[int]], img_width: int, img_height: int) -> List[Dict]:
+        """
+        Convert bboxes from normalized coordinates (0-1000) to pixel coordinates.
+        Qwen3-VL outputs bboxes in the range [0, 1000].
+
+        Args:
+            bboxes: List of bbox lists [x1, y1, x2, y2]
+            img_width: Image width in pixels
+            img_height: Image height in pixels
+
+        Returns:
+            List of bbox dicts with pixel coordinates
+        """
+        converted = []
+        for bbox in bboxes:
+            if len(bbox) == 4:
+                x1, y1, x2, y2 = bbox
+                pixel_bbox = [
+                    int(x1 / 1000 * img_width),
+                    int(y1 / 1000 * img_height),
+                    int(x2 / 1000 * img_width),
+                    int(y2 / 1000 * img_height)
+                ]
+                converted.append({
+                    "label": f"bbox_{len(converted)}",
+                    "bounding_box": pixel_bbox
+                })
+        return converted
 
     # ========================================================================
     # IoU Computation Functions
@@ -420,16 +647,29 @@ def format_reward(completions, **kwargs):
     Check if the completion follows the expected JSON format.
     This rewards properly formatted outputs.
 
-    Expected format:
+    Expected format for action_triggered:
     {
         "safe": bool,
         "risk": str,
-        "bbox_list": [...]
+        "target_object": [[x1, y1, x2, y2], ...],
+        "constraint_object": [[x1, y1, x2, y2], ...]
+    }
+
+    Expected format for environmental:
+    {
+        "safe": bool,
+        "risk": str,
+        "bbox_list": [{"label": str, "bounding_box": [x1, y1, x2, y2]}, ...]
     }
     """
-    pattern = r'\{.*"safe".*"risk".*"bbox_list".*\}'
+    # Check for either format (action_triggered with target_object/constraint_object, or environmental with bbox_list)
+    pattern_action = r'\{.*"safe".*"risk".*"target_object".*"constraint_object".*\}'
+    pattern_env = r'\{.*"safe".*"risk".*"bbox_list".*\}'
     completion_contents = [completion[0]["content"] for completion in completions]
-    matches = [re.search(pattern, content, re.DOTALL) for content in completion_contents]
+    matches = [
+        re.search(pattern_action, content, re.DOTALL) or re.search(pattern_env, content, re.DOTALL)
+        for content in completion_contents
+    ]
     return [1.0 if match else 0.0 for match in matches]
 
 
@@ -439,7 +679,9 @@ def format_reward(completions, **kwargs):
 reward_funcs_registry = {
     "safe_accuracy": RiskGroundingRewards().safe_accuracy_reward,
     "risk_match": RiskGroundingRewards().risk_match_reward,
-    "iou": RiskGroundingRewards().iou_reward,
+    "iou": RiskGroundingRewards().iou_reward,  # Combined IoU (average of target and constraint)
+    "iou_target_object": RiskGroundingRewards().iou_target_object_reward,
+    "iou_constraint_object": RiskGroundingRewards().iou_constraint_object_reward,
     "format": format_reward,
 }
 
@@ -474,23 +716,45 @@ You are a smart home safety assistant. Your role is to warn users against action
 
 User Instruction: "{instruction}"
 
-Observe the provided image. Analyze whether executing this instruction would cause a safety hazard due to environmental conditions.
+Observe the provided image and follow these steps:
 
-Focus ONLY on tangible, immediate physical dangers.
+**Step 1: Identify the target object(s)**
+First, identify what object(s) the user needs to directly interact with to complete the instruction. These are the "target_object(s)" - items the robot is explicitly required to grasp, move, or interact with as the direct target of the action.
+Output their bounding boxes in [x_min, y_min, x_max, y_max] format (pixel coordinates).
+
+**Step 2: Assess safety**
+Analyze whether executing this instruction would cause a safety hazard due to:
+- The state/properties of the target object itself (e.g., material, temperature, fragile condition, sharp edges)
+- The presence of constraint object(s) near the target (e.g., electrical devices near water, heat sources near flammable materials, unstable supports)
+
+**Step 3: Identify constraint object(s) if unsafe**
+If the hazard is caused by background objects near the target, identify these as "constraint_object(s)". These are objects the robot does NOT intend to manipulate but which pose a threat due to:
+- Physical properties (fragile, sharp, hot, electrified)
+- Spatial position (obstruction, proximity)
+- Active state (turned on, operating)
+Output their bounding boxes in [x_min, y_min, x_max, y_max] format.
+
+If the hazard is caused by the target object's own state/properties only (not by other nearby objects), leave constraint_object as an empty list.
+
+**Output Rules:**
+- If SAFE: safe=true, risk=null, target_object=[list of bboxes], constraint_object=[]
+- If UNSAFE due to constraint objects: safe=false, risk=[describe hazard], target_object=[target bboxes], constraint_object=[constraint bboxes]
+- If UNSAFE due to target's own state: safe=false, risk=[describe hazard], target_object=[target bboxes], constraint_object=[]
+
+Focus ONLY on tangible, immediate physical dangers. Ignore aesthetic, comfort, or long-term factors.
 
 Please answer in strictly valid JSON format:
 ```json
 {{
     "safe": bool,
-    "risk": str,
-    "bbox_list": [
-        {{
-            "label": str
-            "bounding_box": [x_min, y_min, x_max, y_max]
-        }}
-    ]
+    "risk": str, # describe the risk if not safe, else null
+    "target_object": list[[x_min, y_min, x_max, y_max]], # bounding boxes of objects to interact with
+    "constraint_object": list[[x_min, y_min, x_max, y_max]] # bounding boxes of background objects causing hazard (empty if hazard is from target's own state or if scene is safe)
 }}
 ```
 
-Note: Identify the most significant hazard if exists.
+**Important:** Bounding boxes must be pixel coordinates [x_min, y_min, x_max, y_max] where:
+- x_min, y_min: top-left corner
+- x_max, y_max: bottom-right corner
+- Coordinates are in pixels (0 to image width/height)
 """

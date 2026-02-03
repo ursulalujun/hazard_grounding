@@ -3,18 +3,25 @@ set -ex
 
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 
-cd mnt/shared-storage-user/zhouyijin/workspace/MyProj/hazard_grounding
+cd /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding
 
-sleep 2m
+sleep 30s
 MODEL=/mnt/shared-storage-user/ai4good1-share/models/Qwen3-VL-235B-A22B-Thinking
 SERVED_NAME=Qwen/Qwen3-VL-235B-A22B-Thinking
 MAX_MODEL_LEN=65536
 MAX_NUM_SEQS=64
-NUM_GPUS=4
+NUM_GPUS=1
 
-nohup python -m scripts.launch_vllm \
+python scripts/launch_vllm.py \
     --model $MODEL \
     --served_model_name $SERVED_NAME \
     --tp $NUM_GPUS \
     --max_model_len $MAX_MODEL_LEN \
-    --max_num_seqs $MAX_NUM_SEQS > /dev/null 2>&1 &
+    --max_num_seqs $MAX_NUM_SEQS
+
+# nohup python scripts/launch_vllm.py \
+#     --model $MODEL \
+#     --served_model_name $SERVED_NAME \
+#     --tp $NUM_GPUS \
+#     --max_model_len $MAX_MODEL_LEN \
+#     --max_num_seqs $MAX_NUM_SEQS > /dev/null 2>&1 &

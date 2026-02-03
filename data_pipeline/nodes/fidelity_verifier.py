@@ -5,16 +5,19 @@ import base64
 from tqdm import tqdm
 from openai import OpenAI  # Recommended SDK for calling Qwen-VL APIs
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from utils import proxy_off
+from utils import proxy_on, proxy_off
 
 class FidelityVerifier:
     def __init__(self, model_name):
         """
         Initialize the verifier and configure the OpenAI-compatible API client.
         """
-        proxy_off()
         api_key = os.environ['VERIFY_API_KEY']
         base_url = os.environ['VERIFY_API_URL']
+        if 'boyuerichdata' in base_url.lower():
+            proxy_on()
+        else:
+            proxy_off()
         self.client = OpenAI(
             api_key=api_key,
             base_url=base_url,
@@ -121,7 +124,6 @@ def verify_fidelity(verifier_model, meta_file_path, save_path, hazard_type, max_
     """
     Load JSON data, process images through the verifier, and save results.
     """
-    proxy_off()
     validator = FidelityVerifier(verifier_model)
     
     with open(meta_file_path, 'r', encoding='utf-8') as f:

@@ -81,7 +81,15 @@ class RFTScriptArguments(ScriptArguments):
     )
     reward_weight_iou: float = field(
         default=1.0,
-        metadata={"help": "Weight for iou reward"},
+        metadata={"help": "Weight for combined iou reward"},
+    )
+    reward_weight_iou_target_object: float = field(
+        default=1.0,
+        metadata={"help": "Weight for iou_target_object reward"},
+    )
+    reward_weight_iou_constraint_object: float = field(
+        default=1.0,
+        metadata={"help": "Weight for iou_constraint_object reward"},
     )
     reward_weight_format: float = field(
         default=0.5,
@@ -277,6 +285,8 @@ def main(script_args, training_args, model_args):
         "safe_accuracy": script_args.reward_weight_safe_accuracy,
         "risk_match": script_args.reward_weight_risk_match,
         "iou": script_args.reward_weight_iou,
+        "iou_target_object": script_args.reward_weight_iou_target_object,
+        "iou_constraint_object": script_args.reward_weight_iou_constraint_object,
         "format": script_args.reward_weight_format,
     }
 
@@ -289,8 +299,12 @@ def main(script_args, training_args, model_args):
         weights=reward_weights
     )
 
-    # Get reward functions
-    script_args.reward_funcs = ['safe_accuracy', 'risk_match', 'iou', 'format']
+    # Get reward functions - use split IoU for action_triggered
+    if script_args.hazard_type == "action_triggered":
+        script_args.reward_funcs = ['safe_accuracy', 'risk_match', 'iou_target_object', 'iou_constraint_object', 'format']
+    else:
+        script_args.reward_funcs = ['safe_accuracy', 'risk_match', 'iou', 'format']
+
     reward_funcs = [custom_registry[func] for func in script_args.reward_funcs]
 
     print(f"Using reward functions: {script_args.reward_funcs}")

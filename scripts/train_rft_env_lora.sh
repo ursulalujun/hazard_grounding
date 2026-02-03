@@ -1,5 +1,5 @@
 #!/bin/bash
-# RFT Training Script for Risk Grounding - Action Triggered Hazard Detection
+# RFT Training Script for Risk Grounding - Environmental Hazard Detection
 # Adapted from Visual-RFT for safety hazard detection and localization
 
 # ==============================================================================
@@ -10,11 +10,11 @@
 export WANDB_MODE=offline
 
 # Hazard type: environmental or action_triggered
-export HAZARD_TYPE="action_triggered"
+export HAZARD_TYPE="environmental"
 
 # Paths
 export PROJECT_ROOT="/mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner"
-export DATA_PATH="${PROJECT_ROOT}/risk_grounding/data_pipeline/data/${HAZARD_TYPE}/success_list.json"
+export DATA_PATH="${PROJECT_ROOT}/risk_grounding/data_pipeline/data/${HAZARD_TYPE}/train_list.json"
 export EMBEDDING_MODEL_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/all-MiniLM-L6-v2"
 
 # Model checkpoint (update this path to your Qwen3-VL-8B-Instruct checkpoint)
@@ -22,35 +22,35 @@ export EMBEDDING_MODEL_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/all-Mini
 export CKPT_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/Qwen3-VL-8B-Instruct"
 
 # Output directory
-export SAVE_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/Qwen3-VL-8B-Instruct-RFT-${HAZARD_TYPE}"
+export SAVE_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/Qwen3-VL-8B-Instruct-RFT-${HAZARD_TYPE}-lora"
 
-# DeepSpeed config
-export DEEPSPEED_CONFIG="${PROJECT_ROOT}/risk_grounding/alignment/Visual-RFT/src/virft/local_scripts/zero3.json"
+# DeepSpeed config (use zero2 for more stable training with LoRA)
+# ZeRO Stage 3 has compatibility issues with LoRA + Vision models
+export DEEPSPEED_CONFIG="${PROJECT_ROOT}/Visual-RFT/src/virft/local_scripts/zero2.json"
+# export DEEPSPEED_CONFIG="${PROJECT_ROOT}/Visual-RFT/src/virft/local_scripts/zero3.json"
+
+# Reward function weights (adjust these to balance different objectives)
+REWARD_WEIGHT_SAFE_ACCURACY=0.5
+REWARD_WEIGHT_RISK_MATCH=2.0
+REWARD_WEIGHT_IOU=5.0
+REWARD_WEIGHT_FORMAT=0.1
 
 # ==============================================================================
-# Reward Weights Configuration
-# ==============================================================================
-#
-# For action_triggered hazard:
-# - safe_accuracy: whether safety judgment is correct
-# - risk_match: semantic similarity of risk description
-# - iou_target_object: localization of the object user needs to interact with
-# - iou_constraint_object: localization of hazard-causing background objects
-# - format: JSON format validity
-#
-# NOTE: target_object should ALWAYS be localized, regardless of scene safety.
-#       The safety judgment depends on constraint_object (hazards), not target_object.
-#
+# LoRA Configuration
 # ==============================================================================
 
-REWARD_WEIGHT_SAFE_ACCURACY=1.0
-REWARD_WEIGHT_RISK_MATCH=1.0
-REWARD_WEIGHT_IOU_TARGET_OBJECT=2.0
-REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT=1.5
-REWARD_WEIGHT_FORMAT=0.5
+# LoRA rank (higher = more parameters, better performance but more memory)
+LORA_R=64
 
-# Legacy combined IoU weight (not used for action_triggered, kept for reference)
-REWARD_WEIGHT_IOU=1.0
+# LoRA alpha (scaling factor, typically r/2 or r/4)
+LORA_ALPHA=16
+
+# LoRA dropout (typically 0.05-0.1)
+LORA_DROPOUT=0.05
+
+# Target modules (which layers to apply LoRA to)
+# Options: "all-linear" (recommended for best performance) or specific modules like "q_proj,v_proj"
+LORA_TARGET_MODULES="all-linear"
 
 # ==============================================================================
 # Launch Training
@@ -66,8 +66,7 @@ echo ""
 echo "Reward Weights:"
 echo "  safe_accuracy: ${REWARD_WEIGHT_SAFE_ACCURACY}"
 echo "  risk_match: ${REWARD_WEIGHT_RISK_MATCH}"
-echo "  iou_target_object: ${REWARD_WEIGHT_IOU_TARGET_OBJECT}"
-echo "  iou_constraint_object: ${REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT}"
+echo "  iou: ${REWARD_WEIGHT_IOU}"
 echo "  format: ${REWARD_WEIGHT_FORMAT}"
 echo "=========================================="
 
@@ -106,7 +105,7 @@ if [ ! -f "${DEEPSPEED_CONFIG}" ]; then
     "gradient_clipping": "auto",
     "steps_per_print": 100,
     "train_batch_size": "auto",
-    "train_micro_batch_size_per_gpu": "auto",
+    "train_micro_batch_size_per_gpu": "auto"
 }
 EOF
 fi
@@ -122,7 +121,7 @@ mkdir -p ${SAVE_PATH}
 
 # Set number of GPUs
 # NUM_GPUS=${NUM_GPUS:-8}
-NUM_GPUS=4
+NUM_GPUS=2
 
 # Run training with torchrun
 torchrun --nproc_per_node="${NUM_GPUS}" \
@@ -139,7 +138,7 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --deepspeed ${DEEPSPEED_CONFIG} \
     --max_prompt_length 2048 \
     --max_completion_length 512 \
-    --per_device_train_batch_size 1 \
+    --per_device_train_batch_size 2 \
     --gradient_accumulation_steps 4 \
     --num_generations 16 \
     --logging_steps 1 \
@@ -150,16 +149,20 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --max_pixels 12845056 \
     --min_pixels 3136 \
     --num_train_epochs 2 \
-    --run_name Qwen3-VL-8B-RFT-${HAZARD_TYPE} \
+    --run_name Qwen3-VL-8B-RFT-${HAZARD_TYPE}-lora \
     --save_steps 300 \
     --save_only_model true \
     --learning_rate 1e-6 \
     --lr_scheduler_type cosine \
     --warmup_ratio 0.1 \
+    --use_peft true \
+    --lora_r ${LORA_R} \
+    --lora_alpha ${LORA_ALPHA} \
+    --lora_dropout ${LORA_DROPOUT} \
+    --lora_target_modules ${LORA_TARGET_MODULES} \
     --reward_weight_safe_accuracy ${REWARD_WEIGHT_SAFE_ACCURACY} \
     --reward_weight_risk_match ${REWARD_WEIGHT_RISK_MATCH} \
-    --reward_weight_iou_target_object ${REWARD_WEIGHT_IOU_TARGET_OBJECT} \
-    --reward_weight_iou_constraint_object ${REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT} \
+    --reward_weight_iou ${REWARD_WEIGHT_IOU} \
     --reward_weight_format ${REWARD_WEIGHT_FORMAT}
 
 echo "=========================================="

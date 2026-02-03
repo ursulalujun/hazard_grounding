@@ -6,12 +6,15 @@
 # Configuration
 # ==============================================================================
 
+# Set W&B to offline mode (for nodes without internet access)
+export WANDB_MODE=offline
+
 # Hazard type: environmental or action_triggered
 export HAZARD_TYPE="environmental"
 
 # Paths
 export PROJECT_ROOT="/mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner"
-export DATA_PATH="${PROJECT_ROOT}/risk_grounding/data_pipeline/data/${HAZARD_TYPE}/success_list.json"
+export DATA_PATH="${PROJECT_ROOT}/risk_grounding/data_pipeline/data/${HAZARD_TYPE}/train_list.json"
 export EMBEDDING_MODEL_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/all-MiniLM-L6-v2"
 
 # Model checkpoint (update this path to your Qwen3-VL-8B-Instruct checkpoint)
@@ -25,6 +28,26 @@ export SAVE_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/Qwen3-VL-8B-Instruc
 export DEEPSPEED_CONFIG="${PROJECT_ROOT}/Visual-RFT/src/virft/local_scripts/zero3.json"
 
 # ==============================================================================
+# Reward Weights Configuration
+# ==============================================================================
+#
+# For environmental hazard:
+# - safe_accuracy: whether safety judgment is correct
+# - risk_match: semantic similarity of risk description
+# - iou: combined IoU of all hazardous area bounding boxes (bbox_list format)
+# - format: JSON format validity
+#
+# Environmental uses bbox_list format (single set of bboxes), not separated
+# target_object/constraint_object like action_triggered.
+#
+# ==============================================================================
+
+REWARD_WEIGHT_SAFE_ACCURACY=1.0
+REWARD_WEIGHT_RISK_MATCH=1.0
+REWARD_WEIGHT_IOU=2.0
+REWARD_WEIGHT_FORMAT=0.5
+
+# ==============================================================================
 # Launch Training
 # ==============================================================================
 
@@ -34,6 +57,12 @@ echo "Hazard Type: ${HAZARD_TYPE}"
 echo "Data Path: ${DATA_PATH}"
 echo "Model: ${CKPT_PATH}"
 echo "Output: ${SAVE_PATH}"
+echo ""
+echo "Reward Weights:"
+echo "  safe_accuracy: ${REWARD_WEIGHT_SAFE_ACCURACY}"
+echo "  risk_match: ${REWARD_WEIGHT_RISK_MATCH}"
+echo "  iou: ${REWARD_WEIGHT_IOU}"
+echo "  format: ${REWARD_WEIGHT_FORMAT}"
 echo "=========================================="
 
 # Check if DeepSpeed config exists
@@ -55,14 +84,6 @@ if [ ! -f "${DEEPSPEED_CONFIG}" ]; then
             "weight_decay": "auto"
         }
     },
-    "scheduler": {
-        "type": "WarmupLR",
-        "params": {
-            "warmup_min_lr": "auto",
-            "warmup_max_lr": "auto",
-            "warmup_num_steps": "auto"
-        }
-    },
     "zero_optimization": {
         "stage": 3,
         "overlap_comm": true,
@@ -79,8 +100,7 @@ if [ ! -f "${DEEPSPEED_CONFIG}" ]; then
     "gradient_clipping": "auto",
     "steps_per_print": 100,
     "train_batch_size": "auto",
-    "train_micro_batch_size_per_gpu": "auto",
-    "gradient_accumulation": "auto"
+    "train_micro_batch_size_per_gpu": "auto"
 }
 EOF
 fi
@@ -95,7 +115,8 @@ fi
 mkdir -p ${SAVE_PATH}
 
 # Set number of GPUs
-NUM_GPUS=${NUM_GPUS:-8}
+# NUM_GPUS=${NUM_GPUS:-8}
+NUM_GPUS=4
 
 # Run training with torchrun
 torchrun --nproc_per_node="${NUM_GPUS}" \
@@ -103,7 +124,7 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --node_rank="0" \
     --master_addr="127.0.0.1" \
     --master_port="12345" \
-    ${PROJECT_ROOT}/risk_grounding/train_rft.py \
+    ${PROJECT_ROOT}/risk_grounding/alignment/rft/train_rft.py \
     --output_dir ${SAVE_PATH} \
     --model_name_or_path ${CKPT_PATH} \
     --dataset_path ${DATA_PATH} \
@@ -112,23 +133,27 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --deepspeed ${DEEPSPEED_CONFIG} \
     --max_prompt_length 2048 \
     --max_completion_length 512 \
-    --per_device_train_batch_size 1 \
+    --per_device_train_batch_size 2 \
     --gradient_accumulation_steps 2 \
-    --num_generations 8 \
+    --num_generations 16 \
     --logging_steps 1 \
     --bf16 true \
     --report_to wandb \
-    --gradient_checkpointing false \
+    --gradient_checkpointing true \
     --attn_implementation flash_attention_2 \
     --max_pixels 12845056 \
     --min_pixels 3136 \
     --num_train_epochs 2 \
     --run_name Qwen3-VL-8B-RFT-${HAZARD_TYPE} \
-    --save_steps 100 \
+    --save_steps 200 \
     --save_only_model true \
     --learning_rate 1e-6 \
     --lr_scheduler_type cosine \
-    --warmup_ratio 0.1
+    --warmup_ratio 0.1 \
+    --reward_weight_safe_accuracy ${REWARD_WEIGHT_SAFE_ACCURACY} \
+    --reward_weight_risk_match ${REWARD_WEIGHT_RISK_MATCH} \
+    --reward_weight_iou ${REWARD_WEIGHT_IOU} \
+    --reward_weight_format ${REWARD_WEIGHT_FORMAT}
 
 echo "=========================================="
 echo "Training completed!"
