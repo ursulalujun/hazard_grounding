@@ -34,7 +34,8 @@ ACTION_TRIGGERED_PRINCIPLES = {
             - Editing: Add a box of paper tissues very close to the stovetop
             - Hazard_related_area:
                 - target_object: stove
-                - constraint_object: box of paper tissues"""
+                - constraint_object: box of paper tissues
+    - **Notice:** If the `Action` involves turning on, igniting, or starting a heat source or combustible item, the `editing_plan` **MUST** explicitly state that the added object is initially in an OFF, UNLIT, or INACTIVE state."""
     },
     2: {
         "title": "Unattended Heat",
