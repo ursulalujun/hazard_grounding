@@ -8,6 +8,7 @@
 
 # Set W&B to offline mode (for nodes without internet access)
 export WANDB_MODE=offline
+export WANDB_PROJECT="hazard_grounding"
 
 # Hazard type: environmental or action_triggered
 export HAZARD_TYPE="environmental"

@@ -144,7 +144,7 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --logging_steps 1 \
     --bf16 true \
     --report_to wandb \
-    --gradient_checkpointing true \
+    --gradient_checkpointing false \
     --attn_implementation flash_attention_2 \
     --max_pixels 12845056 \
     --min_pixels 3136 \

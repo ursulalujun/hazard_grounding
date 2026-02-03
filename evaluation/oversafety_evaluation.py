@@ -10,7 +10,7 @@ from tqdm import tqdm
 import traceback
 from PIL import Image
 
-from evaluation import SafetyAgent, SafetyEvaluator
+from evaluation.evaluation import SafetyAgent, SafetyEvaluator
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

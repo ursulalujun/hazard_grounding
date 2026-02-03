@@ -308,7 +308,7 @@ def main():
     parser.add_argument(
         '--output',
         type=str,
-        default='data/action_triggered/safe_scenarios.json',
+        default='data/action_triggered/safepair/editing_plan.json',
         help='Path to save the generated safe_scenarios.json'
     )
     parser.add_argument(

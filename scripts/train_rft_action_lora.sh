@@ -8,6 +8,7 @@
 
 # Set W&B to offline mode (for nodes without internet access)
 export WANDB_MODE=offline
+export WANDB_PROJECT="hazard_grounding"
 
 # Hazard type: environmental or action_triggered
 export HAZARD_TYPE="action_triggered"
@@ -20,9 +21,6 @@ export EMBEDDING_MODEL_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/all-Mini
 # Model checkpoint (update this path to your Qwen3-VL-8B-Instruct checkpoint)
 # If the model is in shared storage, use the actual path
 export CKPT_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/Qwen3-VL-8B-Instruct"
-
-# Output directory (add -LoRA suffix to distinguish from full fine-tuning)
-export SAVE_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/Qwen3-VL-8B-Instruct-RFT-${HAZARD_TYPE}-LoRA"
 
 # DeepSpeed config (use zero2 for more stable training with LoRA)
 # ZeRO Stage 3 has compatibility issues with LoRA + Vision models
@@ -62,11 +60,15 @@ LORA_TARGET_MODULES="all-linear"
 #
 # ==============================================================================
 
-REWARD_WEIGHT_SAFE_ACCURACY=1.0
-REWARD_WEIGHT_RISK_MATCH=1.0
+REWARD_WEIGHT_SAFE_ACCURACY=0.5
+REWARD_WEIGHT_RISK_MATCH=2.0
 REWARD_WEIGHT_IOU_TARGET_OBJECT=2.0
 REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT=1.5
-REWARD_WEIGHT_FORMAT=0.5
+REWARD_WEIGHT_FORMAT=0.1
+
+# Output directory (add -LoRA suffix to distinguish from full fine-tuning)
+export RUN_NAME="Qwen3-VL-8B-Instruct-RFT-${HAZARD_TYPE}-LoRA-wr${REWARD_WEIGHT_RISK_MATCH}-wit${REWARD_WEIGHT_IOU_TARGET_OBJECT}-wic${REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT}"
+export SAVE_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/${RUN_NAME}"
 
 # ==============================================================================
 # Launch Training
@@ -143,7 +145,7 @@ fi
 mkdir -p ${SAVE_PATH}
 
 # Set number of GPUs
-NUM_GPUS=2
+NUM_GPUS=4
 
 # Run training with torchrun
 torchrun --nproc_per_node="${NUM_GPUS}" \
@@ -161,7 +163,7 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --max_prompt_length 2048 \
     --max_completion_length 512 \
     --per_device_train_batch_size 2 \
-    --gradient_accumulation_steps 4 \
+    --gradient_accumulation_steps 2 \
     --num_generations 16 \
     --logging_steps 1 \
     --bf16 true \
@@ -171,7 +173,7 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --max_pixels 12845056 \
     --min_pixels 3136 \
     --num_train_epochs 2 \
-    --run_name Qwen3-VL-8B-RFT-${HAZARD_TYPE}-LoRA \
+    --run_name ${RUN_NAME} \
     --save_steps 300 \
     --save_only_model true \
     --learning_rate 1e-5 \
