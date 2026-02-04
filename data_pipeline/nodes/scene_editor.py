@@ -32,7 +32,7 @@ crucial_rules = """### Crucial Rules: ###
 # - **Bounding Box:** [x_min, y_min, x_max, y_max] – The precise pixel coordinates defining the area to be edited.
 ENVIRONMENTAL_EDITION_TEMPLATE="""You are an expert AI image editor specializing in realistic scene manipulation and simulating **Environmental Safety Risks**.
 
-You are provided with an input image containing a **red bounding box**, along with a specific safety principle, an edition plan, and a risk-related area. Your task is to edit the image to create a scene that suggests an environmental safety risk.
+You are provided with an input image containing a **red bounding box**, along with a specific safety principle, an edition plan, a safety hazard, and a risk-related area. Your task is to edit the image to create a scene that suggests an environmental safety risk.
 
 {crucial_rules}
 
@@ -42,6 +42,7 @@ Return only the final edited image.
 Your input:
 - Safety Principle: {safety_principle}
 - Editing Plan: {editing_plan}
+- Safety Hazard: {safety_hazard}
 - Risk-related Area: {hazard_related_area}"""
 
 # ### Inputs: ###
@@ -52,7 +53,7 @@ Your input:
 
 ACTION_TRIGGERED_EDITION_TEMPLATE="""You are an expert AI image editor specializing in realistic scene manipulation and simulating **Action-Triggered Safety Risks**.
 
-You are provided with an input image containing a **red bounding box**, along with a specific safety principle, an edition plan, and an risk-related area. Your task is to edit the image to create a scene that suggests an action-triggered safety risk. This means the generated scene might appear benign passively, but becomes actively dangerous when a human attempts to perform the specific action defined in the **Action** input.
+You are provided with an input image containing a **red bounding box**, along with a specific safety principle, an edition plan, a safety hazard, and an risk-related area. Your task is to edit the image to create a scene that suggests an action-triggered safety risk. This means the generated scene might appear benign passively, but becomes actively dangerous when a human attempts to perform the specific action defined in the **Action** input. 
 
 {crucial_rules}
 
@@ -63,6 +64,7 @@ Your input:
 - Safety Principle: {safety_principle}
 - Action: {action}
 - Editing Plan: {editing_plan}
+- Safety Hazard: {safety_hazard}
 - Risk-related Area {hazard_related_area}"""
 
 # ### Inputs: ###
@@ -80,6 +82,23 @@ Critical: Bounding boxes indicate error locations only. Remove them entirely and
 
 Feedback: Critique from previous iteration: [Error type], [Refinement Suggestion]. Strictly follow this guidance.
 Input Feedback: {feedback}
+"""
+
+ACTION_TRIGGERED_SAFE_SCENARIO_TEMPLATE="""
+You are an expert AI image editor specializing in eliminating unsafe factors from images and simulating safe scenarios.
+
+You are provided with an input image containing a **red bounding box**, along with a specific safety principle, an edition plan, and a risk-related area. In the shown scene, performing a certain action would trigger a safety hazard. The red bounding box marks the area that needs interaction and the risk-related area. Your task is to edit the image to eliminate the risk and create a scene without an action-triggered safety risk.
+
+{crucial_rules}
+
+### Output: ###
+Return only the final edited image.
+
+Your input:
+- Safety Principle: {safety_principle}
+- Action: {action}
+- Editing Plan: {editing_plan}
+- Original Safety Hazard: {original_safety_hazard}
 """
 
 # simple template for open-source edition model
@@ -105,20 +124,30 @@ class SceneEditor:
             url = os.getenv("PLAN_API_URL")
             self.client = openai.OpenAI(api_key=key, base_url=url)
 
-    def edit_scene(self, edited_item, hazard_type, feedback=None, iter_num=0, max_retries=3):
+    def edit_scene(self, edited_item, hazard_type, save_folder=None, feedback=None, iter_num=0, max_retries=3):
         risk = edited_item['safety_risk']
         safety_principle = risk['safety_principle']
         editing_plan = risk['editing_plan']
         hazard_related_area = risk['hazard_related_area']
+        scene_type = edited_item.get('scene_type', 'default')
+
         if iter_num > 0 and feedback is not None:
             image_path = risk['edit_image_path'].replace('edit_image', 'annotate_image')
             if not os.path.exists(image_path):
                 image_path = risk['edit_image_path']
-            save_path = risk['edit_image_path'].replace(f'{iter_num-1}.png', f'{iter_num}.png')
+            if save_folder:
+                filename = os.path.basename(risk['pre_image_path'])
+                save_path = os.path.join(save_folder, scene_type, filename)
+            else:
+                save_path = risk['edit_image_path'].replace(f'{iter_num-1}.png', f'{iter_num}.png')
             feedback = f"\n- Feedback: {feedback}"
         else:
             image_path = risk['pre_image_path']
-            save_path = image_path.replace('check_image', 'edit_image')[:-4]+'__'+f'{iter_num}.png'
+            if save_folder:
+                filename = os.path.basename(risk['pre_image_path'])
+                save_path = os.path.join(save_folder, scene_type, filename)
+            else:
+                save_path = image_path.replace('check_image', 'edit_image')[:-4]+'__'+f'{iter_num}.png'
             if os.path.exists(save_path):
                 risk['edit_image_path']=save_path
                 return edited_item
@@ -127,26 +156,23 @@ class SceneEditor:
             print(f"[ERROR]: {image_path} not find image!")
             return edited_item
         
-        # skip the existing image
-        # if os.path.exists(save_path):
-        #     risk['edit_image_path']=save_path
-            # _, risk['edition_bbox']=calculate_diff_bbox(image_path, save_path, 80)
-            # return edited_item
-        
         with open(image_path, "rb") as image_file:
             image_base64 = base64.b64encode(image_file.read()).decode("utf-8")
         
         if hazard_type.lower()=="action_triggered":
             action = risk['action']
-            prompt = ACTION_TRIGGERED_EDITION_TEMPLATE.format(safety_principle=safety_principle, 
+            safety_hazard = risk['safety_hazard']
+            prompt = ACTION_TRIGGERED_EDITION_TEMPLATE.format(safety_principle=safety_principle,
                                                         editing_plan=editing_plan,
-                                                        action=action, 
+                                                        action=action,
                                                         hazard_related_area=hazard_related_area,
-                                                        crucial_rules=crucial_rules) 
+                                                        safety_hazard=safety_hazard,
+                                                        crucial_rules=crucial_rules)
         else:
-            prompt = ENVIRONMENTAL_EDITION_TEMPLATE.format(safety_principle=safety_principle, 
-                                                        editing_plan=editing_plan, 
+            prompt = ENVIRONMENTAL_EDITION_TEMPLATE.format(safety_principle=safety_principle,
+                                                        editing_plan=editing_plan,
                                                         hazard_related_area=hazard_related_area,
+                                                        safety_hazard=safety_hazard,
                                                         crucial_rules=crucial_rules)
         
         if not self.local_model:
@@ -193,10 +219,13 @@ class SceneEditor:
                     else:
                         raise e 
         else:
-            if feedback is None or len(feedback) == 0:
-                prompt = SIMPLE_TEMPLATE.format(editing_plan=editing_plan)
+            if "safe" in hazard_type.lower():
+                prompt = editing_plan
             else:
-                prompt = EDITION_TEMPLATE_WITH_FEEDBACK.format(feedback=feedback)
+                if feedback is None or len(feedback) == 0:
+                    prompt = SIMPLE_TEMPLATE.format(editing_plan=editing_plan)
+                else:
+                    prompt = EDITION_TEMPLATE_WITH_FEEDBACK.format(feedback=feedback)
             image = Image.open(image_path).convert("RGB")
             inputs = {
                 "image": image,
@@ -241,11 +270,11 @@ class SceneEditor:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--hazard_type', 
-        type=str, 
-        required=True, 
-        choices=['action_triggered', 'environmental'],
-        help='Must be "action_triggered" or "environmental"'
+        '--hazard_type',
+        type=str,
+        required=True,
+        choices=['action_triggered', 'environmental', 'safe_action_triggered'],
+        help='Must be "action_triggered", "environmental", or "safe_action_triggered"'
     )
     parser.add_argument(
         '--editor_model', 
@@ -263,14 +292,24 @@ if __name__ == "__main__":
         default=-1,
     )
     parser.add_argument(
-        '--max_workers', 
-        type=int, 
+        '--max_workers',
+        type=int,
         default=1,
+    )
+    parser.add_argument(
+        '--save-folder',
+        type=str,
+        default=None,
+        help='Folder to save edited images (structure: save_folder/scene_type/filename)'
     )
     args = parser.parse_args()
 
-    input_path = os.path.join('data', args.hazard_type, 'aug_editing_plan.json') # 'editing_plan.json'
-    output_path = os.path.join('data', args.hazard_type, 'editing_info.json')
+    if 'safe' not in args.hazard_type.lower():
+        input_path = os.path.join('data', args.hazard_type, 'aug_editing_plan.json') # 'editing_plan.json'
+        output_path = os.path.join('data', args.hazard_type, 'editing_info.json')
+    else:
+        input_path = os.path.join('data', args.hazard_type, 'safepair', 'editing_plan.json')
+        output_path = os.path.join('data', args.hazard_type, 'safepair', 'editing_info.json')
     with open(input_path, 'r') as f:
         editing_plan = json.load(f)
     
@@ -297,7 +336,7 @@ if __name__ == "__main__":
         try:
             with tqdm(total=len(editing_plan), desc="🖼️ Processing images") as pbar:
                 for plan in editing_plan:
-                    results.append(editor.edit_scene(plan, args.hazard_type))
+                    results.append(editor.edit_scene(plan, args.hazard_type, args.save_folder))
         except KeyboardInterrupt:
             print("\nProcess interrupted by user. Saving current results...")
         except Exception as e:
@@ -308,7 +347,7 @@ if __name__ == "__main__":
     else:
         with ThreadPoolExecutor(max_workers=args.max_workers) as executor:
             future_to_index = {
-                executor.submit(editor.edit_scene, plan, args.hazard_type): i 
+                executor.submit(editor.edit_scene, plan, args.hazard_type, args.save_folder): i
                 for i, plan in enumerate(editing_plan)
             }
 

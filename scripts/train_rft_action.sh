@@ -48,10 +48,10 @@ REWARD_WEIGHT_SAFE_ACCURACY=1.0
 REWARD_WEIGHT_RISK_MATCH=1.0
 REWARD_WEIGHT_IOU_TARGET_OBJECT=2.0
 REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT=1.5
-REWARD_WEIGHT_FORMAT=0.5
+REWARD_WEIGHT_FORMAT=0.1
 
-# Legacy combined IoU weight (not used for action_triggered, kept for reference)
-REWARD_WEIGHT_IOU=1.0
+export RUN_NAME="Qwen3-VL-8B-Instruct-RFT-${HAZARD_TYPE}-wr${REWARD_WEIGHT_RISK_MATCH}-wit${REWARD_WEIGHT_IOU_TARGET_OBJECT}-wic${REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT}"
+export SAVE_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/${RUN_NAME}"
 
 # ==============================================================================
 # Launch Training
@@ -150,10 +150,10 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --attn_implementation flash_attention_2 \
     --max_pixels 12845056 \
     --min_pixels 3136 \
-    --num_train_epochs 2 \
-    --run_name Qwen3-VL-8B-RFT-${HAZARD_TYPE} \
-    --save_steps 300 \
-    --save_only_model true \
+    --num_train_epochs 1 \
+    --run_name ${RUN_NAME} \
+    --save_steps 100 \
+    --save_only_model false \
     --learning_rate 1e-6 \
     --lr_scheduler_type cosine \
     --warmup_ratio 0.1 \

@@ -35,6 +35,8 @@ from evaluation.visualization import run_visualization_phase
 
 
 def main():
+    if 'EVALUATION_API_URL' not in os.environ:
+        raise Exception("EVALUATION_API_URL Not Found")
     parser = argparse.ArgumentParser(
         description="Evaluate risk grounding models",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -47,6 +49,8 @@ def main():
                         help='Type of hazard to evaluate')
 
     # Optional arguments
+    parser.add_argument('--adapter', type=str, default=None,
+                        help='Path to LoRA adapter to load (for local models only)')
     parser.add_argument('--evaluation_model', type=str, default='Qwen/Qwen3-VL-235B-A22B-Thinking',
                         help='Model for risk matching judgment')
     parser.add_argument('--data_type', type=str, default='test',
@@ -71,7 +75,13 @@ def main():
     else:
         DATASET_PATH = os.path.join("data_pipeline", "data", args.hazard_type, "success_list.json")
 
-    save_folder = os.path.join("results", args.data_type, args.hazard_type, os.path.basename(args.target_model))
+    # Create save folder (include adapter name if provided)
+    model_name = os.path.basename(args.target_model)
+    if args.adapter:
+        adapter_name = os.path.basename(args.adapter)
+        save_folder = os.path.join("results", args.data_type, args.hazard_type, f"{model_name}+{adapter_name}")
+    else:
+        save_folder = os.path.join("results", args.data_type, args.hazard_type, model_name)
     os.makedirs(save_folder, exist_ok=True)
 
     predictions_file = os.path.join(save_folder, "predictions.json")
@@ -92,7 +102,7 @@ def main():
         print("\n" + "="*60)
         print("PHASE 1: INFERENCE")
         print("="*60)
-        agent = SafetyAgent(model_name=args.target_model, batch_size=args.batch_size)
+        agent = SafetyAgent(model_name=args.target_model, adapter_path=args.adapter, batch_size=args.batch_size)
         eval_items = run_inference_phase(agent, gt_dataset, args.hazard_type, predictions_file)
     else:
         print("\n" + "="*60)

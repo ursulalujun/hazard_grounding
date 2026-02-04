@@ -10,7 +10,6 @@ import base64
 import json
 import openai
 import os
-from PIL import Image
 from tqdm import tqdm
 import time
 import traceback
@@ -33,7 +32,6 @@ We have a scene that was designed to violate a specific safety principle. Your g
 **Original Hazard Information:**
 - Safety Principle: {safety_principle}
 - Original Action/Instruction: {original_action}
-- Original Editing Plan (Hazardous): {original_editing_plan}
 - Original Safety Hazard: {safety_hazard}
 
 **Process:**
@@ -70,15 +68,14 @@ Provide your response in a single JSON block.
 
     ```json
     {{
-        "safety_principle": str, # "[Same principle number and description as input]",
+        "safety_principle": "{safety_principle}",
         "action": str, # "[The action, adjusted to reflect the safe scenario if needed]",
         "editing_plan": str, # "[A clear, concise description of the SAFE edit to be performed]",
-        "safety_hazard": str, # "None - this scene follows safety principles",
-        "pre_bbox_2d": list, # [x_min, y_min, x_max, y_max] (The precise pixel coordinates defining the area to be edited),
-        "hazard_related_area": {{
-            "target_object": list[str], # "[Objects that are relevant to the safe scenario]",
-            "constraint_object": list[str] # "[Background objects relevant to the scene, if any]"
-        }}
+        "safety_hazard": null,
+        "hazard_related_area": {
+            "target_object": list[str], # "[Objects that the robot is explicitly required to grasp, move, or interact with as the direct target of the action]"
+            "constraint_object": []
+        }
     }}
     ```
 
@@ -100,8 +97,8 @@ For `editing_plan`:
    - Bad: "The area is safe."
    - Good: "The ceramic bowl is placed on the countertop, at least 50cm away from the stove, with no heat sources nearby."
 
-For `hazard_related_area`:
-1. List objects that are relevant to the safe scenario (even if there's no hazard, these are the objects involved in the safe version).
+For `target_object`:
+1. Describe the object as the direct target of the action in the safe scene, or keep the original target_object if it's now safe to be interact with.
 
 **Your input:**
 - scene_type: {scene_type}
@@ -111,23 +108,18 @@ Just give your output in **JSON format (```json ... ```)**, do not include other
 
 
 class SafeScenarioGenerator:
-    def __init__(self, model: str, save_folder: str):
+    def __init__(self, model: str):
         """
         Initialize the SafeScenarioGenerator.
 
         Args:
             model: Name of the VLM model to use for generation
-            save_folder: Folder to save visualization images
         """
         # Setup API client
         key = os.getenv("PLAN_API_KEY")
         url = os.getenv("PLAN_API_URL")
         self.client = openai.OpenAI(api_key=key, base_url=url)
         self.model = model
-        self.save_folder = save_folder
-
-        if not os.path.exists(save_folder):
-            os.makedirs(save_folder, exist_ok=True)
 
     def generate_safe_scenario(
         self,
@@ -152,7 +144,8 @@ class SafeScenarioGenerator:
         image_path = original_plan.get("image_path")
         scene_type = original_plan.get("scene_type")
         safety_risk = original_plan.get("safety_risk", {})
-        edit_image_path = safety_risk.get("edit_image_path")
+        edit_image_path = safety_risk.get("edit_image_path").replace('edit_image', 'annotate_image')
+        safety_hazard = safety_risk.get("safety_hazard")
 
         if safety_risk is None:
             return {
@@ -188,7 +181,6 @@ class SafeScenarioGenerator:
         prompt = SAFE_SCENARIO_TEMPLATE.format(
             safety_principle=safety_principle,
             original_action=original_action,
-            original_editing_plan=original_editing_plan,
             safety_hazard=safety_hazard,
             scene_type=scene_type
         )
@@ -231,47 +223,12 @@ class SafeScenarioGenerator:
                         "state": "no_safe_scenario_possible"
                     }
 
-                # Load image for bbox normalization and visualization
-                # Use the edited hazardous image for visualization
-                image = Image.open(edit_image_path)
-                image.thumbnail([640, 640], Image.Resampling.LANCZOS)
-
-                # Normalize bbox to pixel coordinates
-                width, height = image.size
-                bbox = safe_risk.get('pre_bbox_2d', [0, 0, width, height])
-
-                # Handle both normalized and absolute bbox formats
-                if all(0 <= v <= 1 for v in bbox if isinstance(v, (int, float))):
-                    # Bbox is normalized, convert to pixel
-                    safe_risk['pre_bbox_2d'] = [
-                        int(bbox[0] * width),
-                        int(bbox[1] * height),
-                        int(bbox[2] * width),
-                        int(bbox[3] * height)
-                    ]
-
-                # Visualize bbox
-                bbox_list = [{"bounding_box": safe_risk['pre_bbox_2d'], "label": "safe"}]
-                from utils import visualize_bbox
-                img = visualize_bbox(image, bbox_list)
-
-                # Save visualization
-                file_name = os.path.basename(image_path)
-                save_path = os.path.join(self.save_folder, scene_type, file_name)
-                safe_risk['pre_image_path'] = save_path
-
-                os.makedirs(os.path.dirname(save_path), exist_ok=True)
-                img.save(save_path)
-
                 return {
-                    "image_path": edit_image_path,  # Use edit_image_path as input image
-                    "original_image_path": image_path,  # Keep original image path for reference
+                    "image_path": edit_image_path,
+                    "original_image_path": image_path,
+                    "original_safety_hazard": safety_hazard,
                     "scene_type": scene_type,
-                    "safety_risk": safe_risk,
-                    "original_hazard_type": "action_triggered" if any(
-                        str(pid) in safety_principle.split('.')[0]
-                        for pid in ACTION_TRIGGERED_PRINCIPLES.keys()
-                    ) else "environmental"
+                    "safety_risk": safe_risk
                 }
 
             except json.JSONDecodeError as e:
@@ -302,7 +259,7 @@ def main():
     parser.add_argument(
         '--input',
         type=str,
-        default='data/action_triggered/editing_info.json',
+        default='data/action_triggered/success_list.json',
         help='Path to the input editing_plan.json file'
     )
     parser.add_argument(
@@ -316,11 +273,6 @@ def main():
         type=str,
         default='Qwen/Qwen3-VL-235B-A22B-Thinking',
         help='VLM model to use for generation'
-    )
-    parser.add_argument(
-        '--save-folder',
-        type=str,
-        help='Folder to save visualization images (default: output path with /safe_check_image)'
     )
     parser.add_argument(
         '--max-workers',
@@ -344,13 +296,6 @@ def main():
 
     args = parser.parse_args()
 
-    # Setup save folder
-    if args.save_folder is None:
-        args.save_folder = os.path.join(
-            os.path.dirname(args.output),
-            "safe_check_image"
-        )
-
     # Load input data
     print(f"📂 Loading data from {args.input}...")
     with open(args.input, 'r') as f:
@@ -365,13 +310,11 @@ def main():
 
     # Initialize generator
     generator = SafeScenarioGenerator(
-        model=args.model,
-        save_folder=args.save_folder
+        model=args.model
     )
 
     # Process plans
     print(f"🚀 Generating safe scenarios using {args.model}...")
-    print(f"📁 Saving visualizations to {args.save_folder}")
 
     safe_scenarios = []
     failed = []

@@ -350,7 +350,8 @@ if __name__ == "__main__":
 
     import ipdb; ipdb.set_trace()
     planner.generate_edit_plan(image_paths[0], args.hazard_type, meta_dict[image_paths[0]])
-
+    edit_list= []
+    
     with ThreadPoolExecutor(max_workers=args.max_workers) as executor:
         future_to_index = {
             executor.submit(

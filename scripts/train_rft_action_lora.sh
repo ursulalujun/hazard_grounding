@@ -1,3 +1,6 @@
+source /mnt/shared-storage-user/luxiaoya/.bashrc
+conda activate rft
+cd /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding
 #!/bin/bash
 # RFT Training Script with LoRA - Risk Grounding Action Triggered Hazard Detection
 # Adapted from Visual-RFT for safety hazard detection and localization
@@ -61,7 +64,7 @@ LORA_TARGET_MODULES="all-linear"
 # ==============================================================================
 
 REWARD_WEIGHT_SAFE_ACCURACY=0.5
-REWARD_WEIGHT_RISK_MATCH=2.0
+REWARD_WEIGHT_RISK_MATCH=1.0
 REWARD_WEIGHT_IOU_TARGET_OBJECT=2.0
 REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT=1.5
 REWARD_WEIGHT_FORMAT=0.1
@@ -172,9 +175,9 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --attn_implementation flash_attention_2 \
     --max_pixels 12845056 \
     --min_pixels 3136 \
-    --num_train_epochs 2 \
+    --num_train_epochs 1 \
     --run_name ${RUN_NAME} \
-    --save_steps 300 \
+    --save_steps 100 \
     --save_only_model true \
     --learning_rate 1e-5 \
     --lr_scheduler_type cosine \

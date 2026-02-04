@@ -125,6 +125,7 @@ You are a Safety Hazard Data Augmentation Specialist. Your task is to perform in
 - Original Editing Plan: "{editing_plan}"
 - Safety Principle: {safety_principle}
 - Scene Type: {scene_type}
+- Safety Hazard: {safety_hazard}
 - Hazard Related Area: {hazard_related_area}
 
 **Replacement Task:**
@@ -468,6 +469,7 @@ class ItemReplacer:
 
     def _unified_replacement_cot(self, editing_plan: str, safety_principle: str,
                                   action: str, hazard_related_area: Any,
+                                  safety_hazard: str,
                                   scene_type: str, principle_id: str,
                                   replacement_object: str,
                                   replacement_category: str) -> Optional[Dict]:
@@ -495,6 +497,7 @@ class ItemReplacer:
             safety_principle=safety_principle,
             scene_type=scene_type,
             hazard_related_area=hazard_area_str,
+            safety_hazard=safety_hazard,
             replacement_object=replacement_object,
             replacement_category=replacement_category
         )
@@ -582,7 +585,7 @@ class ItemReplacer:
         # Use unified CoT approach - single VLM call
         cot_result = self._unified_replacement_cot(
             original_plan, safety_principle, action,
-            hazard_related_area, scene_type, principle_id,
+            hazard_related_area, safety_hazard, scene_type, principle_id,
             replacement_object, replacement_category
         )
 

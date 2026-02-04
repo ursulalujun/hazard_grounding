@@ -182,7 +182,7 @@ class SafetyEvaluator:
 
             # Constraint object: only for unsafe scenes
             if not is_gt_safe and gt_constraint_bbox:
-                if pred_safe or match_score == 0:
+                if pred_safe: # or match_score == 0:
                     iou_constraint = 0.0
                 else:
                     iou_constraint = self.compute_list_iou(gt_constraint_bbox, pred_constraint_bbox_formatted)
@@ -191,7 +191,7 @@ class SafetyEvaluator:
         else:  # environmental
             # Only compute IoU for unsafe scenes (constraint-like logic)
             if not is_gt_safe and gt_target_bbox:
-                if pred_safe or match_score == 0:
+                if pred_safe: # or match_score == 0:
                     iou_target = 0.0
                 else:
                     iou_target = self.compute_list_iou(gt_target_bbox, pred_target_bbox_formatted)

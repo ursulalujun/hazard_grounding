@@ -134,30 +134,29 @@ def load_risk_grounding_dataset(dataset_path: str, hazard_type: str, max_samples
         # Build ground truth data
         gt_data = {
             "is_gt_safe": is_gt_safe,
+            "safety_hazard": safety_hazard if not is_gt_safe else "",
             "safety_principle": safety_risk.get("safety_principle", ""),
         }
 
-        # Add bbox list if not safe
-        if not is_gt_safe:
-            bbox_annotation = safety_risk.get("bbox_annotation", {})
+        # Add bbox annotation for reward computation (both safe and unsafe)
+        bbox_annotation = safety_risk.get("bbox_annotation", {})
+
+        if hazard_type == "environmental":
+            # Environmental format: {"label1": [x1,y1,x2,y2], "label2": [...]}
+            gt_data["bbox_annotation"] = bbox_annotation
+            # Also provide bbox_list for environmental IoU reward
             bbox_list = []
-            if hazard_type == "environmental":
-                # Environmental format: {"label1": [x1,y1,x2,y2], "label2": [...]}
-                for label, bbox in bbox_annotation.items():
-                    bbox_list.append({
-                        "label": label,
-                        "bounding_box": bbox  # Pixel coordinates
-                    })
-            else:  # action_triggered
-                # Action triggered format: {"category1": {"label1": [x1,y1,x2,y2], ...}, "category2": {...}}
-                # Flatten all bboxes from all categories into a single list
-                for category_name, category_bboxes in bbox_annotation.items():
-                    for label, bbox in category_bboxes.items():
-                        bbox_list.append({
-                            "label": label,
-                            "bounding_box": bbox
-                        })
+            for label, bbox in bbox_annotation.items():
+                bbox_list.append({
+                    "label": label,
+                    "bounding_box": bbox  # Pixel coordinates
+                })
             gt_data["bbox_list"] = bbox_list
+        else:  # action_triggered
+            # Action triggered format: {"target_object": {...}, "constraint_object": {...}}
+            # For safe scenes: target_object exists (object to interact with), constraint_object is empty
+            # For unsafe scenes: both target_object and constraint_object exist
+            gt_data["bbox_annotation"] = bbox_annotation
 
         # Get image path
         image_path = os.path.join("data_pipeline", safety_risk.get("edit_image_path", ""))

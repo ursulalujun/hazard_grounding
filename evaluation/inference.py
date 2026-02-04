@@ -15,6 +15,7 @@ from typing import Dict, List, Optional, Tuple
 import torch
 from PIL import Image
 from transformers import Qwen3VLForConditionalGeneration, AutoProcessor
+from peft import PeftModel
 from openai import OpenAI
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
@@ -130,8 +131,8 @@ Please answer in strictly valid JSON format:
 ```json
 {{
     "safe": bool,
-    "target_object": list[[x_min, y_min, x_max, y_max]], # bounding boxes of objects to interact with
     "risk": str, # describe the risk if not safe, else null
+    "target_object": list[[x_min, y_min, x_max, y_max]], # bounding boxes of objects to interact with
     "constraint_object": list[[x_min, y_min, x_max, y_max]] # bounding boxes of background objects causing hazard (empty if hazard is from target's own state or if scene is safe)
 }}
 ```
@@ -222,15 +223,18 @@ class SafetyAgent:
     Model inference agent for safety hazard detection.
 
     Supports both local models (Qwen-VL) and API models (Gemini, GPT-4V, etc.).
+    Can load LoRA adapters for local models.
     """
 
     def __init__(self, model_name: str = "Qwen/Qwen2-VL-7B-Instruct",
+                 adapter_path: Optional[str] = None,
                  device: str = "cuda", max_retries: int = 3, batch_size: int = 4):
         """
         Initialize the SafetyAgent.
 
         Args:
             model_name: Path to local model or name of API model
+            adapter_path: Path to LoRA adapter (for local models only)
             device: Device for local model inference
             max_retries: Maximum retries for API calls
             batch_size: Batch size for local model inference
@@ -241,7 +245,7 @@ class SafetyAgent:
 
         if os.path.exists(model_name):
             self.model_type = "local"
-            print(f"Loading model: {model_name}...")
+            print(f"Loading base model: {model_name}...")
             if 'qwen' in model_name.lower():
                 self.model = Qwen3VLForConditionalGeneration.from_pretrained(
                     model_name, torch_dtype=torch.bfloat16, device_map="auto"
@@ -251,10 +255,29 @@ class SafetyAgent:
                 self.processor.tokenizer.padding_side = 'left'
             else:
                 raise ValueError(f"Unsupported local model: {model_name}")
+
+            # Load LoRA adapter if provided
+            if adapter_path:
+                if os.path.exists(adapter_path):
+                    print(f"Loading LoRA adapter from: {adapter_path}...")
+                    self.model = PeftModel.from_pretrained(
+                        self.model,
+                        adapter_path,
+                        is_trainable=False
+                    )
+                    # Merge and unload for faster inference
+                    print("Merging LoRA adapter...")
+                    self.model = self.model.merge_and_unload()
+                    print("LoRA adapter merged successfully.")
+                else:
+                    raise ValueError(f"LoRA adapter path not found: {adapter_path}")
+
             print("Model loaded successfully.")
         else:
             self.model_type = "api"
             self.model = model_name
+            if adapter_path:
+                print(f"Warning: adapter_path is ignored for API models")
             key = os.getenv("TARGET_API_KEY")
             url = os.getenv("TARGET_API_URL")
             if 'boyuerichdata' in url.lower():
