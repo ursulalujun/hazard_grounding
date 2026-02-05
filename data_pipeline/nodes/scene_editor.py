@@ -270,11 +270,17 @@ class SceneEditor:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        '--scenario_type', 
+        type=str, 
+        default='unsafe',
+        choices=['unsafe', 'safe']
+    )
+    parser.add_argument(
         '--hazard_type',
         type=str,
         required=True,
-        choices=['action_triggered', 'environmental', 'safe_action_triggered'],
-        help='Must be "action_triggered", "environmental", or "safe_action_triggered"'
+        choices=['action_triggered', 'environmental'],
+        help='Must be "action_triggered" or "environmental"'
     )
     parser.add_argument(
         '--editor_model', 
@@ -296,25 +302,20 @@ if __name__ == "__main__":
         type=int,
         default=1,
     )
-    parser.add_argument(
-        '--save-folder',
-        type=str,
-        default=None,
-        help='Folder to save edited images (structure: save_folder/scene_type/filename)'
-    )
     args = parser.parse_args()
 
-    if 'safe' not in args.hazard_type.lower():
+    if args.scenario_type == 'unsafe':
         input_path = os.path.join('data', args.hazard_type, 'aug_editing_plan.json') # 'editing_plan.json'
         output_path = os.path.join('data', args.hazard_type, 'editing_info.json')
+        edit_folder = os.path.join("data", args.hazard_type, "edit_image")
     else:
         input_path = os.path.join('data', args.hazard_type, 'safepair', 'editing_plan.json')
         output_path = os.path.join('data', args.hazard_type, 'safepair', 'editing_info.json')
+        edit_folder = os.path.join("data", args.hazard_type, 'safepair', "edit_image")
+
+    os.makedirs(edit_folder, exist_ok=True)
     with open(input_path, 'r') as f:
         editing_plan = json.load(f)
-    
-    edit_folder = os.path.join("data", args.hazard_type, "edit_image")
-    os.makedirs(edit_folder, exist_ok=True)
 
     if 'qwen' in args.editor_model.lower():
         local_flag = True
@@ -336,7 +337,7 @@ if __name__ == "__main__":
         try:
             with tqdm(total=len(editing_plan), desc="🖼️ Processing images") as pbar:
                 for plan in editing_plan:
-                    results.append(editor.edit_scene(plan, args.hazard_type, args.save_folder))
+                    results.append(editor.edit_scene(plan, args.hazard_type, edit_folder))
         except KeyboardInterrupt:
             print("\nProcess interrupted by user. Saving current results...")
         except Exception as e:

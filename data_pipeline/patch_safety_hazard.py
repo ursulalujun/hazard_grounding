@@ -5,7 +5,7 @@ This script reads success_list.json and uses a VLM API to generate safety_hazard
 by analyzing how the action violates the safety_principle.
 
 Usage:
-    python scripts/patch_safety_hazard.py \
+    python -m patch_safety_hazard \
         --input_file data_pipeline/data/action_triggered/success_list.json \
         --output_file data_pipeline/data/action_triggered/success_list_updated.json
 """

@@ -177,9 +177,23 @@ def visualize_comparison(item: Dict, hazard_type: str, target_model_name: str, s
         ax.set_title(f"GT (Green) vs Prediction (Red)", fontsize=14, fontweight='bold')
         ax.axis('off')
 
-        # Save
-        sample_id = item.get("id", 0)
-        save_path = os.path.join(save_folder, f"vis_{sample_id:06d}.jpg")
+        # Save with directory structure matching edit_image_path
+        # Extract relative path from edit_image_path (everything after "edit_image/")
+        gt_risks = item["gt_data"]["safety_risk"]
+        edit_image_path = gt_risks.get("edit_image_path", "")
+
+        if edit_image_path and "edit_image/" in edit_image_path:
+            # Get path after "edit_image/": e.g., "living_room/NYU0580__0.png"
+            edit_image_idx = edit_image_path.find("edit_image/")
+            relative_path = edit_image_path[edit_image_idx + len("edit_image/"):]
+            save_path = os.path.join(save_folder, relative_path)
+            # Create parent directory if needed
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        else:
+            # Fallback to original naming scheme
+            sample_id = item.get("id", 0)
+            save_path = os.path.join(save_folder, f"vis_{sample_id:06d}.jpg")
+
         plt.savefig(save_path, bbox_inches='tight', dpi=150)
         plt.close()
 

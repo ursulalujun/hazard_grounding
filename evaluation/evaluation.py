@@ -47,7 +47,9 @@ def main():
     parser.add_argument('--hazard_type', type=str, required=True,
                         choices=['action_triggered', 'environmental'],
                         help='Type of hazard to evaluate')
-
+    parser.add_argument('--version', type=str, required=True,
+                        choices=['v1', 'v2', 'v2_cot'],
+                        help='Type of hazard to evaluate')
     # Optional arguments
     parser.add_argument('--adapter', type=str, default=None,
                         help='Path to LoRA adapter to load (for local models only)')
@@ -79,9 +81,9 @@ def main():
     model_name = os.path.basename(args.target_model)
     if args.adapter:
         adapter_name = os.path.basename(args.adapter)
-        save_folder = os.path.join("results", args.data_type, args.hazard_type, f"{model_name}+{adapter_name}")
+        save_folder = os.path.join("results", args.data_type, args.hazard_type, f"{model_name}+{adapter_name}_{args.version}")
     else:
-        save_folder = os.path.join("results", args.data_type, args.hazard_type, model_name)
+        save_folder = os.path.join("results", args.data_type, args.hazard_type, f"{model_name}_{args.version}")
     os.makedirs(save_folder, exist_ok=True)
 
     predictions_file = os.path.join(save_folder, "predictions.json")
@@ -103,7 +105,7 @@ def main():
         print("PHASE 1: INFERENCE")
         print("="*60)
         agent = SafetyAgent(model_name=args.target_model, adapter_path=args.adapter, batch_size=args.batch_size)
-        eval_items = run_inference_phase(agent, gt_dataset, args.hazard_type, predictions_file)
+        eval_items = run_inference_phase(agent, gt_dataset, args.hazard_type, args.version, predictions_file)
     else:
         print("\n" + "="*60)
         print("SKIPPING INFERENCE - USING EXISTING PREDICTIONS")
@@ -166,8 +168,9 @@ def main():
     if final_metrics:
         print(f"1. Avg Safe Accuracy: {final_metrics.get('avg_safe_accuracy', 0):.4f}")
         print(f"2. Avg Risk GPT Match: {final_metrics.get('avg_risk_match', 0):.4f}")
-        print(f"3. Avg IoU (target_object) - ALL unsafe: {final_metrics.get('avg_iou_target_object', 0):.4f}")
-        print(f"4. Avg IoU (constraint_object) - ALL unsafe: {final_metrics.get('avg_iou_constraint_object', 0):.4f}")
+        print(f"3. Avg Principle Accuracy: {final_metrics.get('avg_principle_accuracy', 0):.4f}")
+        print(f"4. Avg IoU (target_object) - ALL unsafe: {final_metrics.get('avg_iou_target_object', 0):.4f}")
+        print(f"5. Avg IoU (constraint_object) - ALL unsafe: {final_metrics.get('avg_iou_constraint_object', 0):.4f}")
         print(f"   (unsafe samples: {final_metrics.get('unsafe_sample_count', 0)})")
         print(f"   (correct target IoU: {final_metrics.get('avg_iou_target_object_correct_only', 0):.4f} on {final_metrics.get('correct_target_sample_count', 0)} samples)")
         print(f"   (correct constraint IoU: {final_metrics.get('avg_iou_constraint_object_correct_only', 0):.4f} on {final_metrics.get('correct_constraint_sample_count', 0)} samples)")

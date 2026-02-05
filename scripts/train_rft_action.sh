@@ -1,7 +1,9 @@
 #!/bin/bash
 # RFT Training Script for Risk Grounding - Action Triggered Hazard Detection
 # Adapted from Visual-RFT for safety hazard detection and localization
-
+source /mnt/shared-storage-user/luxiaoya/.bashrc
+conda activate rft
+cd /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding
 # ==============================================================================
 # Configuration
 # ==============================================================================

@@ -11,16 +11,16 @@ MAX_MODEL_LEN=65536
 MAX_NUM_SEQS=64
 NUM_GPUS=4
 
-python scripts/launch_vllm.py \
-    --model $MODEL \
-    --served_model_name $SERVED_NAME \
-    --tp $NUM_GPUS \
-    --max_model_len $MAX_MODEL_LEN \
-    --max_num_seqs $MAX_NUM_SEQS
-
-# nohup python scripts/launch_vllm.py \
+# python scripts/launch_vllm.py \
 #     --model $MODEL \
 #     --served_model_name $SERVED_NAME \
 #     --tp $NUM_GPUS \
 #     --max_model_len $MAX_MODEL_LEN \
-#     --max_num_seqs $MAX_NUM_SEQS > /dev/null 2>&1 &
+#     --max_num_seqs $MAX_NUM_SEQS
+
+nohup python scripts/launch_vllm.py \
+    --model $MODEL \
+    --served_model_name $SERVED_NAME \
+    --tp $NUM_GPUS \
+    --max_model_len $MAX_MODEL_LEN \
+    --max_num_seqs $MAX_NUM_SEQS > /dev/null 2>&1 &
