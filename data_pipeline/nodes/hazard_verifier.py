@@ -230,7 +230,7 @@ class HazardVerifier:
             # risk['hazard_check_log'] = check_result
             return f"REJECTED: {refinement_suggestion}"
 
-def process_single_item(item, verifier, hazard_type):
+def process_single_item(item, verifier, hazard_type, scenario_type):
     """
     Logic function to process a single data item
     """
@@ -275,12 +275,12 @@ def process_single_item(item, verifier, hazard_type):
     risk["hazard_check"] = verifier.verify_object(image_path, pil_image, objects_to_detect, risk, hazard_type)
 
     # --- Step 2: Check spatial relationships ---
-    if risk["hazard_check"] == "ACCEPTED":
+    if scenario_type == "unsafe" and risk["hazard_check"] == "ACCEPTED":
         risk["hazard_check"] = verifier.verify_state(pil_image, risk, hazard_type)
     
     return item, "Success"
 
-def verify_hazard(meta_file_path, save_path, detector_name, hazard_type, max_workers):
+def verify_hazard(meta_file_path, save_path, detector_name, hazard_type, scenario_type, max_workers):
     # if "qwen" in detector_name.lower():
     #     proxy_off()
     # else:
@@ -297,14 +297,14 @@ def verify_hazard(meta_file_path, save_path, detector_name, hazard_type, max_wor
     failed_items = []
 
     import ipdb; ipdb.set_trace()
-    process_single_item(data[2], verifier, hazard_type)
+    process_single_item(data[2], verifier, hazard_type, scenario_type)
     
     print(f"🚀 Starting parallel processing with {max_workers} workers...")
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         # 提交所有任务
         future_to_item = {
-            executor.submit(process_single_item, item, verifier, hazard_type): i 
+            executor.submit(process_single_item, item, verifier, hazard_type, scenario_type): i 
             for i, item in enumerate(data)
         }
 
@@ -335,6 +335,12 @@ def verify_hazard(meta_file_path, save_path, detector_name, hazard_type, max_wor
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        '--scenario_type', 
+        type=str, 
+        default='unsafe',
+        choices=['unsafe', 'safe']
+    )
+    parser.add_argument(
         '--hazard_type',
         type=str,
         required=True,
@@ -358,9 +364,14 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    meta_file_path = os.path.join(args.root_folder, args.hazard_type, "annotation_info.json")
-    save_path = os.path.join(args.root_folder, args.hazard_type, "annotation_info.json")
-    save_folder = os.path.join(args.root_folder, args.hazard_type, "annotate_image")
+    if args.scenario_type == 'unsafe':
+        meta_file_path = os.path.join(args.root_folder, args.hazard_type, "annotation_info.json")
+        save_path = os.path.join(args.root_folder, args.hazard_type, "annotation_info.json")
+        save_folder = os.path.join(args.root_folder, args.hazard_type, "annotate_image")
+    else:
+        meta_file_path = os.path.join(args.root_folder, args.hazard_type, 'safepair', "annotation_info.json")
+        save_path = os.path.join(args.root_folder, args.hazard_type, 'safepair', "annotation_info.json")
+        save_folder = os.path.join(args.root_folder, args.hazard_type, 'safepair', "annotate_image")
     if not os.path.exists(save_folder):
         os.mkdir(save_folder)
-    verify_hazard(meta_file_path, save_path, args.detector_name, args.hazard_type, args.max_workers)
+    verify_hazard(meta_file_path, save_path, args.detector_name, args.hazard_type, args.scenario_type, args.max_workers)

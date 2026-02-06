@@ -168,6 +168,12 @@ def verify_fidelity(verifier_model, meta_file_path, save_path, hazard_type, max_
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Image Fidelity Verification using Qwen-VL API")
     parser.add_argument(
+        '--scenario_type', 
+        type=str, 
+        default='unsafe',
+        choices=['unsafe', 'safe']
+    )
+    parser.add_argument(
         '--hazard_type', 
         type=str, 
         required=True, 
@@ -191,6 +197,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     # Define file paths based on the hazard type provided
-    meta_file_path = os.path.join(args.root_folder, args.hazard_type, "editing_info.json")
-    save_path = os.path.join(args.root_folder, args.hazard_type, "annotation_info.json")
+    if args.scenario_type == 'unsafe':
+        meta_file_path = os.path.join(args.root_folder, args.hazard_type, "editing_info.json")
+        save_path = os.path.join(args.root_folder, args.hazard_type, "annotation_info.json")
+    else:
+        meta_file_path = os.path.join(args.root_folder, args.hazard_type, 'safepair', 'editing_info.json')
+        save_path = os.path.join(args.root_folder, args.hazard_type, 'safepair', "annotation_info.json")
     verify_fidelity(args.verifier_model, meta_file_path, save_path, args.hazard_type, args.max_workers)

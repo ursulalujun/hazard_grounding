@@ -15,7 +15,8 @@ class WeightedRewards:
     # Default reward weights
     DEFAULT_WEIGHTS = {
         "safe_accuracy": 1.0,
-        "risk_match": 1.0,
+        "safety_hazard_match": 1.0,
+        "principle_accuracy": 1.0,
         "iou": 1.0,
         "iou_target_object": 1.0,
         "iou_constraint_object": 1.0,
@@ -41,10 +42,16 @@ class WeightedRewards:
         weight = self.weights.get("safe_accuracy", 1.0)
         return [r * weight for r in base_rewards]
 
-    def risk_match_reward(self, completions, solution, **kwargs):
-        """Risk match reward with weight applied."""
-        base_rewards = self.calculator.risk_match_reward(completions, solution, **kwargs)
-        weight = self.weights.get("risk_match", 1.0)
+    def safety_hazard_match_reward(self, completions, solution, **kwargs):
+        """Safety hazard match reward with weight applied."""
+        base_rewards = self.calculator.safety_hazard_match_reward(completions, solution, **kwargs)
+        weight = self.weights.get("safety_hazard_match", 1.0)
+        return [r * weight for r in base_rewards]
+
+    def principle_accuracy_reward(self, completions, solution, **kwargs):
+        """Principle accuracy reward with weight applied."""
+        base_rewards = self.calculator.principle_accuracy_reward(completions, solution, **kwargs)
+        weight = self.weights.get("principle_accuracy", 1.0)
         return [r * weight for r in base_rewards]
 
     def iou_reward(self, completions, solution, **kwargs):
@@ -87,7 +94,8 @@ def get_weighted_reward_registry(embedding_model_path: str, weights: Dict[str, f
     weighted = WeightedRewards(embedding_model_path, weights)
     return {
         "safe_accuracy": weighted.safe_accuracy_reward,
-        "risk_match": weighted.risk_match_reward,
+        "safety_hazard_match": weighted.safety_hazard_match_reward,
+        "principle_accuracy": weighted.principle_accuracy_reward,
         "iou": weighted.iou_reward,
         "iou_target_object": weighted.iou_target_object_reward,
         "iou_constraint_object": weighted.iou_constraint_object_reward,
@@ -102,7 +110,8 @@ def get_weighted_reward_registry(embedding_model_path: str, weights: Dict[str, f
 # Focus on safety classification (safe/unsafe)
 SAFETY_FOCUSED_WEIGHTS = {
     "safe_accuracy": 2.0,
-    "risk_match": 0.5,
+    "safety_hazard_match": 0.5,
+    "principle_accuracy": 0.5,
     "iou": 1.0,
     "iou_target_object": 1.0,
     "iou_constraint_object": 1.0,
@@ -112,17 +121,30 @@ SAFETY_FOCUSED_WEIGHTS = {
 # Focus on localization accuracy (bounding box)
 LOCALIZATION_FOCUSED_WEIGHTS = {
     "safe_accuracy": 1.0,
-    "risk_match": 0.5,
+    "safety_hazard_match": 0.5,
+    "principle_accuracy": 0.5,
     "iou": 2.0,
     "iou_target_object": 2.0,
     "iou_constraint_object": 2.0,
     "format": 0.5,
 }
 
-# Focus on risk description quality
+# Focus on safety hazard description quality
 DESCRIPTION_FOCUSED_WEIGHTS = {
     "safe_accuracy": 1.0,
-    "risk_match": 2.0,
+    "safety_hazard_match": 2.0,
+    "principle_accuracy": 1.0,
+    "iou": 1.0,
+    "iou_target_object": 1.0,
+    "iou_constraint_object": 1.0,
+    "format": 0.5,
+}
+
+# Focus on principle classification accuracy
+PRINCIPLE_FOCUSED_WEIGHTS = {
+    "safe_accuracy": 1.0,
+    "safety_hazard_match": 1.0,
+    "principle_accuracy": 2.0,
     "iou": 1.0,
     "iou_target_object": 1.0,
     "iou_constraint_object": 1.0,
@@ -132,7 +154,8 @@ DESCRIPTION_FOCUSED_WEIGHTS = {
 # Balanced weights (equal importance)
 BALANCED_WEIGHTS = {
     "safe_accuracy": 1.0,
-    "risk_match": 1.0,
+    "safety_hazard_match": 1.0,
+    "principle_accuracy": 1.0,
     "iou": 1.0,
     "iou_target_object": 1.0,
     "iou_constraint_object": 1.0,
@@ -142,7 +165,8 @@ BALANCED_WEIGHTS = {
 # Focus on target object localization (action_triggered)
 TARGET_OBJECT_FOCUSED_WEIGHTS = {
     "safe_accuracy": 1.0,
-    "risk_match": 0.5,
+    "safety_hazard_match": 0.5,
+    "principle_accuracy": 0.5,
     "iou": 1.0,
     "iou_target_object": 2.0,
     "iou_constraint_object": 1.0,
@@ -152,7 +176,8 @@ TARGET_OBJECT_FOCUSED_WEIGHTS = {
 # Focus on constraint object localization (action_triggered)
 CONSTRAINT_OBJECT_FOCUSED_WEIGHTS = {
     "safe_accuracy": 1.0,
-    "risk_match": 0.5,
+    "safety_hazard_match": 0.5,
+    "principle_accuracy": 0.5,
     "iou": 1.0,
     "iou_target_object": 1.0,
     "iou_constraint_object": 2.0,

@@ -124,10 +124,14 @@ class SceneEditor:
             url = os.getenv("PLAN_API_URL")
             self.client = openai.OpenAI(api_key=key, base_url=url)
 
-    def edit_scene(self, edited_item, hazard_type, save_folder=None, feedback=None, iter_num=0, max_retries=3):
+    def edit_scene(self, edited_item, hazard_type, scenario_type, save_folder, feedback=None, iter_num=0, max_retries=3):
         risk = edited_item['safety_risk']
+        if risk is None:
+            return
         safety_principle = risk['safety_principle']
         editing_plan = risk['editing_plan']
+        if editing_plan is None:
+            return
         hazard_related_area = risk['hazard_related_area']
         scene_type = edited_item.get('scene_type', 'default')
 
@@ -135,19 +139,13 @@ class SceneEditor:
             image_path = risk['edit_image_path'].replace('edit_image', 'annotate_image')
             if not os.path.exists(image_path):
                 image_path = risk['edit_image_path']
-            if save_folder:
-                filename = os.path.basename(risk['pre_image_path'])
-                save_path = os.path.join(save_folder, scene_type, filename)
-            else:
-                save_path = risk['edit_image_path'].replace(f'{iter_num-1}.png', f'{iter_num}.png')
+            filename = os.path.basename(risk['pre_image_path'])
+            save_path = os.path.join(save_folder, scene_type, filename)
             feedback = f"\n- Feedback: {feedback}"
         else:
             image_path = risk['pre_image_path']
-            if save_folder:
-                filename = os.path.basename(risk['pre_image_path'])
-                save_path = os.path.join(save_folder, scene_type, filename)
-            else:
-                save_path = image_path.replace('check_image', 'edit_image')[:-4]+'__'+f'{iter_num}.png'
+            filename = os.path.basename(risk['pre_image_path'])
+            save_path = os.path.join(save_folder, scene_type, filename)
             if os.path.exists(save_path):
                 risk['edit_image_path']=save_path
                 return edited_item
@@ -219,7 +217,7 @@ class SceneEditor:
                     else:
                         raise e 
         else:
-            if "safe" in hazard_type.lower():
+            if scenario_type == "safe":
                 prompt = editing_plan
             else:
                 if feedback is None or len(feedback) == 0:
@@ -329,7 +327,7 @@ if __name__ == "__main__":
         editing_plan = editing_plan[args.min_index : args.max_index]
 
     # import ipdb; ipdb.set_trace()
-    # editor.edit_scene(editing_plan[0], args.hazard_type)
+    # editor.edit_scene(editing_plan[0], args.hazard_type, edit_folder)
 
     results = [None] * len(editing_plan)
 
@@ -337,7 +335,7 @@ if __name__ == "__main__":
         try:
             with tqdm(total=len(editing_plan), desc="🖼️ Processing images") as pbar:
                 for plan in editing_plan:
-                    results.append(editor.edit_scene(plan, args.hazard_type, edit_folder))
+                    results.append(editor.edit_scene(plan, args.hazard_type, args.scenario_type, edit_folder))
         except KeyboardInterrupt:
             print("\nProcess interrupted by user. Saving current results...")
         except Exception as e:
@@ -348,7 +346,7 @@ if __name__ == "__main__":
     else:
         with ThreadPoolExecutor(max_workers=args.max_workers) as executor:
             future_to_index = {
-                executor.submit(editor.edit_scene, plan, args.hazard_type, args.save_folder): i
+                executor.submit(editor.edit_scene, plan, args.hazard_type, edit_folder): i
                 for i, plan in enumerate(editing_plan)
             }
 

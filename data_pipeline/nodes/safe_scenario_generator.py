@@ -234,6 +234,7 @@ class ObjectRequirementAnalyzer:
 
                 result['safety_principle'] = safety_principle
                 result['safety_hazard'] = None
+                result['pre_image_path'] = image_path
                 return {
                     "image_path": image_path,
                     "scene_type": scene_type,

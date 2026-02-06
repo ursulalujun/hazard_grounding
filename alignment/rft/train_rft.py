@@ -47,8 +47,8 @@ class RFTScriptArguments(ScriptArguments):
     """
 
     reward_funcs: list[str] = field(
-        default_factory=lambda: ["safe_accuracy", "risk_match", "iou", "format"],
-        metadata={"help": "List of reward functions. Possible values: 'safe_accuracy', 'risk_match', 'iou', 'format'"},
+        default_factory=lambda: ["safe_accuracy", "safety_hazard_match", "principle_accuracy", "iou", "format"],
+        metadata={"help": "List of reward functions. Possible values: 'safe_accuracy', 'safety_hazard_match', 'principle_accuracy', 'iou', 'format'"},
     )
     hazard_type: str = field(
         default="environmental",
@@ -75,9 +75,13 @@ class RFTScriptArguments(ScriptArguments):
         default=1.0,
         metadata={"help": "Weight for safe_accuracy reward"},
     )
-    reward_weight_risk_match: float = field(
+    reward_weight_safety_hazard_match: float = field(
         default=1.0,
-        metadata={"help": "Weight for risk_match reward"},
+        metadata={"help": "Weight for safety_hazard_match reward"},
+    )
+    reward_weight_principle_accuracy: float = field(
+        default=1.0,
+        metadata={"help": "Weight for principle_accuracy reward"},
     )
     reward_weight_iou: float = field(
         default=1.0,
@@ -282,7 +286,8 @@ def main(script_args, training_args, model_args):
     # Build reward weights from script arguments
     reward_weights = {
         "safe_accuracy": script_args.reward_weight_safe_accuracy,
-        "risk_match": script_args.reward_weight_risk_match,
+        "safety_hazard_match": script_args.reward_weight_safety_hazard_match,
+        "principle_accuracy": script_args.reward_weight_principle_accuracy,
         "iou": script_args.reward_weight_iou,
         "iou_target_object": script_args.reward_weight_iou_target_object,
         "iou_constraint_object": script_args.reward_weight_iou_constraint_object,
@@ -300,9 +305,9 @@ def main(script_args, training_args, model_args):
 
     # Get reward functions - use split IoU for action_triggered
     if script_args.hazard_type == "action_triggered":
-        script_args.reward_funcs = ['safe_accuracy', 'risk_match', 'iou_target_object', 'iou_constraint_object', 'format']
+        script_args.reward_funcs = ['safe_accuracy', 'safety_hazard_match', 'principle_accuracy', 'iou_target_object', 'iou_constraint_object', 'format']
     else:
-        script_args.reward_funcs = ['safe_accuracy', 'risk_match', 'iou', 'format']
+        script_args.reward_funcs = ['safe_accuracy', 'safety_hazard_match', 'iou', 'format']
 
     reward_funcs = [custom_registry[func] for func in script_args.reward_funcs]
 

@@ -17,7 +17,7 @@ export HAZARD_TYPE="action_triggered"
 
 # Paths
 export PROJECT_ROOT="/mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner"
-export DATA_PATH="${PROJECT_ROOT}/risk_grounding/data_pipeline/data/${HAZARD_TYPE}/success_list.json"
+export DATA_PATH="${PROJECT_ROOT}/risk_grounding/data_pipeline/data/${HAZARD_TYPE}/train_list.json"
 export EMBEDDING_MODEL_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/all-MiniLM-L6-v2"
 
 # Model checkpoint (update this path to your Qwen3-VL-8B-Instruct checkpoint)
@@ -25,7 +25,7 @@ export EMBEDDING_MODEL_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/all-Mini
 export CKPT_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/Qwen3-VL-8B-Instruct"
 
 # Output directory
-export SAVE_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/Qwen3-VL-8B-Instruct-RFT-${HAZARD_TYPE}"
+# export SAVE_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/Qwen3-VL-8B-Instruct-RFT-${HAZARD_TYPE}"
 
 # DeepSpeed config
 export DEEPSPEED_CONFIG="${PROJECT_ROOT}/risk_grounding/alignment/Visual-RFT/src/virft/local_scripts/zero3.json"
@@ -36,7 +36,8 @@ export DEEPSPEED_CONFIG="${PROJECT_ROOT}/risk_grounding/alignment/Visual-RFT/src
 #
 # For action_triggered hazard:
 # - safe_accuracy: whether safety judgment is correct
-# - risk_match: semantic similarity of risk description
+# - safety_hazard_match: semantic similarity of safety hazard description
+# - principle_accuracy: whether safety principle classification is correct
 # - iou_target_object: localization of the object user needs to interact with
 # - iou_constraint_object: localization of hazard-causing background objects
 # - format: JSON format validity
@@ -47,12 +48,13 @@ export DEEPSPEED_CONFIG="${PROJECT_ROOT}/risk_grounding/alignment/Visual-RFT/src
 # ==============================================================================
 
 REWARD_WEIGHT_SAFE_ACCURACY=1.0
-REWARD_WEIGHT_RISK_MATCH=1.0
+REWARD_WEIGHT_SAFETY_HAZARD_MATCH=1.0
+REWARD_WEIGHT_PRINCIPLE_ACCURACY=1.0
 REWARD_WEIGHT_IOU_TARGET_OBJECT=2.0
 REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT=1.5
 REWARD_WEIGHT_FORMAT=0.1
 
-export RUN_NAME="Qwen3-VL-8B-Instruct-RFT-${HAZARD_TYPE}-wr${REWARD_WEIGHT_RISK_MATCH}-wit${REWARD_WEIGHT_IOU_TARGET_OBJECT}-wic${REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT}"
+export RUN_NAME="Qwen3-VL-8B-Instruct-RFT-mixed-${HAZARD_TYPE}-wsh${REWARD_WEIGHT_SAFETY_HAZARD_MATCH}-wp${REWARD_WEIGHT_PRINCIPLE_ACCURACY}-wit${REWARD_WEIGHT_IOU_TARGET_OBJECT}-wic${REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT}"
 export SAVE_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/${RUN_NAME}"
 
 # ==============================================================================
@@ -68,7 +70,8 @@ echo "Output: ${SAVE_PATH}"
 echo ""
 echo "Reward Weights:"
 echo "  safe_accuracy: ${REWARD_WEIGHT_SAFE_ACCURACY}"
-echo "  risk_match: ${REWARD_WEIGHT_RISK_MATCH}"
+echo "  safety_hazard_match: ${REWARD_WEIGHT_SAFETY_HAZARD_MATCH}"
+echo "  principle_accuracy: ${REWARD_WEIGHT_PRINCIPLE_ACCURACY}"
 echo "  iou_target_object: ${REWARD_WEIGHT_IOU_TARGET_OBJECT}"
 echo "  iou_constraint_object: ${REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT}"
 echo "  format: ${REWARD_WEIGHT_FORMAT}"
@@ -160,7 +163,8 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --lr_scheduler_type cosine \
     --warmup_ratio 0.1 \
     --reward_weight_safe_accuracy ${REWARD_WEIGHT_SAFE_ACCURACY} \
-    --reward_weight_risk_match ${REWARD_WEIGHT_RISK_MATCH} \
+    --reward_weight_safety_hazard_match ${REWARD_WEIGHT_SAFETY_HAZARD_MATCH} \
+    --reward_weight_principle_accuracy ${REWARD_WEIGHT_PRINCIPLE_ACCURACY} \
     --reward_weight_iou_target_object ${REWARD_WEIGHT_IOU_TARGET_OBJECT} \
     --reward_weight_iou_constraint_object ${REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT} \
     --reward_weight_format ${REWARD_WEIGHT_FORMAT}
