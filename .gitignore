@@ -8,3 +8,5 @@ alignment/Visual-RFT
 wandb/
 logs/
 scripts/serve_vllm.sh
+alignment/LlamaFactory
+third_party/

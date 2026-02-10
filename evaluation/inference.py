@@ -21,7 +21,25 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
 from data_pipeline.utils import proxy_off, proxy_on, bbox_norm_to_pixel
-from evaluation.prompt import ENVIRONMENTAL_EVAL_TEMPLATE, ENVIRONMENTAL_EVAL_TEMPLATE_GEMINI, ACTION_TRIGGER_EVAL_TEMPLATE_V1, ACTION_TRIGGER_EVAL_TEMPLATE_V2, ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT, ACTION_TRIGGER_EVAL_TEMPLATE_V1_GEMINI, ACTION_TRIGGER_EVAL_TEMPLATE_V2_GEMINI, ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT_GEMINI, ACTION_TRIGGER_EVAL_TEMPLATE_V3_WITH_COT, ACTION_TRIGGER_EVAL_TEMPLATE_V3_WITH_COT_GEMINI
+from evaluation.prompt import (
+    ENVIRONMENTAL_EVAL_TEMPLATE, 
+    ENVIRONMENTAL_EVAL_TEMPLATE_GEMINI, 
+    ACTION_TRIGGER_EVAL_TEMPLATE_V1, 
+    ACTION_TRIGGER_EVAL_TEMPLATE_V2, 
+    ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT, 
+    ACTION_TRIGGER_EVAL_TEMPLATE_V1_GEMINI, 
+    ACTION_TRIGGER_EVAL_TEMPLATE_V2_GEMINI, 
+    ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT_GEMINI, 
+    ACTION_TRIGGER_EVAL_TEMPLATE_V3_WITH_COT, 
+    ACTION_TRIGGER_EVAL_TEMPLATE_V3_WITH_COT_GEMINI
+)
+from evaluation.utils import add_sys_path
+
+third_party_dir = os.path.join(os.path.dirname(__file__), '..', 'third_party')
+with add_sys_path(os.path.join(third_party_dir, 'Robobrain2.5')):
+    print(os.path.abspath(third_party_dir))
+    from inference import UnifiedInference as RoboBrainInference
+
 
 # Bbox conversion utilities
 def convert_yx_first_to_xy_first(bbox_yx, width, height):
@@ -104,6 +122,9 @@ class SafetyAgent:
                 self.processor = AutoProcessor.from_pretrained(model_name)
                 # Set padding_side to left for decoder-only architecture
                 self.processor.tokenizer.padding_side = 'left'
+            elif 'robobrain' in model_name.lower():
+                self.model = RoboBrainInference(model_name)
+                self.processor = None
             else:
                 raise ValueError(f"Unsupported local model: {model_name}")
 
@@ -181,24 +202,28 @@ class SafetyAgent:
         ]
 
         if self.model_type == "local":
-            inputs = self.processor.apply_chat_template(
-                messages,
-                tokenize=True,
-                add_generation_prompt=True,
-                return_dict=True,
-                return_tensors="pt"
-            )
-            inputs = inputs.to(self.model.device)
+            if self.processor is not None:
+                inputs = self.processor.apply_chat_template(
+                    messages,
+                    tokenize=True,
+                    add_generation_prompt=True,
+                    return_dict=True,
+                    return_tensors="pt"
+                )
+                inputs = inputs.to(self.model.device)
 
-            with torch.no_grad():
-                generated_ids = self.model.generate(**inputs, max_new_tokens=512)
+                with torch.no_grad():
+                    generated_ids = self.model.generate(**inputs, max_new_tokens=512)
 
-            generated_ids_trimmed = [
-                out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
-            ]
-            output_text = self.processor.batch_decode(
-                generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
-            )[0]
+                generated_ids_trimmed = [
+                    out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+                ]
+                output_text = self.processor.batch_decode(
+                    generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+                )[0]
+            
+            else:
+                output_text = self.model.inference(text=prompt_text, image=image_path, task='general')['answer']
         else:
             with open(image_path, "rb") as image_file:
                 base64_image = base64.b64encode(image_file.read()).decode('utf-8')

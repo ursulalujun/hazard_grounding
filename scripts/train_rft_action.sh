@@ -48,13 +48,14 @@ export DEEPSPEED_CONFIG="${PROJECT_ROOT}/risk_grounding/alignment/Visual-RFT/src
 # ==============================================================================
 
 REWARD_WEIGHT_SAFE_ACCURACY=1.0
-REWARD_WEIGHT_SAFETY_HAZARD_MATCH=1.0
-REWARD_WEIGHT_PRINCIPLE_ACCURACY=1.0
+REWARD_WEIGHT_SAFETY_HAZARD_MATCH=0.5
+REWARD_WEIGHT_PRINCIPLE_ACCURACY=2.0
 REWARD_WEIGHT_IOU_TARGET_OBJECT=2.0
-REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT=1.5
+REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT=2.0
 REWARD_WEIGHT_FORMAT=0.1
+EPOCH_NUM=2
 
-export RUN_NAME="Qwen3-VL-8B-Instruct-RFT-mixed-${HAZARD_TYPE}-wsh${REWARD_WEIGHT_SAFETY_HAZARD_MATCH}-wp${REWARD_WEIGHT_PRINCIPLE_ACCURACY}-wit${REWARD_WEIGHT_IOU_TARGET_OBJECT}-wic${REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT}"
+export RUN_NAME="Qwen3-VL-8B-Instruct-RFT-mixed-${HAZARD_TYPE}-epoch${EPOCH_NUM}-wsh${REWARD_WEIGHT_SAFETY_HAZARD_MATCH}-wp${REWARD_WEIGHT_PRINCIPLE_ACCURACY}-wit${REWARD_WEIGHT_IOU_TARGET_OBJECT}-wic${REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT}"
 export SAVE_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/${RUN_NAME}"
 
 # ==============================================================================
@@ -155,9 +156,9 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --attn_implementation flash_attention_2 \
     --max_pixels 12845056 \
     --min_pixels 3136 \
-    --num_train_epochs 1 \
+    --num_train_epochs ${EPOCH_NUM} \
     --run_name ${RUN_NAME} \
-    --save_steps 100 \
+    --save_steps 250 \
     --save_only_model false \
     --learning_rate 1e-6 \
     --lr_scheduler_type cosine \

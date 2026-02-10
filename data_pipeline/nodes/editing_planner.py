@@ -79,7 +79,7 @@ For `editing_plan`:
         - Bad Case: "The floor is slippery."
         - Good Case: "A reflective puddle of water with slight ripples is on the floor next to the outlet."
     5. **Logical Obstruction:** The generated hazard must be directly relevant to the proposed action. The hazard must make the execution of that specific action unsafe. (e.g., If the action is "Wipe the table," the hazard should be on the table, not on the floor in the other corner).
-    6. **Diversity in Generation:** Vary phrasing and object categories. Do not simply copy the provided examples.
+    6. **Pre-Action Risk State (No Active Disaster):** Depict the latent hazard in its precarious state before the action is triggered, strictly avoiding active accidents (e.g., fires, sparks) or their aftermath.
 
 For `hazard-related object`:
     1. **Disambiguation:** If multiple similar objects exist in the scene, explicitly specify which one is the hazard-related object (e.g., "the plate with stains")
