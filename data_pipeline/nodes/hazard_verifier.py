@@ -98,7 +98,7 @@ class HazardVerifier:
         self.client = openai.OpenAI(api_key=key, base_url=url)
         self.detector = detector_model
 
-    def detect(self, image, label, risk_info, hazard_type):
+    def detect(self, image, label, risk_info):
         """
         Directly call Qwen for Grounding to get the most relevant bbox
         """
@@ -107,11 +107,8 @@ class HazardVerifier:
         edit_desc = risk_info["editing_plan"]
         safety_principle = risk_info["safety_principle"]
         safety_hazard = risk_info["safety_hazard"]
-        if hazard_type == "environmental":
-            ins_context = f""
-        else:
-            action = risk_info["action"]
-            ins_context = f"\n- Action Instruction: {action}\n"
+        action = risk_info["action"]
+        ins_context = f"\n- Action Instruction: {action}\n"
         
         max_retries = 3
         for attempt in range(1, max_retries + 1):
@@ -155,7 +152,7 @@ class HazardVerifier:
         return None
 
 
-    def verify_object(self, image_path, pil_image, objects_to_detect, risk, hazard_type):
+    def verify_object(self, image_path, pil_image, objects_to_detect, risk):
         """
         Loop through object list, directly use Qwen to get coordinates
         """
@@ -163,7 +160,7 @@ class HazardVerifier:
 
         for role, obj_label in objects_to_detect:
             # Directly call Qwen Grounding
-            final_box = self.detect(pil_image, obj_label, risk, hazard_type)
+            final_box = self.detect(pil_image, obj_label, risk)
 
             if final_box is None:
                 error_info = f"REJECTED: [Missing Hazard-Related Area] {role}: {obj_label}"
@@ -180,24 +177,21 @@ class HazardVerifier:
         # --- Visualization and save ---
         save_path = image_path.replace('edit_image', 'annotate_image')
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        
+
         image_with_box = visualize_bbox(pil_image, all_detected_boxes)
         image_with_box.save(save_path)
 
         return "ACCEPTED"
 
-    def verify_state(self, image, risk, hazard_type):
+    def verify_state(self, image, risk):
         base64_image = image_to_base64(image)
-        
+
         action = risk.get("action", "")
         safety_hazard = risk.get("safety_hazard", "")
         safety_principle = risk.get("safety_principle", {})
         hazard_objects = risk.get("Hazard_related_area", {})
-        
-        if hazard_type.lower() == 'environmental':
-            prompt = ENVIRONMENTAL_STATE_CHECK_TEMPLATE.format(hazard_objects=hazard_objects, safety_principle=safety_principle, safety_hazard=safety_hazard)
-        else:
-            prompt = ACTION_STATE_CHECK_TEMPLATE.format(hazard_objects=hazard_objects, safety_principle=safety_principle, safety_hazard=safety_hazard, action=action)
+
+        prompt = ACTION_STATE_CHECK_TEMPLATE.format(hazard_objects=hazard_objects, safety_principle=safety_principle, safety_hazard=safety_hazard, action=action)
 
         messages = [
             {
@@ -230,7 +224,7 @@ class HazardVerifier:
             # risk['hazard_check_log'] = check_result
             return f"REJECTED: {refinement_suggestion}"
 
-def process_single_item(item, verifier, hazard_type, scenario_type):
+def process_single_item(item, verifier, scenario_type):
     """
     Logic function to process a single data item
     """
@@ -250,37 +244,31 @@ def process_single_item(item, verifier, hazard_type, scenario_type):
     objects_to_detect = []
     hazard_objs = risk["hazard_related_area"]
 
-    # Build detection list
-    if hazard_type.lower() == "environmental":
-        risk["bbox_annotation"] = {}
-        # Assume hazard_objs is a list under environmental
-        for obj_name in hazard_objs:
-            objects_to_detect.append(("hazard_area", obj_name))
-    else:
-        target_objs = hazard_objs.get("target_object", [])
-        constraint_objs = hazard_objs.get("constraint_object", [])
+    # Build detection list (action_triggered format)
+    target_objs = hazard_objs.get("target_object", [])
+    constraint_objs = hazard_objs.get("constraint_object", [])
 
-        risk["bbox_annotation"] = {
-            "target_object": {},
-            "constraint_object": {}
-        }
-        if target_objs:
-            for name in target_objs:
-                objects_to_detect.append(("target_object", name))
-        if constraint_objs:
-            for name in constraint_objs:
-                objects_to_detect.append(("constraint_object", name))
+    risk["bbox_annotation"] = {
+        "target_object": {},
+        "constraint_object": {}
+    }
+    if target_objs:
+        for name in target_objs:
+            objects_to_detect.append(("target_object", name))
+    if constraint_objs:
+        for name in constraint_objs:
+            objects_to_detect.append(("constraint_object", name))
 
     # --- Step 1: Annotate BBox ---
-    risk["hazard_check"] = verifier.verify_object(image_path, pil_image, objects_to_detect, risk, hazard_type)
+    risk["hazard_check"] = verifier.verify_object(image_path, pil_image, objects_to_detect, risk)
 
     # --- Step 2: Check spatial relationships ---
     if scenario_type == "unsafe" and risk["hazard_check"] == "ACCEPTED":
-        risk["hazard_check"] = verifier.verify_state(pil_image, risk, hazard_type)
-    
+        risk["hazard_check"] = verifier.verify_state(pil_image, risk)
+
     return item, "Success"
 
-def verify_hazard(meta_file_path, save_path, detector_name, hazard_type, scenario_type, max_workers):
+def verify_hazard(meta_file_path, save_path, detector_name, scenario_type, max_workers):
     # if "qwen" in detector_name.lower():
     #     proxy_off()
     # else:
@@ -297,14 +285,14 @@ def verify_hazard(meta_file_path, save_path, detector_name, hazard_type, scenari
     failed_items = []
 
     import ipdb; ipdb.set_trace()
-    process_single_item(data[2], verifier, hazard_type, scenario_type)
-    
+    process_single_item(data[2], verifier, scenario_type)
+
     print(f"🚀 Starting parallel processing with {max_workers} workers...")
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         # 提交所有任务
         future_to_item = {
-            executor.submit(process_single_item, item, verifier, hazard_type, scenario_type): i 
+            executor.submit(process_single_item, item, verifier, scenario_type): i
             for i, item in enumerate(data)
         }
 
@@ -335,17 +323,10 @@ def verify_hazard(meta_file_path, save_path, detector_name, hazard_type, scenari
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--scenario_type', 
-        type=str, 
+        '--scenario_type',
+        type=str,
         default='unsafe',
         choices=['unsafe', 'safe']
-    )
-    parser.add_argument(
-        '--hazard_type',
-        type=str,
-        required=True,
-        choices=['action_triggered', 'environmental'],
-        help='Must be "action_triggered" or "environmental"'
     )
     parser.add_argument(
         '--detector_name',
@@ -364,14 +345,16 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    hazard_type = "action_triggered"
+
     if args.scenario_type == 'unsafe':
-        meta_file_path = os.path.join(args.root_folder, args.hazard_type, "annotation_info.json")
-        save_path = os.path.join(args.root_folder, args.hazard_type, "annotation_info.json")
-        save_folder = os.path.join(args.root_folder, args.hazard_type, "annotate_image")
+        meta_file_path = os.path.join(args.root_folder, hazard_type, "annotation_info.json")
+        save_path = os.path.join(args.root_folder, hazard_type, "annotation_info.json")
+        save_folder = os.path.join(args.root_folder, hazard_type, "annotate_image")
     else:
-        meta_file_path = os.path.join(args.root_folder, args.hazard_type, 'safepair', "annotation_info.json")
-        save_path = os.path.join(args.root_folder, args.hazard_type, 'safepair', "annotation_info.json")
-        save_folder = os.path.join(args.root_folder, args.hazard_type, 'safepair', "annotate_image")
+        meta_file_path = os.path.join(args.root_folder, hazard_type, 'safepair', "annotation_info.json")
+        save_path = os.path.join(args.root_folder, hazard_type, 'safepair', "annotation_info.json")
+        save_folder = os.path.join(args.root_folder, hazard_type, 'safepair', "annotate_image")
     if not os.path.exists(save_folder):
         os.mkdir(save_folder)
-    verify_hazard(meta_file_path, save_path, args.detector_name, args.hazard_type, args.scenario_type, args.max_workers)
+    verify_hazard(meta_file_path, save_path, args.detector_name, args.scenario_type, args.max_workers)

@@ -20,8 +20,7 @@ from utils import parse_json
 from typing import Optional, Dict, Any, List
 
 from nodes.principle_tracker import (
-    ACTION_TRIGGERED_PRINCIPLES,
-    ENVIRONMENTAL_PRINCIPLES
+    ACTION_TRIGGERED_PRINCIPLES
 )
 
 

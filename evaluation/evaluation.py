@@ -10,15 +10,7 @@ Usage:
     # Run from risk_grounding directory (no __init__.py needed)
     python -m evaluation.evaluation \\
         --target_model checkpoints/Qwen3-VL-8B-Instruct \\
-        --hazard_type action_triggered \\
         --data_type test
-
-    # Or run as module (requires __init__.py)
-    python -m evaluation.evaluation \\
-        --target_model gemini-2.0-flash-exp \\
-        --hazard_type environmental \\
-        --skip_inference \\
-        --skip_viz
 """
 
 import argparse
@@ -44,12 +36,9 @@ def main():
     # Required arguments
     parser.add_argument('--target_model', type=str, required=True,
                         help='Path to local model or name of API model (e.g., gemini-2.0-flash-exp)')
-    parser.add_argument('--hazard_type', type=str, required=True,
-                        choices=['action_triggered', 'environmental'],
-                        help='Type of hazard to evaluate')
     parser.add_argument('--version', type=str, required=True,
                         choices=['v1', 'v2', 'v2_cot'],
-                        help='Type of hazard to evaluate')
+                        help='Prompt version to use')
     # Optional arguments
     parser.add_argument('--adapter', type=str, default=None,
                         help='Path to LoRA adapter to load (for local models only)')
@@ -70,20 +59,20 @@ def main():
                         help='Skip visualization phase')
 
     args = parser.parse_args()
-
-    # Setup paths
+    
+    # Setup paths (remove hazard_type level from directory structure)
     if args.data_type == "test":
-        DATASET_PATH = os.path.join("data_pipeline", "data", "test", args.hazard_type, "annotation_info.json")
+        DATASET_PATH = os.path.join("data_pipeline", "data", "test", "annotation_info_debug.json")
     else:
-        DATASET_PATH = os.path.join("data_pipeline", "data", args.hazard_type, "success_list.json")
+        DATASET_PATH = os.path.join("data_pipeline", "data", "success_list.json")
 
     # Create save folder (include adapter name if provided)
     model_name = os.path.basename(args.target_model)
     if args.adapter:
         adapter_name = os.path.basename(args.adapter)
-        save_folder = os.path.join("results", args.data_type, args.hazard_type, f"{model_name}+{adapter_name}_{args.version}")
+        save_folder = os.path.join("results", args.data_type, f"{model_name}+{adapter_name}_{args.version}")
     else:
-        save_folder = os.path.join("results", args.data_type, args.hazard_type, f"{model_name}_{args.version}")
+        save_folder = os.path.join("results", args.data_type, f"{model_name}_{args.version}")
     os.makedirs(save_folder, exist_ok=True)
 
     predictions_file = os.path.join(save_folder, "predictions.json")
@@ -100,12 +89,13 @@ def main():
     # ======================================================================
     # Phase 1: Inference
     # ======================================================================
+    import ipdb; ipdb.set_trace()
     if not args.skip_inference:
         print("\n" + "="*60)
         print("PHASE 1: INFERENCE")
         print("="*60)
         agent = SafetyAgent(model_name=args.target_model, adapter_path=args.adapter, batch_size=args.batch_size)
-        eval_items = run_inference_phase(agent, gt_dataset, args.hazard_type, args.version, predictions_file)
+        eval_items = run_inference_phase(agent, gt_dataset, args.version, predictions_file)
     else:
         print("\n" + "="*60)
         print("SKIPPING INFERENCE - USING EXISTING PREDICTIONS")
@@ -144,6 +134,7 @@ def main():
 
         print(f"Loaded {len(eval_items)} predictions from {predictions_file}")
 
+    import ipdb; ipdb.set_trace()
     # ======================================================================
     # Phase 2: Evaluation
     # ======================================================================
@@ -151,7 +142,7 @@ def main():
     print("PHASE 2: EVALUATION")
     print("="*60)
     evaluator = SafetyEvaluator(model_name=args.evaluation_model, target_model_name=args.target_model)
-    detailed_logs, final_metrics = run_evaluation_phase(evaluator, eval_items, args.hazard_type, args.max_workers)
+    detailed_logs, final_metrics = run_evaluation_phase(evaluator, eval_items, args.max_workers)
 
     # Save results
     final_output_data = {
@@ -176,6 +167,7 @@ def main():
         print(f"   (correct constraint IoU: {final_metrics.get('avg_iou_constraint_object_correct_only', 0):.4f} on {final_metrics.get('correct_constraint_sample_count', 0)} samples)")
     print(f"\nResults saved to: {output_file}")
 
+    import ipdb; ipdb.set_trace()
     # ======================================================================
     # Phase 3: Visualization
     # ======================================================================
@@ -183,7 +175,7 @@ def main():
         print("\n" + "="*60)
         print("PHASE 3: VISUALIZATION")
         print("="*60)
-        run_visualization_phase(eval_items, args.hazard_type, args.target_model, save_folder, args.viz_workers)
+        run_visualization_phase(eval_items, args.target_model, save_folder, args.viz_workers)
     else:
         print("\n" + "="*60)
         print("SKIPPING VISUALIZATION")

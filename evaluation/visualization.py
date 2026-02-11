@@ -25,13 +25,12 @@ def convert_yx_first_to_xy_first(bbox_yx, width, height):
     return bbox_norm_to_pixel(bbox_x_first, width, height)
 
 
-def visualize_comparison(item: Dict, hazard_type: str, target_model_name: str, save_folder: str):
+def visualize_comparison(item: Dict, target_model_name: str, save_folder: str):
     """
     Visualize GT (green) vs Prediction (red) on the same image.
 
     Args:
         item: Dict containing image_path, prediction, gt_data
-        hazard_type: 'action_triggered' or 'environmental'
         target_model_name: Name of target model (for bbox format detection)
         save_folder: Path to save visualization
 
@@ -48,35 +47,27 @@ def visualize_comparison(item: Dict, hazard_type: str, target_model_name: str, s
         fig, ax = plt.subplots(1, 1, figsize=(12, 9))
         ax.imshow(img)
 
-        # Parse GT bboxes
+        # Parse GT bboxes (action_triggered format)
         gt_risks = item["gt_data"]["safety_risk"]
         gt_target_bboxes = []
         gt_constraint_bboxes = []
 
         if "bbox_annotation" in gt_risks:
-            if hazard_type == "environmental":
-                # Environmental: all in bbox_list (treat as constraint-like)
-                for label, bbox in gt_risks["bbox_annotation"].items():
+            bbox_annotation = gt_risks["bbox_annotation"]
+            if "target_object" in bbox_annotation:
+                for label, bbox in bbox_annotation["target_object"].items():
+                    gt_target_bboxes.append({
+                        "label": label,
+                        "bbox": bbox  # Already in pixel coordinates
+                    })
+            if "constraint_object" in bbox_annotation:
+                for label, bbox in bbox_annotation["constraint_object"].items():
                     gt_constraint_bboxes.append({
                         "label": label,
                         "bbox": bbox  # Already in pixel coordinates
                     })
-            else:  # action_triggered
-                bbox_annotation = gt_risks["bbox_annotation"]
-                if "target_object" in bbox_annotation:
-                    for label, bbox in bbox_annotation["target_object"].items():
-                        gt_target_bboxes.append({
-                            "label": label,
-                            "bbox": bbox  # Already in pixel coordinates
-                        })
-                if "constraint_object" in bbox_annotation:
-                    for label, bbox in bbox_annotation["constraint_object"].items():
-                        gt_constraint_bboxes.append({
-                            "label": label,
-                            "bbox": bbox  # Already in pixel coordinates
-                        })
 
-        # Parse Prediction bboxes (convert to pixel if needed)
+        # Parse Prediction bboxes (action_triggered format)
         prediction = item["prediction"]
         is_gemini_gpt = ("gemini" in target_model_name.lower() or
                         "gpt" in target_model_name.lower())
@@ -84,40 +75,26 @@ def visualize_comparison(item: Dict, hazard_type: str, target_model_name: str, s
         pred_target_bboxes = []
         pred_constraint_bboxes = []
 
-        if hazard_type == "environmental":
-            pred_bbox_list = prediction.get("bbox_list", [])
-            for bbox_item in pred_bbox_list:
-                if is_gemini_gpt:
-                    # Convert from [y_min, x_min, y_max, x_max] [0,1000] to pixel
-                    converted = convert_yx_first_to_xy_first(bbox_item["bounding_box"], width, height)
-                else:
-                    # Convert from [x_min, y_min, x_max, y_max] [0,1000] to pixel
-                    converted = bbox_norm_to_pixel(bbox_item["bounding_box"], width, height)
-                pred_constraint_bboxes.append({
-                    "label": bbox_item["label"],
-                    "bbox": converted
-                })
-        else:  # action_triggered
-            # Target object
-            for bbox in prediction.get("target_object", []):
-                if is_gemini_gpt:
-                    converted = convert_yx_first_to_xy_first(bbox, width, height)
-                else:
-                    converted = bbox_norm_to_pixel(bbox, width, height)
-                pred_target_bboxes.append({
-                    "label": "target",
-                    "bbox": converted
-                })
-            # Constraint object
-            for bbox in prediction.get("constraint_object", []):
-                if is_gemini_gpt:
-                    converted = convert_yx_first_to_xy_first(bbox, width, height)
-                else:
-                    converted = bbox_norm_to_pixel(bbox, width, height)
-                pred_constraint_bboxes.append({
-                    "label": "constraint",
-                    "bbox": converted
-                })
+        # Target object
+        for bbox in prediction.get("target_object", []):
+            if is_gemini_gpt:
+                converted = convert_yx_first_to_xy_first(bbox, width, height)
+            else:
+                converted = bbox_norm_to_pixel(bbox, width, height)
+            pred_target_bboxes.append({
+                "label": "target",
+                "bbox": converted
+            })
+        # Constraint object
+        for bbox in prediction.get("constraint_object", []):
+            if is_gemini_gpt:
+                converted = convert_yx_first_to_xy_first(bbox, width, height)
+            else:
+                converted = bbox_norm_to_pixel(bbox, width, height)
+            pred_constraint_bboxes.append({
+                "label": "constraint",
+                "bbox": converted
+            })
 
         # Draw GT bboxes (green, solid line)
         for bbox_item in gt_target_bboxes:
@@ -204,7 +181,7 @@ def visualize_comparison(item: Dict, hazard_type: str, target_model_name: str, s
         return None
 
 
-def run_visualization_phase(eval_items: List[Dict], hazard_type: str,
+def run_visualization_phase(eval_items: List[Dict],
                              target_model_name: str, save_folder: str,
                              max_workers: int = 8) -> int:
     """
@@ -212,7 +189,6 @@ def run_visualization_phase(eval_items: List[Dict], hazard_type: str,
 
     Args:
         eval_items: List of items containing predictions and ground truth
-        hazard_type: Type of hazard
         target_model_name: Name of target model (for bbox format detection)
         save_folder: Path to save visualizations
         max_workers: Number of parallel workers
@@ -228,7 +204,7 @@ def run_visualization_phase(eval_items: List[Dict], hazard_type: str,
     success_count = 0
 
     def visualize_one(item):
-        return visualize_comparison(item, hazard_type, target_model_name, vis_folder)
+        return visualize_comparison(item, target_model_name, vis_folder)
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(visualize_one, item): item["id"] for item in eval_items}

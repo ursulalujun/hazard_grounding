@@ -124,7 +124,7 @@ class SceneEditor:
             url = os.getenv("PLAN_API_URL")
             self.client = openai.OpenAI(api_key=key, base_url=url)
 
-    def edit_scene(self, edited_item, hazard_type, scenario_type, save_folder, feedback=None, iter_num=0, max_retries=3):
+    def edit_scene(self, edited_item, scenario_type, save_folder, feedback=None, iter_num=0, max_retries=3):
         risk = edited_item['safety_risk']
         if risk is None:
             return
@@ -156,22 +156,16 @@ class SceneEditor:
         
         with open(image_path, "rb") as image_file:
             image_base64 = base64.b64encode(image_file.read()).decode("utf-8")
-        
-        if hazard_type.lower()=="action_triggered":
-            action = risk['action']
-            safety_hazard = risk['safety_hazard']
-            prompt = ACTION_TRIGGERED_EDITION_TEMPLATE.format(safety_principle=safety_principle,
-                                                        editing_plan=editing_plan,
-                                                        action=action,
-                                                        hazard_related_area=hazard_related_area,
-                                                        safety_hazard=safety_hazard,
-                                                        crucial_rules=crucial_rules)
-        else:
-            prompt = ENVIRONMENTAL_EDITION_TEMPLATE.format(safety_principle=safety_principle,
-                                                        editing_plan=editing_plan,
-                                                        hazard_related_area=hazard_related_area,
-                                                        safety_hazard=safety_hazard,
-                                                        crucial_rules=crucial_rules)
+
+        # Always use action_triggered logic
+        action = risk['action']
+        safety_hazard = risk['safety_hazard']
+        prompt = ACTION_TRIGGERED_EDITION_TEMPLATE.format(safety_principle=safety_principle,
+                                                    editing_plan=editing_plan,
+                                                    action=action,
+                                                    hazard_related_area=hazard_related_area,
+                                                    safety_hazard=safety_hazard,
+                                                    crucial_rules=crucial_rules)
         
         if not self.local_model:
             messages=[
@@ -274,25 +268,18 @@ if __name__ == "__main__":
         choices=['unsafe', 'safe']
     )
     parser.add_argument(
-        '--hazard_type',
+        '--editor_model',
         type=str,
-        required=True,
-        choices=['action_triggered', 'environmental'],
-        help='Must be "action_triggered" or "environmental"'
-    )
-    parser.add_argument(
-        '--editor_model', 
-        type=str, 
         default='../checkpoints/Qwen-Image-Edit-2511' # 'gemini-2.5-flash-image',
     )
     parser.add_argument(
-        '--min_index', 
-        type=int, 
+        '--min_index',
+        type=int,
         default=0,
     )
     parser.add_argument(
-        '--max_index', 
-        type=int, 
+        '--max_index',
+        type=int,
         default=-1,
     )
     parser.add_argument(
@@ -302,14 +289,16 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    hazard_type = "action_triggered"
+
     if args.scenario_type == 'unsafe':
-        input_path = os.path.join('data', args.hazard_type, 'aug_editing_plan.json') # 'editing_plan.json'
-        output_path = os.path.join('data', args.hazard_type, 'editing_info.json')
-        edit_folder = os.path.join("data", args.hazard_type, "edit_image")
+        input_path = os.path.join('data', hazard_type, 'aug_editing_plan.json') # 'editing_plan.json'
+        output_path = os.path.join('data', hazard_type, 'editing_info.json')
+        edit_folder = os.path.join("data", hazard_type, "edit_image")
     else:
-        input_path = os.path.join('data', args.hazard_type, 'safepair', 'editing_plan.json')
-        output_path = os.path.join('data', args.hazard_type, 'safepair', 'editing_info.json')
-        edit_folder = os.path.join("data", args.hazard_type, 'safepair', "edit_image")
+        input_path = os.path.join('data', hazard_type, 'safepair', 'editing_plan.json')
+        output_path = os.path.join('data', hazard_type, 'safepair', 'editing_info.json')
+        edit_folder = os.path.join("data", hazard_type, 'safepair', "edit_image")
 
     os.makedirs(edit_folder, exist_ok=True)
     with open(input_path, 'r') as f:
@@ -320,14 +309,14 @@ if __name__ == "__main__":
     else:
         local_flag = False
     editor = SceneEditor(args.editor_model, local_flag)
-    
+
     if args.max_index == -1:
         editing_plan = editing_plan[args.min_index :]
     else:
         editing_plan = editing_plan[args.min_index : args.max_index]
 
     # import ipdb; ipdb.set_trace()
-    # editor.edit_scene(editing_plan[0], args.hazard_type, edit_folder)
+    # editor.edit_scene(editing_plan[0], edit_folder)
 
     results = [None] * len(editing_plan)
 
@@ -335,7 +324,7 @@ if __name__ == "__main__":
         try:
             with tqdm(total=len(editing_plan), desc="🖼️ Processing images") as pbar:
                 for plan in editing_plan:
-                    results.append(editor.edit_scene(plan, args.hazard_type, args.scenario_type, edit_folder))
+                    results.append(editor.edit_scene(plan, args.scenario_type, edit_folder))
         except KeyboardInterrupt:
             print("\nProcess interrupted by user. Saving current results...")
         except Exception as e:
@@ -346,7 +335,7 @@ if __name__ == "__main__":
     else:
         with ThreadPoolExecutor(max_workers=args.max_workers) as executor:
             future_to_index = {
-                executor.submit(editor.edit_scene, plan, args.hazard_type, edit_folder): i
+                executor.submit(editor.edit_scene, plan, args.scenario_type, edit_folder): i
                 for i, plan in enumerate(editing_plan)
             }
 

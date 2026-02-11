@@ -7,8 +7,8 @@ This script performs two main tasks:
 2. Replace objects in editing plans using Qwen3-VL-235B for validation
 
 Usage:
-    # Generate object lists for all principles of a hazard type
-    python item_replacement.py --mode generate_objects --hazard_type action_triggered
+    # Generate object lists for all principles
+    python item_replacement.py --mode generate_objects
 
     # Replace objects in editing plans
     python item_replacement.py --mode replace --input editing_plan.json --output aug_editing_plan.json
@@ -30,7 +30,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import openai
 
 # Import principles from principle_tracker
-from nodes.principle_tracker import ACTION_TRIGGERED_PRINCIPLES, ENVIRONMENTAL_PRINCIPLES
+from nodes.principle_tracker import ACTION_TRIGGERED_PRINCIPLES
 from utils import parse_json, proxy_off, proxy_on
 
 # ========================================================================
@@ -230,14 +230,13 @@ class ObjectListGenerator:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def generate_for_principle(self, principle_id: int, principle_info: Dict,
-                              hazard_type: str, max_retries: int = 3) -> Optional[Dict]:
+                              max_retries: int = 3) -> Optional[Dict]:
         """
         Generate object list for a single safety principle
 
         Args:
             principle_id: Principle identifier (integer)
             principle_info: Principle info dict with title, description, examples
-            hazard_type: "action_triggered" or "environmental"
             max_retries: Maximum API call retries
 
         Returns:
@@ -249,7 +248,6 @@ class ObjectListGenerator:
             # Clean up examples section
             examples_text = principle_info["examples"].strip()
             examples_section = f"\n**Examples:**\n{examples_text}"
-
         prompt = OBJECT_LIST_GENERATION_TEMPLATE.format(
             principle_id=principle_id,
             principle_title=principle_info["title"],
@@ -296,12 +294,11 @@ class ObjectListGenerator:
                     print(f"❌ Failed to generate object list for principle {principle_id}")
                     return None
 
-    def save_object_list(self, obj_list: Dict, hazard_type: str):
+    def save_object_list(self, obj_list: Dict):
         """Save object list to file"""
-        hazard_dir = self.output_dir / hazard_type
-        hazard_dir.mkdir(exist_ok=True)
+        self.output_dir.mkdir(exist_ok=True)
 
-        output_file = hazard_dir / f"principle_{obj_list['principle_id']}.json"
+        output_file = self.output_dir / f"principle_{obj_list['principle_id']}.json"
 
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(obj_list, f, indent=2, ensure_ascii=False)
@@ -309,31 +306,24 @@ class ObjectListGenerator:
         print(f"Saved object list to {output_file}")
         return output_file
 
-    def generate_all_principles(self, hazard_type: str):
+    def generate_all_principles(self):
         """
-        Generate object lists for all principles of a hazard type
-
-        Args:
-            hazard_type: "action_triggered" or "environmental"
+        Generate object lists for all principles.
 
         Returns:
             List of successfully generated object lists
         """
-        # Get principles dict from principle_tracker
-        if hazard_type == "action_triggered":
-            principles = ACTION_TRIGGERED_PRINCIPLES
-        else:
-            principles = ENVIRONMENTAL_PRINCIPLES
+        principles = ACTION_TRIGGERED_PRINCIPLES
 
-        print(f"Generating object lists for {len(principles)} principles ({hazard_type})...")
+        print(f"Generating object lists for {len(principles)} principles (action_triggered)...")
 
         results = []
         failed_principles = []
 
         for principle_id, principle_info in tqdm(principles.items(), desc="Generating object lists"):
-            obj_list = self.generate_for_principle(principle_id, principle_info, hazard_type)
+            obj_list = self.generate_for_principle(principle_id, principle_info)
             if obj_list:
-                self.save_object_list(obj_list, hazard_type)
+                self.save_object_list(obj_list)
                 results.append(obj_list)
             else:
                 failed_principles.append(principle_id)
@@ -421,10 +411,6 @@ class ItemReplacer:
             if info['title'] in safety_principle:
                 return pid
 
-        for pid, info in ENVIRONMENTAL_PRINCIPLES.items():
-            if info['title'] in safety_principle:
-                return pid
-
         return None
 
     def _extract_objects_from_plan(self, risk_data: Dict) -> List[str]:
@@ -432,14 +418,10 @@ class ItemReplacer:
         objects = []
         hazard_area = risk_data.get("hazard_related_area", {})
 
-        if isinstance(hazard_area, dict):
-            # Action triggered format
-            for category in ["target_object", "constraint_object"]:
-                for obj in hazard_area.get(category, []):
-                    objects.append(obj)
-        elif isinstance(hazard_area, list):
-            # Environmental format
-            objects.extend(hazard_area)
+        # Action triggered format
+        for category in ["target_object", "constraint_object"]:
+            for obj in hazard_area.get(category, []):
+                objects.append(obj)
 
         return objects
 
@@ -524,19 +506,12 @@ class ItemReplacer:
         """Update hazard_related_area with replacement object"""
         hazard_area = risk_data.get("hazard_related_area", {})
 
-        # Replace in hazard_related_area
-        if isinstance(hazard_area, dict):
-            # Action triggered format
-            for category in ["target_object", "constraint_object"]:
-                objects = hazard_area.get(category, [])
-                for i, obj in enumerate(objects):
-                    if original_object.lower() in obj.lower() or obj.lower() in original_object.lower():
-                        objects[i] = replacement_object
-        elif isinstance(hazard_area, list):
-            # Environmental format
-            for i, obj in enumerate(hazard_area):
+        # Action triggered format
+        for category in ["target_object", "constraint_object"]:
+            objects = hazard_area.get(category, [])
+            for i, obj in enumerate(objects):
                 if original_object.lower() in obj.lower() or obj.lower() in original_object.lower():
-                    hazard_area[i] = replacement_object
+                    objects[i] = replacement_object
 
         return risk_data
 
@@ -730,13 +705,6 @@ def main():
         help='Mode: generate_objects or replace'
     )
     parser.add_argument(
-        '--hazard_type',
-        type=str,
-        required=True,
-        choices=['action_triggered', 'environmental'],
-        help='Hazard type (action_triggered or environmental)'
-    )
-    parser.add_argument(
         '--augmentation_model',
         type=str,
         default='gemini-2.5-pro'
@@ -744,7 +712,7 @@ def main():
     parser.add_argument(
         '--replace_model',
         type=str,
-        default='gemini-2.5-pro'
+        default='Qwen/Qwen3-VL-235B-A22B-Thinking'
     )
     parser.add_argument(
         '--max_workers',
@@ -752,42 +720,43 @@ def main():
         default=24,
         help='Maximum number of parallel workers for API calls'
     )
+    parser.add_argument(
+        '--root_folder',
+        type=str,
+        default="data",
+    )
 
     args = parser.parse_args()
 
-    object_lists_dir = os.path.join("data", args.hazard_type, "augmentation_object")
+    object_lists_dir = os.path.join(args.root_folder, "augmentation_object")
 
     if args.mode == 'generate_objects':
-        # Generate object lists for all principles of the hazard type
+        # Generate object lists for all principles
         generator = ObjectListGenerator(
             model=args.augmentation_model,
             output_dir=object_lists_dir
         )
 
-        # Get principle count for info
-        if args.hazard_type == 'action_triggered':
-            num_principles = len(ACTION_TRIGGERED_PRINCIPLES)
-        else:
-            num_principles = len(ENVIRONMENTAL_PRINCIPLES)
+        num_principles = len(ACTION_TRIGGERED_PRINCIPLES)
 
-        print(f"\nGenerating object lists for all {num_principles} {args.hazard_type} principles...")
+        print(f"\nGenerating object lists for all {num_principles} action_triggered principles...")
         print("="*60)
 
-        results = generator.generate_all_principles(args.hazard_type)
+        results = generator.generate_all_principles()
 
         print("\n" + "="*60)
         print(f"Object List Generation Complete!")
-        print(f"  Principles processed: {args.hazard_type}")
+        print(f"  Principles processed: action_triggered")
         print(f"  Successfully generated: {len(results)}/{num_principles}")
         print("="*60)
 
     elif args.mode == 'replace':
-        input_file = os.path.join("data", args.hazard_type, "editing_plan.json")
+        input_file = os.path.join(args.root_folder, "editing_plan.json")
 
         # Auto-generate output filename
         input_path = Path(input_file)
         output_path = str(input_path.parent / f"aug_{input_path.name}")
-        
+
         # Replace objects in editing plans
         replacer = ItemReplacer(
             object_lists_dir=object_lists_dir,

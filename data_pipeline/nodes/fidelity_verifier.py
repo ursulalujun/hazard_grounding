@@ -120,22 +120,22 @@ def process_single_item(validator, item):
     
     return item
 
-def verify_fidelity(verifier_model, meta_file_path, save_path, hazard_type, max_workers):
+def verify_fidelity(verifier_model, meta_file_path, save_path, max_workers):
     """
     Load JSON data, process images through the verifier, and save results.
     """
     validator = FidelityVerifier(verifier_model)
-    
+
     with open(meta_file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
-    
+
     # data = []
     # for d in data_pre:
     #     if d['scene_type'] == "bathroom":
     #         data.append(d)
     # data = data[:100]
-    
-    print(f"Starting verification for {hazard_type}...")
+
+    print(f"Starting verification for action_triggered...")
 
     updated_data = []
 
@@ -146,7 +146,7 @@ def verify_fidelity(verifier_model, meta_file_path, save_path, hazard_type, max_
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         # Map the function to the data
         future_to_item = {executor.submit(process_single_item, validator, item): item for item in data}
-        
+
         with tqdm(total=len(data), desc="🖼️ Processing Images") as pbar:
             for future in as_completed(future_to_item):
                 try:
@@ -168,24 +168,18 @@ def verify_fidelity(verifier_model, meta_file_path, save_path, hazard_type, max_
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Image Fidelity Verification using Qwen-VL API")
     parser.add_argument(
-        '--scenario_type', 
-        type=str, 
+        '--scenario_type',
+        type=str,
         default='unsafe',
         choices=['unsafe', 'safe']
     )
     parser.add_argument(
-        '--hazard_type', 
-        type=str, 
-        required=True, 
-        help='The category of hazard to process'
-    )
-    parser.add_argument(
-        '--max_workers', 
-        type=int, 
+        '--max_workers',
+        type=int,
         default=24
     )
     parser.add_argument(
-        '--verifier_model', 
+        '--verifier_model',
         type=str,
         default="Qwen/Qwen3-VL-235B-A22B-Thinking"
     )
@@ -195,12 +189,14 @@ if __name__ == "__main__":
         default="data",
     )
     args = parser.parse_args()
-    
-    # Define file paths based on the hazard type provided
+
+    hazard_type = "action_triggered"
+
+    # Define file paths based on the scenario type
     if args.scenario_type == 'unsafe':
-        meta_file_path = os.path.join(args.root_folder, args.hazard_type, "editing_info.json")
-        save_path = os.path.join(args.root_folder, args.hazard_type, "annotation_info.json")
+        meta_file_path = os.path.join(args.root_folder, hazard_type, "editing_info.json")
+        save_path = os.path.join(args.root_folder, hazard_type, "annotation_info.json")
     else:
-        meta_file_path = os.path.join(args.root_folder, args.hazard_type, 'safepair', 'editing_info.json')
-        save_path = os.path.join(args.root_folder, args.hazard_type, 'safepair', "annotation_info.json")
-    verify_fidelity(args.verifier_model, meta_file_path, save_path, args.hazard_type, args.max_workers)
+        meta_file_path = os.path.join(args.root_folder, hazard_type, 'safepair', 'editing_info.json')
+        save_path = os.path.join(args.root_folder, hazard_type, 'safepair', "annotation_info.json")
+    verify_fidelity(args.verifier_model, meta_file_path, save_path, args.max_workers)

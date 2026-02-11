@@ -22,14 +22,15 @@ class RiskWeaverPipeline:
         self.max_retries = args.max_retries
 
         # Initialize PrincipleTracker for balanced generation
-        checkpoint_path = os.path.join("data", args.hazard_type, "principle_checkpoint.json")
+        checkpoint_path = os.path.join("data", "principle_checkpoint.json")
         self.principle_tracker = PrincipleTracker(
             max_per_principle=args.max_per_principle,
             checkpoint_path=checkpoint_path
         )
 
         # Initialize Agents with principle tracker
-        self.planner = EditingPlanner(args.planner_model, principle_tracker=self.principle_tracker)
+        save_folder = os.path.join("data", "check_image")
+        self.planner = EditingPlanner(args.planner_model, save_folder, principle_tracker=self.principle_tracker)
 
         # Determine if the editor is local
         is_local_editor = os.path.exists(args.editor_model)
@@ -46,18 +47,16 @@ class RiskWeaverPipeline:
         Implements the Verify-Refine Loop for a single image.
         """
         # Check if all principles have reached quota
-        if not self.principle_tracker.is_principle_available(self.args.hazard_type):
+        if not self.principle_tracker.is_principle_available():
             print(f"✅ All safety principles have reached the maximum quota ({self.args.max_per_principle})")
             print("Stopping pipeline...")
             with threading.Lock():
                 self._stop_flag = True
             return None
 
-        meta_info = {image_path: scene_type}
-
         # 1. Risk Architect (EditingPlanner) - Planning
         try:
-            editing_item = self.planner.generate_edit_plan(image_path, self.args.hazard_type, meta_info)
+            editing_item = self.planner.generate_edit_plan(image_path, scene_type)
             # Check if planning failed due to no available principles
             if editing_item is None or editing_item.get('safety_risk') is None:
                 return None
@@ -69,8 +68,7 @@ class RiskWeaverPipeline:
         for attempt in range(0, self.max_retries):
             # 2. Scene Editor Agent - Execution
             try:
-                edited_item = self.editor.edit_scene(editing_item, self.args.hazard_type,
-                                                     current_feedback, attempt)
+                edited_item = self.editor.edit_scene(editing_item, current_feedback, attempt)
             except Exception as e:
                 print(f"[-] Scene Editing failed for {image_path}: {e}")
                 return None
@@ -90,9 +88,9 @@ class RiskWeaverPipeline:
             risk_data = edited_item["safety_risk"]
             pil_img = Image.open(edit_img_path).convert("RGB")
 
-            # Prepare objects to detect based on hazard type
+            # Prepare objects to detect
             objects_to_detect = self._get_objects_to_detect(risk_data)
-            detective_res = self.hazard_detective.verify_object(edit_img_path, pil_img, objects_to_detect, risk_data, self.args.hazard_type)
+            detective_res = self.hazard_detective.verify_object(edit_img_path, pil_img, objects_to_detect, risk_data)
 
             if "REJECTED" in detective_res:
                 current_feedback = f"{detective_res.split('REJECTED:')[-1]}, Original Editing Plan: {risk_data['editing_plan']} Refinement Suggestion: add missing objects."
@@ -101,7 +99,7 @@ class RiskWeaverPipeline:
 
             annotate_img_path = edit_img_path.replace('edit_image', 'annotate_image')
             anno_pil_img = Image.open(annotate_img_path).convert("RGB")
-            state_res = self.hazard_detective.verify_state(anno_pil_img, risk_data, self.args.hazard_type)
+            state_res = self.hazard_detective.verify_state(anno_pil_img, risk_data)
 
             # 4. Decision: Pass Both Checks?
             if "REJECTED" in state_res:
@@ -114,7 +112,7 @@ class RiskWeaverPipeline:
                 safety_principle_text = risk_data.get("safety_principle", "")
                 principle_id = extract_principle_id(safety_principle_text)
                 if principle_id is not None:
-                    self.principle_tracker.increment(self.args.hazard_type, principle_id)
+                    self.principle_tracker.increment(principle_id)
                 return edited_item
 
         print(f"[Failed!] {os.path.basename(image_path)}: {current_feedback}")
@@ -124,21 +122,15 @@ class RiskWeaverPipeline:
     def _get_objects_to_detect(self, risk_data):
         objects = []
         hazard_objs = risk_data["hazard_related_area"]
-        if self.args.hazard_type == "environmental":
-            risk_data["bbox_annotation"] = {}
-            for obj_name in hazard_objs:
-                objects.append(("hazard_area", obj_name))
-        else:
-            risk_data["bbox_annotation"] = {"target_object": {}, "constraint_object": {}}
-            for name in hazard_objs.get("target_object", []):
-                objects.append(("target_object", name))
-            for name in hazard_objs.get("constraint_object", []):
-                objects.append(("constraint_object", name))
+        risk_data["bbox_annotation"] = {"target_object": {}, "constraint_object": {}}
+        for name in hazard_objs.get("target_object", []):
+            objects.append(("target_object", name))
+        for name in hazard_objs.get("constraint_object", []):
+            objects.append(("constraint_object", name))
         return objects
 
 def main():
     parser = argparse.ArgumentParser(description="Risk-Weaver Multi-agent Pipeline")
-    parser.add_argument('--hazard_type', type=str, required=True, choices=['action_triggered', 'environmental'])
     parser.add_argument('--planner_model', type=str, default='gemini-2.5-pro')
     parser.add_argument('--editor_model', type=str, default="gpt-image-1-mini") # "gemini-2.5-flash-image"
     parser.add_argument('--detector_model', type=str, default="Qwen/Qwen3-VL-235B-A22B-Thinking")
@@ -155,10 +147,10 @@ def main():
     # Setup directories
     root_folder = os.path.join("data", "base_image")
     meta_path = os.path.join("data", "meta_info.json")
-    output_path = os.path.join("data", args.hazard_type, "annotated_data.json")
+    output_path = os.path.join("data", "annotated_data.json")
 
     for folder_name in ["check_image", "edit_image", "annotate_image"]:
-        save_folder = os.path.join("data", args.hazard_type, folder_name)
+        save_folder = os.path.join("data", folder_name)
         if not os.path.exists(save_folder):
             os.mkdir(save_folder)
 
@@ -214,7 +206,7 @@ def main():
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(final_results, f, indent=2, ensure_ascii=False)
 
-    extract_and_plot_principles(os.path.join("data", args.hazard_type), final_results)
+    extract_and_plot_principles("data", final_results)
     print(f"✅ Pipeline complete. Generated {len(final_results)} samples. Saved to {output_path}")
 
 if __name__ == "__main__":

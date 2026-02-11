@@ -22,16 +22,10 @@ from tqdm import tqdm
 
 from data_pipeline.utils import proxy_off, proxy_on, bbox_norm_to_pixel
 from evaluation.prompt import (
-    ENVIRONMENTAL_EVAL_TEMPLATE, 
-    ENVIRONMENTAL_EVAL_TEMPLATE_GEMINI, 
-    ACTION_TRIGGER_EVAL_TEMPLATE_V1, 
     ACTION_TRIGGER_EVAL_TEMPLATE_V2, 
     ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT, 
-    ACTION_TRIGGER_EVAL_TEMPLATE_V1_GEMINI, 
     ACTION_TRIGGER_EVAL_TEMPLATE_V2_GEMINI, 
-    ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT_GEMINI, 
-    ACTION_TRIGGER_EVAL_TEMPLATE_V3_WITH_COT, 
-    ACTION_TRIGGER_EVAL_TEMPLATE_V3_WITH_COT_GEMINI
+    ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT_GEMINI
 )
 from evaluation.utils import add_sys_path
 
@@ -159,14 +153,14 @@ class SafetyAgent:
             self.client = OpenAI(api_key=key, base_url=url)
             print(f"Using API model: {model_name}")
 
-    def infer_single(self, image_path: str, instruction: str, hazard_type: str, version: str) -> Tuple[Optional[Dict], Optional[str]]:
+    def infer_single(self, image_path: str, instruction: str, version: str) -> Tuple[Optional[Dict], Optional[str]]:
         """
         Inference for a single sample.
 
         Args:
             image_path: Path to the image file
-            instruction: User instruction (for action_triggered hazards)
-            hazard_type: Type of hazard ('action_triggered' or 'environmental')
+            instruction: User instruction
+            version: Prompt version to use
 
         Returns:
             Tuple of (parsed_prediction, raw_output_text)
@@ -176,20 +170,14 @@ class SafetyAgent:
 
         is_gemini_gpt = self.model_type == "api" and ("gemini" in self.model.lower() or "gpt" in self.model.lower())
 
-        if "action" in hazard_type.lower():
-            if version.lower() == "v1":
-                template = ACTION_TRIGGER_EVAL_TEMPLATE_V1_GEMINI if is_gemini_gpt else ACTION_TRIGGER_EVAL_TEMPLATE_V1
-            elif version.lower() == "v2":
-                template = ACTION_TRIGGER_EVAL_TEMPLATE_V2
-            elif version.lower() == "v2_cot":
-                template = ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT if is_gemini_gpt else ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT_GEMINI
-            elif version.lower() == "v3_cot":
-                template = ACTION_TRIGGER_EVAL_TEMPLATE_V3_WITH_COT if is_gemini_gpt else ACTION_TRIGGER_EVAL_TEMPLATE_V3_WITH_COT_GEMINI
-            else:
-                raise NotImplementedError("Version Not Found")
-            prompt_text = template.format(instruction=instruction)
+        # Always use action_triggered templates
+        if version.lower() == "v2":
+            template = ACTION_TRIGGER_EVAL_TEMPLATE_V2 if is_gemini_gpt else ACTION_TRIGGER_EVAL_TEMPLATE_V2_GEMINI
+        elif version.lower() == "v2_cot":
+            template = ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT if is_gemini_gpt else ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT_GEMINI
         else:
-            prompt_text = ENVIRONMENTAL_EVAL_TEMPLATE_GEMINI if is_gemini_gpt else ENVIRONMENTAL_EVAL_TEMPLATE
+            raise NotImplementedError("Version Not Found")
+        prompt_text = template.format(instruction=instruction)
 
         messages = [
             {
@@ -221,8 +209,11 @@ class SafetyAgent:
                 output_text = self.processor.batch_decode(
                     generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
                 )[0]
-            
-            else:
+
+                if "</think>" in output_text:
+                    output_text = output_text.split("</think>")[-1]
+
+            else: 
                 output_text = self.model.inference(text=prompt_text, image=image_path, task='general')['answer']
         else:
             with open(image_path, "rb") as image_file:
@@ -282,24 +273,18 @@ class SafetyAgent:
         # Prepare all prompts
         all_messages = []
         for item in items:
-            hazard_type = item.get("hazard_type", "environmental")
             instruction = item.get("instruction", "")
             version = item.get("version", "")
 
-            if "action" in hazard_type.lower():
-                if version.lower() == "v1":
-                    template = ACTION_TRIGGER_EVAL_TEMPLATE_V1
-                elif version.lower() == "v2":
-                    template = ACTION_TRIGGER_EVAL_TEMPLATE_V2
-                elif version.lower() == "v2_cot":
-                    template = ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT
-                elif version.lower() == "v3_cot":
-                    template = ACTION_TRIGGER_EVAL_TEMPLATE_V3_WITH_COT
-                else:
-                    raise NotImplementedError("Version Not Found")
-                prompt_text = template.format(instruction=instruction)
+            # Always use action_triggered templates
+            if version.lower() == "v2":
+                template = ACTION_TRIGGER_EVAL_TEMPLATE_V2
+            elif version.lower() == "v2_cot":
+                template = ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT
             else:
-                prompt_text = ENVIRONMENTAL_EVAL_TEMPLATE
+                raise NotImplementedError("Version Not Found")
+
+            prompt_text = template.format(instruction=instruction)
 
             all_messages.append([
                 {
@@ -343,6 +328,8 @@ class SafetyAgent:
                     )
 
                     for j, (item, output_text) in enumerate(zip(batch_items, output_texts)):
+                        if "</think>" in output_text:
+                            output_text = output_text.split("</think>")[-1]
                         prediction = self._parse_json(output_text)
                         results.append({
                             "id": item["id"],
@@ -360,7 +347,6 @@ class SafetyAgent:
                         prediction, raw_output = self.infer_single(
                             item["image_path"],
                             item.get("instruction", ""),
-                            item.get("hazard_type", "environmental"),
                             item.get("version", "")
                         )
                         results.append({
@@ -382,7 +368,6 @@ class SafetyAgent:
             prediction, raw_output = self.infer_single(
                 item["image_path"],
                 item.get("instruction", ""),
-                item.get("hazard_type", "environmental"),
                 item.get("version", ""),
             )
             return {
@@ -431,15 +416,14 @@ class SafetyAgent:
                 return {"safe": False, "safety_hazard": "Error parsing output", "target_object": [], "constraint_object": []}
 
 
-def run_inference_phase(agent: SafetyAgent, dataset: List[Dict], hazard_type: str,
-                        version: str, predictions_file: str) -> List[Dict]:
+def run_inference_phase(agent: SafetyAgent, dataset: List[Dict], version: str, predictions_file: str) -> List[Dict]:
     """
     Run inference phase and save predictions.
 
     Args:
         agent: SafetyAgent instance
         dataset: Ground truth dataset
-        hazard_type: Type of hazard
+        version: Prompt version
         predictions_file: Path to save predictions
 
     Returns:
@@ -463,8 +447,7 @@ def run_inference_phase(agent: SafetyAgent, dataset: List[Dict], hazard_type: st
             "id": i,
             "image_path": image_path,
             "instruction": dr.get("instruction", ""),
-            "hazard_type": hazard_type,
-            "version": version, 
+            "version": version,
             "gt_data": gt_data
         })
 

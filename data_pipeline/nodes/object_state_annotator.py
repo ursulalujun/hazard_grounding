@@ -5,7 +5,7 @@ This script annotates the visual state of objects in safety hazard images.
 It uses Qwen3-VL-235B-A22B-Thinking to describe object states relevant to the safety hazard.
 
 Usage:
-    python -m data_pipeline.nodes.object_state_annotator \\
+    python -m nodes.object_state_annotator \\
         --input data/action_triggered/success_list.json \\
         --output data/action_triggered/success_list_annotated.json \\
         --max_workers 24
@@ -368,13 +368,13 @@ if __name__ == "__main__":
     parser.add_argument(
         '--input',
         type=str,
-        default="data/action_triggered/success_list.json",
+        default="data/success_list.json",
         help='Path to input JSON file'
     )
     parser.add_argument(
         '--output',
         type=str,
-        default="data/action_triggered/success_list_annotated.json",
+        default="data/success_list_annotated.json",
         help='Path to output JSON file'
     )
     parser.add_argument(

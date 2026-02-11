@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from utils import parse_json, visualize_bbox, extract_and_plot_principles, bbox_norm_to_pixel, proxy_on, proxy_off, extract_principle_id
 from typing import Optional, Dict, Any
-from nodes.principle_tracker import PrincipleTracker
+from nodes.principle_tracker import PrincipleTracker, ACTION_TRIGGERED_PRINCIPLES
 
 ACTION_TRIGGERED_HZARD_TEMPLATE = """
 You are an expert AI assistant specializing in domestic safety and robotic planning. Your task is to analyze an input image of an indoor scene and propose several realistic edits that introduce a specific **Action-Triggered Safety Hazard**.
@@ -91,55 +91,6 @@ Your input:
 Just give your output in **JSON format (```json ... ```)**, do not include other information. If no logical hazard can be added, please output `null`. DO NOT add objects that do not match the `scene_type`.
 """
 
-ENVIRONMENTAL_HAZARD_TEMPLATE = """You are an expert AI assistant specializing in domestic safety and data generation. Your task is to analyze an input image of an indoor scene and propose several realistic edits that introduce a specific **environmental safety hazard**.
-
-An "environmental safety hazard" is a persistent, long-term risk in the environment that requires regular inspection, as opposed to a temporary risk caused by an ongoing action.
-
-Your goal is to generate a JSON object describing this edit. You must adhere to the **Critical Rules** provided below.
-
-{safety_principles}
-
-**Input Format:**
-   - image: [Image file],
-   - type: [String, e.g., "kitchen", "bathroom", "office", "living_room"]
-
-**Output Format:**
-
-Provide your response in a single JSON block.
-
-   - If a suitable, realistic edit is possible, use this format:
-
-      ```json
-        {{
-         "safety_principle": str, # "[Principle Number]. [Brief description of the violated principle]",
-         "editing_plan": str, # "[A clear, concise description of the edit to be performed]",
-         "safety_hazard": str # "[Describe the specific safety hazard in the edited scene]",
-         "pre_bbox_2d": list, # [x_min, y_min, x_max, y_max] (The precise pixel coordinates defining the area to be edited)
-         "hazard_related_area": list[str], # The specific area where a safety risk exists, or the visual cue identifying a hazard in the environment.
-        }}
-      ```
-
-   - If no edit is possible (due to poor image quality, or no logical hazard can be added), output `null`.
-
-**Critical Rules:**
-
-1.  **Minimal Editing**:
-    - Prioritize modifying existing objects (e.g., changing a ceramic bowl to a metal one) or adding hazard-related objects that can create a safety hazard in combination with existing objects. Avoid overhauling the entire scene or ignoring existing objects to force a fit.
-    - Restrict the scope of modification to the smallest possible bounding box. Avoid large-scale changes or altering the entire image. Example: For the hazard of Mold and Mildew, 'Add visible patches of black mold or green mildew growing in the corner of the ceiling,' rather than covering the entire ceiling or wall with mold.
-2.  **Contextual Realism:** If you must **add** an object, it *must* be common and contextually appropriate for the scene type. (e.g., Adding a space heater in a living room is reasonable; adding one in a shower stall is not). The final scene must look like a plausible, real-world household.
-3.  **Detailed Visual Descriptions:** The `editing_plan` must be extremely detailed to provide clear guidance for the image generation model. You MUST specify:
-    - **Attributes:** Size (e.g., tall, tiny), Material (e.g., glass, metal, ceramic), Color, Texture, and State (e.g., steaming, broken, wet, frayed).
-    - **Spatial Relationships:** Exact positioning relative to other objects (e.g., "precariously balanced on the edge," "hidden under the rug," "touching the hot burner").
-    - **Hazard Cues:** Explicitly describe the visual features that cause the safety hazard.
-*Bad Case:* "Add a cup on the shelf."
-*Good Case:* "Add a very tall glass cup on a high shelf or the top of the unit. Position the glass on the very edge, with one-third of its base hanging over into empty space, appearing precariously balanced and creating a visible risk of falling and injuring someone."
-
-Your input:
-    - scene_type: {scene_type}
-
-Just give your output in **JSON format (```json ... ```)**. If no logical hazard can be added, please output `null`. DO NOT add objects that do not match the `scene_type`.
-"""
-
 
 class EditingPlanner:
     def __init__(self, planner_model: str, save_folder: str, principle_tracker=None):
@@ -163,14 +114,13 @@ class EditingPlanner:
         if not os.path.exists(save_folder):
             os.mkdir(save_folder)
 
-    def generate_edit_plan(self, image_path: str, hazard_type: str, scene_type: str,
+    def generate_edit_plan(self, image_path: str, scene_type: str,
                           min_pixels=64 * 32 * 32, max_pixels=9800* 32 * 32, max_retries=3) -> Optional[Dict[str, Any]]:
         """
         Generate an editing plan for the given image.
 
         Args:
             image_path: Path to the input image
-            hazard_type: Either "action_triggered" or "environmental"
             meta_info: Dictionary mapping image paths to scene types
             min_pixels: Minimum pixels for image encoding
             max_pixels: Maximum pixels for image encoding
@@ -188,10 +138,10 @@ class EditingPlanner:
 
         # Get dynamic principles text from tracker
         if self.principle_tracker is not None:
-            safety_principles_text = self.principle_tracker.get_principles_prompt_section(hazard_type)
+            safety_principles_text = self.principle_tracker.get_principles_prompt_section()
             if not safety_principles_text:
                 # All principles have reached quota
-                print(f"⚠️ All safety principles have reached the maximum quota for {hazard_type}")
+                print(f"⚠️ All safety principles have reached the maximum quota")
                 return {
                     "image_path": image_path,
                     "scene_type": scene_type,
@@ -200,27 +150,17 @@ class EditingPlanner:
                 }
         else:
             # Use default full principles text (backward compatibility)
-            from risk_grounding.data_pipeline.nodes.principle_tracker import ACTION_TRIGGERED_PRINCIPLES, ENVIRONMENTAL_PRINCIPLES
-            if hazard_type.lower() == "action_triggered":
-                principles_dict = ACTION_TRIGGERED_PRINCIPLES
-            else:
-                principles_dict = ENVIRONMENTAL_PRINCIPLES
+            principles_dict = ACTION_TRIGGERED_PRINCIPLES
             safety_principles_text = "## Safety Principles\n"
             for pid in sorted(principles_dict.keys()):
                 p = principles_dict[pid]
                 safety_principles_text += f"\n    {pid}. **{p['title']}:** {p['description']}{p['examples']}"
 
         # Format prompt with dynamic principles
-        if hazard_type.lower() == "action_triggered":
-            prompt = ACTION_TRIGGERED_HZARD_TEMPLATE.format(
-                scene_type=scene_type,
-                safety_principles=safety_principles_text
-            )
-        else:
-            prompt = ENVIRONMENTAL_HAZARD_TEMPLATE.format(
-                scene_type=scene_type,
-                safety_principles=safety_principles_text
-            )
+        prompt = ACTION_TRIGGERED_HZARD_TEMPLATE.format(
+            scene_type=scene_type,
+            safety_principles=safety_principles_text
+        )
 
         messages = [
             {
@@ -275,8 +215,7 @@ class EditingPlanner:
                         safety_principle_text = safety_risk.get("safety_principle", "")
                         principle_id = extract_principle_id(safety_principle_text)
                         if principle_id is not None:
-                            self.principle_tracker.increment(hazard_type, principle_id)
-                            # print(f"✓ Principle {principle_id} count: {self.principle_tracker.get_count(hazard_type, principle_id)}/{self.principle_tracker.max_per_principle}")
+                            self.principle_tracker.increment(principle_id)
 
                 return res
             except Exception as e:
@@ -291,13 +230,6 @@ class EditingPlanner:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--hazard_type',
-        type=str,
-        required=True,
-        choices=['action_triggered', 'environmental'],
-        help='Must be "action_triggered" or "environmental"'
-    )
     parser.add_argument(
         '--planner_name',
         type=str,
@@ -322,19 +254,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
   
     meta_path = os.path.join(args.root_folder, "meta_info.json")
-    output_path = os.path.join(args.root_folder, args.hazard_type, "editing_plan.json")
-    save_folder = os.path.join(args.root_folder, args.hazard_type, "check_image")
+    output_path = os.path.join(args.root_folder, "editing_plan.json")
+    save_folder = os.path.join(args.root_folder, "check_image")
 
     with open(meta_path, 'r') as f:
         meta_dict = json.load(f)
         
     image_paths = list(meta_dict.keys())
-    image_paths = image_paths[5000:]
+    image_paths = image_paths
   
     total_files = len(image_paths)
 
     # Initialize PrincipleTracker with checkpoint
-    checkpoint_path = os.path.join(args.root_folder, args.hazard_type, "principle_checkpoint.json")
+    checkpoint_path = os.path.join(args.root_folder, "principle_checkpoint.json")
     principle_tracker = PrincipleTracker(
         max_per_principle=args.max_per_principle,
         checkpoint_path=checkpoint_path
@@ -349,7 +281,7 @@ if __name__ == "__main__":
     stop_flag = False  # Flag to stop processing when all principles reach quota
 
     import ipdb; ipdb.set_trace()
-    planner.generate_edit_plan(image_paths[0], args.hazard_type, meta_dict[image_paths[0]])
+    planner.generate_edit_plan(image_paths[0], meta_dict[image_paths[0]])
     edit_list= []
     
     with ThreadPoolExecutor(max_workers=args.max_workers) as executor:
@@ -357,7 +289,6 @@ if __name__ == "__main__":
             executor.submit(
                 planner.generate_edit_plan,
                 path,
-                args.hazard_type,
                 meta_dict[path]
             ): (i, path)
             for i, path in enumerate(image_paths)
@@ -380,7 +311,7 @@ if __name__ == "__main__":
                         edit_list.append(result)
 
                         # Check if all principles have reached quota
-                        if not principle_tracker.is_principle_available(args.hazard_type):
+                        if not principle_tracker.is_principle_available():
                             print(f"\n✅ All safety principles have reached the maximum quota ({args.max_per_principle})")
                             print("Stopping planning phase...")
                             stop_flag = True
@@ -397,4 +328,4 @@ if __name__ == "__main__":
     with open(output_path, 'w') as f:
         json.dump(edit_list, f, indent=2)
 
-    extract_and_plot_principles(os.path.join("data", args.hazard_type), edit_list)
+    extract_and_plot_principles(args.root_folder, edit_list)

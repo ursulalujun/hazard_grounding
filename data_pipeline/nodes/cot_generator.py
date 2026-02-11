@@ -6,8 +6,8 @@ which can be used as Ground Truth for SFT training.
 
 Usage:
     python -m nodes.cot_generator \\
-        --input data/action_triggered/success_list_annotated.json \\
-        --output data/action_triggered/success_list_with_cot.json \\
+        --input data/success_list_annotated.json \\
+        --output data/success_list_with_cot.json \\
         --max_workers 24
 """
 
@@ -20,7 +20,7 @@ from PIL import Image
 from tqdm import tqdm
 import openai
 
-from utils import image_to_base64, proxy_on, proxy_off
+from utils import image_to_base64, proxy_on, proxy_off, parse_json
 
 
 # ========================================================================
@@ -91,13 +91,15 @@ Provide ONLY the Chain of Thought reasoning in English, following the 4-step for
     "step1": "Based on the action instruction \"Heat the soup in the bowl placed on the counter directly in front of the microwave\", the target objects to be interacted with are: [target object][microwave][607, 0, 998, 435][turned on] and [target object][ceramic bowl][692, 181, 957, 367][].",
     "step2": "Heating the ceramic bowl in the microwave would not cause a safety problem by itself, as ceramic is microwave-safe material.",
     "step3": "Examining the area around the microwave and ceramic bowl, there is a metal soup spoon inside the bowl: [constraint object][metal soup spoon][747, 205, 991, 247][metal]. When placing the ceramic bowl into the microwave, the metal soup spoon is likely to be included and heated along with the food. This poses a serious safety risk.",
-    "step4": "The metal soup spoon acts as the hazard source. When heated in a microwave, it can generate electrical arcing (sparks) that may ignite flammable materials, damage the microwave's interior, or start a fire. Catastrophic consequences include electrical fires, microwave explosion from sustained arcing, or injury from flying sparks and superheated steam. [safety_hazard][The metal soup spoon acts as the hazard source, generating sparks that can ignite flammable materials, damage the microwave's interior, or start a fire. Catastrophic consequences include electrical fires, microwave explosion from sustained arcing, or injury from flying sparks and superheated steam.], violate [principle_id][3]"
+    "step4": "The metal soup spoon acts as the hazard source. When heated in a microwave, it can generate electrical arcing (sparks) that may ignite flammable materials, damage the microwave's interior, or start a fire. Catastrophic consequences include electrical fires, microwave explosion from sustained arcing, or injury from flying sparks and superheated steam. [safety_hazard][The metal soup spoon acts as the hazard source, generating sparks that can ignite flammable materials, damage the microwave's interior, or start a fire. Catastrophic consequences include electrical fires, microwave explosion from sustained arcing, or injury from flying sparks and superheated steam.], violating [principle_id][3]"
 }}
 ```
 
 ### Important Notes: ##
 - The bbox should be in the format [x_min, y_min, x_max, y_max]
-- If an object has no relevant state (state is null), omit the state part and output []
+- Construct the CoT reasoning process exactly as the input target object and constraint object. Don't add new objects and state.
+    - If an object has no relevant state (state is null), omit the state part and output [XX object][object_name][bbox][].
+    - If the input target/constraint object is empty dict, just output: there is no target/constraint object in the scene, and therefore no safety hazard will be triggered.
 - Be specific about how the constraint object creates or contributes to the hazard
 """
 
@@ -219,6 +221,7 @@ class CoTGenerator:
                 if "</think>" in response:
                     response = response.split("</think>")[-1].strip()
 
+                response = parse_json(response)
                 return response
 
             except Exception as e:
@@ -270,7 +273,7 @@ class CoTGenerator:
                 image = None
 
         # Generate CoT
-        cot = self._generate_cot(
+        step_cot = self._generate_cot(
             safety_principle=safety_principle,
             action=action,
             safety_hazard=safety_hazard,
@@ -279,6 +282,9 @@ class CoTGenerator:
         )
 
         # Add CoT to safety_risk
+        step4, answer = step_cot["step4"].split("[safety_hazard]")
+
+        cot = "<think> " + step_cot["step1"] + " " + step_cot["step2"] + " " + step_cot["step3"] + " " + step4 + "</think> " + "[safety_hazard]" + answer
         safety_risk["cot"] = cot
 
         # Also extract and store principle_id
