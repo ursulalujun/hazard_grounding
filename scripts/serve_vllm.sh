@@ -1,4 +1,5 @@
 #!/bin/bash
+# rj -n vllm-qwen3 -i "registry.h.pjlab.org.cn/ailab-ai4good1-ai4good1_gpu/vllm:py311_torch-2.8.0-cu128_vllm-0.11.0rc2" -g 4 bash -exc /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding/scripts/serve_vllm.sh
 set -ex
 
 export VLLM_WORKER_MULTIPROC_METHOD=spawn

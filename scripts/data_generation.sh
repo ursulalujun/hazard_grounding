@@ -31,6 +31,9 @@ python -m nodes.fidelity_verifier --root_folder $FOLDER
 
 python -m nodes.hazard_verifier --root_folder $FOLDER
 
-python -m nodes.object_state_annotator
+python -m nodes.object_state_annotator --root_folder $FOLDER
 
-python -m nodes.cot_generator --input data/success_list_annotated.json --output data/success_list_with_cot.json
+python -m nodes.cot_generator --root_folder $FOLDER
+
+#### For Safe Scenario
+python -m nodes.safe_scenario_generator --root_folder $FOLDER # default to read success_list.json

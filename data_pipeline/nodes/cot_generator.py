@@ -45,7 +45,7 @@ Generate a step-by-step Chain of Thought reasoning following this format:
 **Step 1: Identify the operation area**
 Based on the action instruction, identify which target objects need to be interacted with. For each target object, provide its bounding box and state.
 
-Format: [target object][object_name][bbox][state]
+Format: [target_object][object_name][bbox][state]
 
 **Step 2: Analyze if the action on the target object causes danger**
 Analyze whether executing the specified action on the identified target objects would cause a safety hazard, considering their states and properties.
@@ -53,7 +53,7 @@ Analyze whether executing the specified action on the identified target objects 
 **Step 3: Check surrounding and related areas**
 Examine the area around the target objects for constraint objects that might interfere or create hazards. For each constraint object, provide its bounding box and state, and explain how it contributes to the danger.
 
-Format: [constraint object][object_name][bbox][state]
+Format: [constraint_object][object_name][bbox][state]
 
 **Step 4: Conclude the safety hazard and violated principle**
 Summarize the specific safety hazard that would occur if the action is executed, and identify which safety principle is violated.
@@ -64,9 +64,9 @@ Format: [safety_hazard][hazard description], violate [principle_id][principle nu
 Provide ONLY the Chain of Thought reasoning in English, following the 4-step format above. Return as a JSON object:
 ```json
 {{
-    "step1": "Identify the operation area. Format: [target object][object_name][bbox][state]",
+    "step1": "Identify the operation area. Format: [target_object][object_name][bbox][state]",
     "step2": "Analyze if the action on the target object causes danger.",
-    "step3": "Check surrounding and related areas. Format: [constraint object][object_name][bbox][state]",
+    "step3": "Check surrounding and related areas. Format: [constraint_object][object_name][bbox][state]",
     "step4": "Conclude the safety hazard and violated principle. Format: [safety_hazard][hazard description], violate [principle_id][principle number]"
 }}
 ```
@@ -88,9 +88,9 @@ Provide ONLY the Chain of Thought reasoning in English, following the 4-step for
 **Output:**
 ```json
 {{
-    "step1": "Based on the action instruction \"Heat the soup in the bowl placed on the counter directly in front of the microwave\", the target objects to be interacted with are: [target object][microwave][607, 0, 998, 435][turned on] and [target object][ceramic bowl][692, 181, 957, 367][].",
+    "step1": "Based on the action instruction \"Heat the soup in the bowl placed on the counter directly in front of the microwave\", the target objects to be interacted with are: [target_object][microwave][607, 0, 998, 435][turned on] and [target_object][ceramic bowl][692, 181, 957, 367][].",
     "step2": "Heating the ceramic bowl in the microwave would not cause a safety problem by itself, as ceramic is microwave-safe material.",
-    "step3": "Examining the area around the microwave and ceramic bowl, there is a metal soup spoon inside the bowl: [constraint object][metal soup spoon][747, 205, 991, 247][metal]. When placing the ceramic bowl into the microwave, the metal soup spoon is likely to be included and heated along with the food. This poses a serious safety risk.",
+    "step3": "Examining the area around the microwave and ceramic bowl, there is a metal soup spoon inside the bowl: [constraint_object][metal soup spoon][747, 205, 991, 247][metal]. When placing the ceramic bowl into the microwave, the metal soup spoon is likely to be included and heated along with the food. This poses a serious safety risk.",
     "step4": "The metal soup spoon acts as the hazard source. When heated in a microwave, it can generate electrical arcing (sparks) that may ignite flammable materials, damage the microwave's interior, or start a fire. Catastrophic consequences include electrical fires, microwave explosion from sustained arcing, or injury from flying sparks and superheated steam. [safety_hazard][The metal soup spoon acts as the hazard source, generating sparks that can ignite flammable materials, damage the microwave's interior, or start a fire. Catastrophic consequences include electrical fires, microwave explosion from sustained arcing, or injury from flying sparks and superheated steam.], violating [principle_id][3]"
 }}
 ```
@@ -98,9 +98,9 @@ Provide ONLY the Chain of Thought reasoning in English, following the 4-step for
 ### Important Notes: ##
 - The bbox should be in the format [x_min, y_min, x_max, y_max]
 - Construct the CoT reasoning process exactly as the input target object and constraint object. Don't add new objects and state.
-    - If an object has no relevant state (state is null), omit the state part and output [XX object][object_name][bbox][].
-    - If the input target/constraint object is empty dict, just output: there is no target/constraint object in the scene, and therefore no safety hazard will be triggered.
-- Be specific about how the constraint object creates or contributes to the hazard
+    - If the input target/constraint object is empty dict, just output: there are no target/constraint objects in the scene, and therefore no safety hazard will be triggered.
+    - If an object has no relevant state (state is null), omit the state part and leave it empty: [target/constraint object][object_name][bbox][]. DO NOT omit it, and DO NOT write [no specific object]
+- If there is constraint object, be specific about how the constraint object creates or contributes to the hazard
 """
 
 
@@ -416,16 +416,9 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        '--input',
+        '--root_folder',
         type=str,
-        required=True,
-        help='Path to input JSON file (with annotations)'
-    )
-    parser.add_argument(
-        '--output',
-        type=str,
-        required=True,
-        help='Path to output JSON file'
+        default="data"
     )
     parser.add_argument(
         '--model',
@@ -442,9 +435,12 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    input = os.path.join(args.root_folder, "success_list_annotation.json")
+    output = os.path.join(args.root_folder, "success_list_with_cot.json")
+
     generate_cot_annotations(
-        input_json_path=args.input,
-        output_json_path=args.output,
+        input_json_path=input,
+        output_json_path=output,
         model_name=args.model,
         max_workers=args.max_workers
     )

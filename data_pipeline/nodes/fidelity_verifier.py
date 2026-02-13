@@ -190,13 +190,11 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    hazard_type = "action_triggered"
-
     # Define file paths based on the scenario type
     if args.scenario_type == 'unsafe':
-        meta_file_path = os.path.join(args.root_folder, hazard_type, "editing_info.json")
-        save_path = os.path.join(args.root_folder, hazard_type, "annotation_info.json")
+        meta_file_path = os.path.join(args.root_folder, "editing_info.json")
+        save_path = os.path.join(args.root_folder, "annotation_info.json")
     else:
-        meta_file_path = os.path.join(args.root_folder, hazard_type, 'safepair', 'editing_info.json')
-        save_path = os.path.join(args.root_folder, hazard_type, 'safepair', "annotation_info.json")
+        meta_file_path = os.path.join(args.root_folder, 'safepair', 'editing_info.json')
+        save_path = os.path.join(args.root_folder, 'safepair', "annotation_info.json")
     verify_fidelity(args.verifier_model, meta_file_path, save_path, args.max_workers)

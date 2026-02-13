@@ -287,18 +287,21 @@ if __name__ == "__main__":
         type=int,
         default=1,
     )
+    parser.add_argument(
+        '--root_folder',
+        type=str,
+        default="data",
+    )
     args = parser.parse_args()
 
-    hazard_type = "action_triggered"
-
     if args.scenario_type == 'unsafe':
-        input_path = os.path.join('data', hazard_type, 'aug_editing_plan.json') # 'editing_plan.json'
-        output_path = os.path.join('data', hazard_type, 'editing_info.json')
-        edit_folder = os.path.join("data", hazard_type, "edit_image")
+        input_path = os.path.join(args.root_folder, 'aug_editing_plan.json') # 'editing_plan.json'
+        output_path = os.path.join(args.root_folder, 'editing_info.json')
+        edit_folder = os.path.join(args.root_folder, "edit_image")
     else:
-        input_path = os.path.join('data', hazard_type, 'safepair', 'editing_plan.json')
-        output_path = os.path.join('data', hazard_type, 'safepair', 'editing_info.json')
-        edit_folder = os.path.join("data", hazard_type, 'safepair', "edit_image")
+        input_path = os.path.join(args.root_folder, 'safepair', 'editing_plan.json')
+        output_path = os.path.join(args.root_folder, 'safepair', 'editing_info.json')
+        edit_folder = os.path.join(args.root_folder, 'safepair', "edit_image")
 
     os.makedirs(edit_folder, exist_ok=True)
     with open(input_path, 'r') as f:

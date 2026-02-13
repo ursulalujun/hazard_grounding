@@ -22,10 +22,11 @@ from tqdm import tqdm
 
 from data_pipeline.utils import proxy_off, proxy_on, bbox_norm_to_pixel
 from evaluation.prompt import (
-    ACTION_TRIGGER_EVAL_TEMPLATE_V2, 
-    ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT, 
-    ACTION_TRIGGER_EVAL_TEMPLATE_V2_GEMINI, 
-    ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT_GEMINI
+    ACTION_TRIGGER_EVAL_TEMPLATE_V1,
+    ACTION_TRIGGER_EVAL_TEMPLATE_V2,
+    ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT,
+    ACTION_TRIGGER_EVAL_TEMPLATE_V2_GEMINI,
+    ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT_GEMINI,
 )
 from evaluation.utils import add_sys_path
 
@@ -105,6 +106,7 @@ class SafetyAgent:
         self.device = device
         self.max_retries = max_retries
         self.batch_size = batch_size
+        self.model_name = model_name
 
         if os.path.exists(model_name):
             self.model_type = "local"
@@ -153,13 +155,13 @@ class SafetyAgent:
             self.client = OpenAI(api_key=key, base_url=url)
             print(f"Using API model: {model_name}")
 
-    def infer_single(self, image_path: str, instruction: str, version: str) -> Tuple[Optional[Dict], Optional[str]]:
+    def infer_single(self, image_path: str, action: str, version: str) -> Tuple[Optional[Dict], Optional[str]]:
         """
         Inference for a single sample.
 
         Args:
             image_path: Path to the image file
-            instruction: User instruction
+            action: User action
             version: Prompt version to use
 
         Returns:
@@ -172,12 +174,12 @@ class SafetyAgent:
 
         # Always use action_triggered templates
         if version.lower() == "v2":
-            template = ACTION_TRIGGER_EVAL_TEMPLATE_V2 if is_gemini_gpt else ACTION_TRIGGER_EVAL_TEMPLATE_V2_GEMINI
+            template = ACTION_TRIGGER_EVAL_TEMPLATE_V2_GEMINI if is_gemini_gpt else ACTION_TRIGGER_EVAL_TEMPLATE_V2
         elif version.lower() == "v2_cot":
-            template = ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT if is_gemini_gpt else ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT_GEMINI
+            template = ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT_GEMINI if is_gemini_gpt else ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT
         else:
             raise NotImplementedError("Version Not Found")
-        prompt_text = template.format(instruction=instruction)
+        prompt_text = template.format(action=action)
 
         messages = [
             {
@@ -256,7 +258,7 @@ class SafetyAgent:
         Batch inference for local model or parallel API calls.
 
         Args:
-            items: List of dicts with keys: id, image_path, instruction, hazard_type
+            items: List of dicts with keys: id, image_path, action, hazard_type
 
         Returns:
             List of prediction results
@@ -273,19 +275,20 @@ class SafetyAgent:
         # Prepare all prompts
         all_messages = []
         for item in items:
-            instruction = item.get("instruction", "")
-            version = item.get("version", "")
+            action = item.get("action")
+            version = item.get("version")
 
             # Always use action_triggered templates
-            if version.lower() == "v2":
+            if version.lower() == "v1":
+                template = ACTION_TRIGGER_EVAL_TEMPLATE_V1
+            elif version.lower() == "v2":
                 template = ACTION_TRIGGER_EVAL_TEMPLATE_V2
             elif version.lower() == "v2_cot":
                 template = ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT
             else:
                 raise NotImplementedError("Version Not Found")
 
-            prompt_text = template.format(instruction=instruction)
-
+            prompt_text = template.format(action=action)
             all_messages.append([
                 {
                     "role": "user",
@@ -301,10 +304,14 @@ class SafetyAgent:
 
         # Process in batches
         with tqdm(total=len(items), desc="Running inference (local)") as pbar:
+
             for i in range(0, len(all_messages), self.batch_size):
                 batch_messages = all_messages[i:i + self.batch_size]
                 batch_items = items[i:i + self.batch_size]
-
+                if "think" in self.model_name.lower():
+                    max_new_tokens = 4096
+                else:
+                    max_new_tokens = 512
                 try:
                     # Process batch
                     inputs = self.processor.apply_chat_template(
@@ -318,7 +325,7 @@ class SafetyAgent:
                     inputs = inputs.to(self.model.device)
 
                     with torch.no_grad():
-                        generated_ids = self.model.generate(**inputs, max_new_tokens=512)
+                        generated_ids = self.model.generate(**inputs, max_new_tokens=max_new_tokens)
 
                     generated_ids_trimmed = [
                         out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
@@ -346,7 +353,7 @@ class SafetyAgent:
                     for item in batch_items:
                         prediction, raw_output = self.infer_single(
                             item["image_path"],
-                            item.get("instruction", ""),
+                            item.get("action", ""),
                             item.get("version", "")
                         )
                         results.append({
@@ -367,7 +374,7 @@ class SafetyAgent:
         def infer_one(item):
             prediction, raw_output = self.infer_single(
                 item["image_path"],
-                item.get("instruction", ""),
+                item.get("action", ""),
                 item.get("version", ""),
             )
             return {
@@ -446,7 +453,7 @@ def run_inference_phase(agent: SafetyAgent, dataset: List[Dict], version: str, p
         valid_items.append({
             "id": i,
             "image_path": image_path,
-            "instruction": dr.get("instruction", ""),
+            "action": dr.get("action"),
             "version": version,
             "gt_data": gt_data
         })

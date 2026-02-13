@@ -60,7 +60,7 @@ def run_oversafety_evaluation(
         valid_items.append({
             "id": i,
             "image_path": image_path,
-            "instruction": dr.get("instruction", ""),
+            "action": dr.get("action"),
             "version": version,
             "gt_data": gt_data
         })

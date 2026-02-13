@@ -266,16 +266,9 @@ def main():
         description="Analyze task instructions to identify and add missing objects"
     )
     parser.add_argument(
-        '--input',
+        '--root_folder',
         type=str,
-        default='risk_grounding/data_pipeline/data/action_triggered/aug_editing_plan.json',
-        help='Path to the input editing_plan.json file'
-    )
-    parser.add_argument(
-        '--output',
-        type=str,
-        default='risk_grounding/data_pipeline/data/action_triggered/object_requirement_analysis.json',
-        help='Path to save the generated object requirement analysis results'
+        default="data"
     )
     parser.add_argument(
         '--model',
@@ -298,9 +291,12 @@ def main():
 
     args = parser.parse_args()
 
+    input = os.path.join(args.root_folder, "success_list.json")
+    output = os.path.join(args.root_folder, "safepair", "editing_plan.json")
+
     # Load input data
-    print(f"📂 Loading data from {args.input}...")
-    with open(args.input, 'r') as f:
+    print(f"📂 Loading data from {input}...")
+    with open(input, 'r') as f:
         editing_plans = json.load(f)
 
     # Apply limit if specified
@@ -354,9 +350,9 @@ def main():
                     pbar.update(1)
 
     # Save results
-    print(f"\n💾 Saving results to {args.output}...")
-    os.makedirs(os.path.dirname(args.output) if os.path.dirname(args.output) else '.', exist_ok=True)
-    with open(args.output, 'w') as f:
+    print(f"\n💾 Saving results to {output}...")
+    os.makedirs(os.path.dirname(output) if os.path.dirname(output) else '.', exist_ok=True)
+    with open(output, 'w') as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
 
     # Print summary
@@ -368,7 +364,7 @@ def main():
     print(f"  All objects present (skipped): {skipped}")
     print(f"  Failed: {len(failed)}")
     print(f"{'='*50}")
-    print(f"✅ Done! Results saved to {args.output}")
+    print(f"✅ Done! Results saved to {output}")
 
 
 if __name__ == "__main__":

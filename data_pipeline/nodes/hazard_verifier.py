@@ -314,7 +314,6 @@ def verify_hazard(meta_file_path, save_path, detector_name, scenario_type, max_w
         print(f"⚠️ Totally {len(failed_items)} failure cases.")
 
     # Save results
-    import ipdb; ipdb.set_trace() 
     with open(save_path, "w", encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
@@ -345,16 +344,14 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    hazard_type = "action_triggered"
-
     if args.scenario_type == 'unsafe':
-        meta_file_path = os.path.join(args.root_folder, hazard_type, "annotation_info.json")
-        save_path = os.path.join(args.root_folder, hazard_type, "annotation_info.json")
-        save_folder = os.path.join(args.root_folder, hazard_type, "annotate_image")
+        meta_file_path = os.path.join(args.root_folder, "annotation_info.json")
+        save_path = os.path.join(args.root_folder, "annotation_info.json")
+        save_folder = os.path.join(args.root_folder, "annotate_image")
     else:
-        meta_file_path = os.path.join(args.root_folder, hazard_type, 'safepair', "annotation_info.json")
-        save_path = os.path.join(args.root_folder, hazard_type, 'safepair', "annotation_info.json")
-        save_folder = os.path.join(args.root_folder, hazard_type, 'safepair', "annotate_image")
+        meta_file_path = os.path.join(args.root_folder, 'safepair', "annotation_info.json")
+        save_path = os.path.join(args.root_folder, 'safepair', "annotation_info.json")
+        save_folder = os.path.join(args.root_folder, 'safepair', "annotate_image")
     if not os.path.exists(save_folder):
         os.mkdir(save_folder)
     verify_hazard(meta_file_path, save_path, args.detector_name, args.scenario_type, args.max_workers)

@@ -6,8 +6,8 @@ It uses Qwen3-VL-235B-A22B-Thinking to describe object states relevant to the sa
 
 Usage:
     python -m nodes.object_state_annotator \\
-        --input data/action_triggered/success_list.json \\
-        --output data/action_triggered/success_list_annotated.json \\
+        --input data/success_list.json \\
+        --output data/success_list_annotated.json \\
         --max_workers 24
 """
 
@@ -366,16 +366,9 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        '--input',
+        '--root_folder',
         type=str,
-        default="data/success_list.json",
-        help='Path to input JSON file'
-    )
-    parser.add_argument(
-        '--output',
-        type=str,
-        default="data/success_list_annotated.json",
-        help='Path to output JSON file'
+        default="data"
     )
     parser.add_argument(
         '--model',
@@ -392,9 +385,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    input = os.path.join(args.root_folder, "success_list.json")
+    output = os.path.join(args.root_folder, "success_list_annotation.json")
     annotate_object_states(
-        input_json_path=args.input,
-        output_json_path=args.output,
+        input_json_path=input,
+        output_json_path=output,
         model_name=args.model,
         max_workers=args.max_workers
     )

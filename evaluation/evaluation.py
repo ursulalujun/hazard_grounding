@@ -62,7 +62,7 @@ def main():
     
     # Setup paths (remove hazard_type level from directory structure)
     if args.data_type == "test":
-        DATASET_PATH = os.path.join("data_pipeline", "data", "test", "annotation_info_debug.json")
+        DATASET_PATH = os.path.join("data_pipeline", "data", "test", "annotation_info.json")
     else:
         DATASET_PATH = os.path.join("data_pipeline", "data", "success_list.json")
 
@@ -89,7 +89,6 @@ def main():
     # ======================================================================
     # Phase 1: Inference
     # ======================================================================
-    import ipdb; ipdb.set_trace()
     if not args.skip_inference:
         print("\n" + "="*60)
         print("PHASE 1: INFERENCE")
@@ -134,7 +133,6 @@ def main():
 
         print(f"Loaded {len(eval_items)} predictions from {predictions_file}")
 
-    import ipdb; ipdb.set_trace()
     # ======================================================================
     # Phase 2: Evaluation
     # ======================================================================
@@ -167,7 +165,6 @@ def main():
         print(f"   (correct constraint IoU: {final_metrics.get('avg_iou_constraint_object_correct_only', 0):.4f} on {final_metrics.get('correct_constraint_sample_count', 0)} samples)")
     print(f"\nResults saved to: {output_file}")
 
-    import ipdb; ipdb.set_trace()
     # ======================================================================
     # Phase 3: Visualization
     # ======================================================================
