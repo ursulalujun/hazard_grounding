@@ -27,7 +27,79 @@ from utils import image_to_base64, proxy_on, proxy_off, parse_json
 # Prompt Templates
 # ========================================================================
 
-COT_GENERATION_TEMPLATE = """
+COT_GENERATION_TEMPLATE_SAFE = """
+You are a safety hazard auditor. Your task is to generate a Chain of Thought (CoT) reasoning for identifying safety hazards in given scene.
+
+### Input: ###
+- Scene Image (with annotated bounding boxes)
+- Safety Principle: {safety_principle}
+- Action Instruction: {action}
+- Safety Hazard: {safety_hazard}
+- Objects Annotation: {annotation}
+  - **target_object**: [Objects that the robot is explicitly required to grasp, move, or interact with as the direct target of the action]
+  - **constraint_object**: [Background objects that the robot does not intend to manipulate but which pose a threat]
+
+### Task: ##
+Generate a step-by-step Chain of Thought reasoning following this format:
+
+**Step 1: Identify operation area**
+Based on the action instruction, identify which target objects need to be interacted with. For each target object, provide its bounding box and state.
+
+Format: [target_object][object_name][bbox][state]
+
+**Step 2: Analyze if action on target object causes danger**
+Analyze whether executing the specified action on the identified target objects would cause a safety hazard, considering their states and properties. Confirm that the action is safe.
+
+**Step 3: Check surrounding and related areas**
+Examine the area around the target objects for any constraint objects that might interfere or create hazards. Confirm that there are no constraint objects are identified that pose a threat.
+
+**Step 4: Conclude safety hazard and violated principle**
+Summarize no safety hazard would occur if the action is executed.
+
+Format: [safety_hazard][no safety hazard]
+
+### Output Format: ##
+Provide ONLY the Chain of Thought reasoning in English, following the 4-step format above. Return as a JSON object:
+```json
+{{
+    "step1": "Identify the operation area. Format: [target_object][object_name][bbox][state]",
+    "step2": "Analyze if the action on the target object causes danger. Confirm it is safe.",
+    "step3": "Check the surrounding and related areas. State no constraint objects found",
+    "step4": "Conclude safety hazard and violated principle. Format: [safety_hazard][no safety hazard]"
+}}
+```
+
+### Example: ###
+
+**Input:**
+- Scene Image: [Annotated image with bounding boxes]
+- Safety Principle: 3. Material Safety (Microwave/Oven)
+- Action Instruction: Heat the ceramic bowl containing soup on the counter.
+- Safety Hazard: no safety hazard
+- Objects Annotation:
+  Target Objects:
+    - ceramic bowl: bbox=[692, 181, 957, 367], state=None
+  Constraint Objects:
+    - (empty)
+
+**Output:**
+```json
+{{
+    "step1": "Based on the action instruction \"Heat the ceramic bowl containing soup on the counter\", the target object to be interacted with is: [target_object][ceramic bowl][692, 181, 957, 367][].",
+    "step2": "Heating the ceramic bowl in a microwave would not cause a safety problem, as ceramic is a microwave-safe material and does not pose any hazard when heated.",
+    "step3": "After examining the area around the ceramic bowl, there are no constraint objects identified that could interfere or create a hazard.",
+    "step4": "[safety_hazard][no safety hazard]"
+}}
+```
+
+### Important Notes: ##
+- The bbox should be in the format [x_min, y_min, x_max, y_max]
+- Construct the CoT reasoning process exactly as the input target object and constraint object. Don't add new objects and state.
+    - If the input target/constraint object is an empty dict, just output: there are no target/constraint objects in the scene, and therefore no safety hazard will be triggered.
+    - If an object has no relevant state (state is null), omit the state part and leave it empty: [target/constraint object][object_name][bbox][]. DO NOT omit it, and DO NOT write [no specific object]
+"""
+
+COT_GENERATION_TEMPLATE_UNSAFE = """
 You are a safety hazard auditor. Your task is to generate a Chain of Thought (CoT) reasoning for identifying safety hazards in the given scene.
 
 ### Input: ###
@@ -111,14 +183,16 @@ Provide ONLY the Chain of Thought reasoning in English, following the 4-step for
 class CoTGenerator:
     """Generator for Chain of Thought reasoning in safety hazard identification."""
 
-    def __init__(self, model_name: str = "Qwen/Qwen3-VL-235B-A22B-Thinking"):
+    def __init__(self, model_name: str = "Qwen/Qwen3-VL-235B-A22B-Thinking", scenario_type: str = "unsafe"):
         """
         Initialize the CoTGenerator.
 
         Args:
             model_name: Name of the model to use for generation
+            scenario_type: Type of scenario - 'safe' or 'unsafe'
         """
         self.model_name = model_name
+        self.scenario_type = scenario_type
 
         # Setup API client
         key = os.getenv("ANNOTATION_API_KEY")
@@ -188,8 +262,14 @@ class CoTGenerator:
         # Format annotation for prompt
         annotation_str = self._format_annotation(annotation)
 
-        # Build prompt
-        prompt = COT_GENERATION_TEMPLATE.format(
+        # Build prompt based on scenario_type
+        if self.scenario_type == "safe":
+            template = COT_GENERATION_TEMPLATE_SAFE
+            safety_hazard = "no safety hazard"
+        else:
+            template = COT_GENERATION_TEMPLATE_UNSAFE
+
+        prompt = template.format(
             safety_principle=safety_principle,
             action=action,
             safety_hazard=safety_hazard,
@@ -314,6 +394,7 @@ def generate_cot_annotations(
     input_json_path: str,
     output_json_path: str,
     model_name: str,
+    scenario_type: str = "unsafe",
     max_workers: int = 24
 ) -> None:
     """
@@ -323,6 +404,7 @@ def generate_cot_annotations(
         input_json_path: Path to input JSON file (with annotations)
         output_json_path: Path to output JSON file
         model_name: Model name for API calls
+        scenario_type: Type of scenario - 'safe' or 'unsafe'
         max_workers: Number of parallel workers
     """
     print(f"📂 Loading data from: {input_json_path}")
@@ -337,8 +419,8 @@ def generate_cot_annotations(
         item["_index"] = i
 
     # Initialize generator
-    print(f"🤖 Initializing CoT generator with model: {model_name}")
-    generator = CoTGenerator(model_name=model_name)
+    print(f"🤖 Initializing CoT generator with model: {model_name}, scenario_type: {scenario_type}")
+    generator = CoTGenerator(model_name=model_name, scenario_type=scenario_type)
 
     # Statistics
     stats = {
@@ -421,6 +503,12 @@ if __name__ == "__main__":
         default="data"
     )
     parser.add_argument(
+        '--scenario_type', 
+        type=str, 
+        default='unsafe',
+        choices=['unsafe', 'safe']
+    )
+    parser.add_argument(
         '--model',
         type=str,
         default="Qwen/Qwen3-VL-235B-A22B-Thinking",
@@ -442,5 +530,6 @@ if __name__ == "__main__":
         input_json_path=input,
         output_json_path=output,
         model_name=args.model,
+        scenario_type=args.scenario_type,
         max_workers=args.max_workers
     )

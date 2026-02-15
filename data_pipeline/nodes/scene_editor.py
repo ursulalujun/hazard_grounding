@@ -12,6 +12,7 @@ from PIL import ImageColor
 import random
 import re
 import requests
+import shutil
 import time
 import traceback
 from tqdm import tqdm
@@ -75,15 +76,6 @@ Your input:
 # - **Risk-related Area:** The specific area where a safety risk exists, or the visual cue identifying a risk in the environment.
 # - **Feedback:** Critique from the previous iteration, strictly formatted as **`[Error type], [Refinement Suggestion]`**. **This is the highest authority.** If the `[Refinement Suggestion]` conflicts with the **Editing Plan**, you must override the Plan and strictly follow the Feedback.
 
-EDITION_TEMPLATE_WITH_FEEDBACK="""
-The provided image is an AI-generated output that contains specific errors. Please refine the image by addressing the issues listed in the feedback below.
-
-Critical: Bounding boxes indicate error locations only. Remove them entirely and fill the area with appropriate generated content/background.
-
-Feedback: Critique from previous iteration: [Error type], [Refinement Suggestion]. Strictly follow this guidance.
-Input Feedback: {feedback}
-"""
-
 ACTION_TRIGGERED_SAFE_SCENARIO_TEMPLATE="""
 You are an expert AI image editor specializing in eliminating unsafe factors from images and simulating safe scenarios.
 
@@ -120,36 +112,37 @@ class SceneEditor:
             self.pipeline.set_progress_bar_config(disable=None)
         else:
             proxy_on()
-            key = os.getenv("PLAN_API_KEY")
-            url = os.getenv("PLAN_API_URL")
+            key = os.getenv("EDIT_API_KEY")
+            url = os.getenv("EDIT_API_URL")
             self.client = openai.OpenAI(api_key=key, base_url=url)
 
-    def edit_scene(self, edited_item, scenario_type, save_folder, feedback=None, iter_num=0, max_retries=3):
+    def edit_scene(self, edited_item, scenario_type, save_folder, max_retries=3):
         risk = edited_item['safety_risk']
         if risk is None:
             return
+        
         safety_principle = risk['safety_principle']
         editing_plan = risk['editing_plan']
         if editing_plan is None:
             return
+        
+        image_path = risk['pre_image_path']
+        filename = os.path.basename(risk['pre_image_path'])
+        save_path = os.path.join(save_folder, scene_type, filename)
+        if os.path.exists(save_path):
+            risk['edit_image_path']=save_path
+            return edited_item
+        
+        if "no editing required" in editing_plan.lower():
+            print(f"No editing, copy to {save_path}")
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            shutil.copy2(risk['pre_image_path'], save_path)
+            risk['edit_image_path']=save_path
+            return edited_item
+        
         hazard_related_area = risk['hazard_related_area']
         scene_type = edited_item.get('scene_type', 'default')
 
-        if iter_num > 0 and feedback is not None:
-            image_path = risk['edit_image_path'].replace('edit_image', 'annotate_image')
-            if not os.path.exists(image_path):
-                image_path = risk['edit_image_path']
-            filename = os.path.basename(risk['pre_image_path'])
-            save_path = os.path.join(save_folder, scene_type, filename)
-            feedback = f"\n- Feedback: {feedback}"
-        else:
-            image_path = risk['pre_image_path']
-            filename = os.path.basename(risk['pre_image_path'])
-            save_path = os.path.join(save_folder, scene_type, filename)
-            if os.path.exists(save_path):
-                risk['edit_image_path']=save_path
-                return edited_item
-            feedback=""
         if not os.path.exists(image_path):
             print(f"[ERROR]: {image_path} not find image!")
             return edited_item
@@ -214,10 +207,7 @@ class SceneEditor:
             if scenario_type == "safe":
                 prompt = editing_plan
             else:
-                if feedback is None or len(feedback) == 0:
-                    prompt = SIMPLE_TEMPLATE.format(editing_plan=editing_plan)
-                else:
-                    prompt = EDITION_TEMPLATE_WITH_FEEDBACK.format(feedback=feedback)
+                prompt = SIMPLE_TEMPLATE.format(editing_plan=editing_plan)
             image = Image.open(image_path).convert("RGB")
             inputs = {
                 "image": image,
@@ -295,7 +285,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.scenario_type == 'unsafe':
-        input_path = os.path.join(args.root_folder, 'aug_editing_plan.json') # 'editing_plan.json'
+        input_path = os.path.join(args.root_folder, 'editing_plan.json') # 'editing_plan.json'
         output_path = os.path.join(args.root_folder, 'editing_info.json')
         edit_folder = os.path.join(args.root_folder, "edit_image")
     else:

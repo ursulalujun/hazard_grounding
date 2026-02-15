@@ -37,3 +37,5 @@ python -m nodes.cot_generator --root_folder $FOLDER
 
 #### For Safe Scenario
 python -m nodes.safe_scenario_generator --root_folder $FOLDER # default to read success_list.json
+
+python -m nodes.scene_editor --scenario_type safe --root_folder $FOLDER

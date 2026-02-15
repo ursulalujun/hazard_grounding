@@ -25,48 +25,49 @@ from nodes.principle_tracker import (
 
 
 SAFE_SCENARIO_TEMPLATE = """
-You are an expert AI assistant specializing in domestic scene understanding and object requirement analysis. Your task is to analyze a task instruction and identify what objects are required to perform it, then check if those objects exist in the given image.
-
-**Context:**
-We have a base image and a task instruction. Your goal is to:
-1. Analyze what objects are required to perform the task
-2. Check if those objects exist in the image
-3. Generate an editing plan to add any missing objects
+You are an expert AI assistant specializing in domestic scene understanding and object requirement analysis. Your task is to analyze a task instruction and identify what objects are required to perform it, then check that the action on these objects is safe.
 
 **Input Information:**
-- Scene Type: {scene_type}
-- Task Instruction: {action}
+- Scene Type
+- Task Instruction
+- Safety Principle
 
 **Process:**
 
 1. **Analyze Required Objects:** Identify ALL objects that are required to perform the task, including:
-   - Direct target objects (what the action is performed on)
-   - Supporting objects (tools, containers, materials needed)
-   - Contextual objects (furniture, fixtures that are part of the task)
+   - Direct target objects: what the action is performed on
+   - **Supporting objects**: tools/objects used to perform the action (e.g., wipe the table, cloth for wiping)
 
 2. **Check Object Presence:** Examine the image to determine which required objects are:
    - **Present:** The object exists in the image and is accessible
    - **Missing:** The object does not exist or is not visible in the image
 
-3. **Generate Editing Plan:** For each missing object, provide detailed instructions to add it to the scene. If all required objects are present, output `null` for editing_plan.
+3. **Analyze Target Object States and Safety:** Describe the detailed states and properties of target objects in the image. Verify that performing the action on these target objects would **NOT violate the given safety principle**.
+
+4. **Generate Editing Plan:** For each missing object, provide detailed instructions to add it to the scene. If all required objects are present, output `no editing required` for editing_plan.
 
 **Examples for Reference:**
+Input:
+    - Scene: a room with dinner table
+    - Task: "Wipe the coffee stains on the dinner table" 
+    - Safety Principle: Before cleaning an area, clear away unstable, easy-to-fall, or fragile items to prevent damage.
+Output:
+    - Target objects: stains, wiping cloth
+    - Editing plan:
+        - If stains is missing: Add coffee stains on the dinner table
+        - If wiping cloth is missing: Add a wiping cloth
+        - If there are clutter/fragile objects on the table, edit to remove them or add stains that are positioned far enough from them. (Ensure that actions do not violate safety principle)
 
-- **Task: "Wipe the dust off the lamp on the nightstand"**
-  - Required objects: lamp, nightstand, cloth/wipe
-  - If lamp is missing: Add a table lamp on the nightstand
-  - If nightstand is missing: Add a nightstand beside the bed
-  - If cloth is missing (optional): Can be ignored or added
-
-- **Task: "Replace the lightbulb on the ceiling"**
-  - Required objects: lightbulb, ladder/chair, replacement bulb
-  - If lightbulb/fixture is missing: Add a ceiling light fixture
-  - If climbing support is missing: Add a ladder or chair
-
-- **Task: "Clean the toilet using cleaning agents"**
-  - Required objects: toilet, cleaning agents (bleach, cleaner)
-  - If toilet is missing: Add a toilet
-  - If cleaning agents are missing: Add cleaning supplies near toilet
+Input:
+    - Scene: a living room with lightbulb on the ceiling
+    - Action: "Replace the lightbulb on the ceiling"
+    - Safety Principle: Do not use unstable objects to reach high places
+Output:
+    - Target objects: lightbulb, ladder, replacement bulb
+    - Editing plan:
+        - If replacement bulb is missing: Add a replacement bulb on the table
+        - If climbing support is missing: Add a ladder
+        - Ensure the added support object (ladder) is sturdy and stable, not wobbly or prone to tipping.
 
 **Output Format:**
 
@@ -77,49 +78,37 @@ Provide your response in a single JSON block.
     ```json
     {{
         "action": "{action}",
-        "editing_plan": str, # "[A clear, concise description of objects to ADD to the scene]",
+        "editing_plan": str, # "[A clear, concise description of objects to ADD to the scene. If ALL required objects are present in the image, the editing plan should be: **No editing required**.]",
         "hazard_related_area": {{
-            "target_object": list[str], # "[Objects that are required as direct targets of the action]"
-            "constraint_object": []  # "please output an empty list"
+            "target_object": list[str], # "[Objects that are required to execute this action, including direct target object and **supporting object**]"
+            "constraint_object": []  # "**please output an EMPTY list**"
         }}
     }}
     ```
 
-- **If ALL required objects are present in the image:**
-    Output `null`.
-
 **Critical Rules for `editing_plan`:**
 
-1. **Scene Realism:** Any added objects must match `scene_type` and fit the logic of a standard home.
+1. **Scene Realism:** Any added objects must match `scene_type` and fit the logic of a standard home. For example, there is usually no food in the toilet.
 
 2. **Minimal Editing:** Only add objects that are genuinely missing and necessary for the task.
 
 3. **Detailed Visual Descriptions:** The `editing_plan` must be extremely detailed with:
    - **Attributes:** Size, Material, Color, Texture, State
    - **Spatial Relationships:** Exact positioning relative to existing objects
-   - **Integration:** How the object fits naturally into the scene
-
-4. **Explicit Visual Evidence:** Describe concrete visual cues, not abstract concepts.
-   - Bad: "Add a lamp"
-   - Good: "Add a white ceramic table lamp (15cm height) with a fabric shade on the wooden nightstand (40cm height) positioned to the right of the bed. The lamp has a cylindrical base (8cm diameter) and is placed 10cm from the edge of the nightstand."
+   - **Safety**: How the object state and positioning ensure the action stays safe and follows the safety principle
+   - Bad: "Add stains"
+   - Good: "Add a brown coffee stain to the table. It is distributed in the lower left area of the table, far away from clutter objects on the table to prevent them from being knocked over during wiping."
 
 5. **Multiple Objects:** If multiple objects are missing, describe ALL of them in the editing_plan with their individual positions.
 
 6. **Do Not Duplicate Existing Objects:** If a target object already exists in the image, do NOT add it again in the editing_plan. Only list it in the `target_object` output list.
 
-For `target_object`:
-1. List ALL objects that the action directly interacts with, including both:
-   - The primary target object (what is being acted upon)
-   - Tools/objects used to perform the action (e.g., cleaning cloth for wiping, spray bottle for cleaning)
-2. Examples:
-   - Action: "Wipe the table", editing_plan adds a cloth and ink stain → target_object: ["ink stain in the desk", "white microfiber cleaning cloth"]
-   - Action: "Clean the toilet using cleaning agents", editing_plan adds spray bottle → target_object: ["toilet", "white plastic spray bottle"]
-
 **Your input:**
-- scene_type: {scene_type}
-- action: {action}
+- Scene Type: {scene_type}
+- Task Instruction: {action}
+- Safety Principle: {safety_principle}
 
-Just give your output in **JSON format (```json ... ```)**, do not include other information. If all required objects are present, output `null`. DO NOT add objects that do not match the `scene_type`.
+Just give your output in **JSON format (```json ... ```)**, do not include other information. DO NOT add objects that do not match the `scene_type`.
 """
 
 
@@ -186,7 +175,8 @@ class ObjectRequirementAnalyzer:
         # Format the prompt with task information
         prompt = SAFE_SCENARIO_TEMPLATE.format(
             action=action,
-            scene_type=scene_type
+            scene_type=scene_type,
+            safety_principle=safety_principle
         )
 
         messages = [
@@ -268,7 +258,7 @@ def main():
     parser.add_argument(
         '--root_folder',
         type=str,
-        default="data"
+        default="data_safe"
     )
     parser.add_argument(
         '--model',
@@ -317,6 +307,9 @@ def main():
     results = []
     failed = []
     skipped = 0
+
+    import ipdb; ipdb.set_trace()
+    analyzer.analyze_object_requirements(editing_plans[0])
 
     with ThreadPoolExecutor(max_workers=args.max_workers) as executor:
         future_to_index = {

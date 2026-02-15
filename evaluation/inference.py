@@ -32,7 +32,6 @@ from evaluation.utils import add_sys_path
 
 third_party_dir = os.path.join(os.path.dirname(__file__), '..', 'third_party')
 with add_sys_path(os.path.join(third_party_dir, 'Robobrain2.5')):
-    print(os.path.abspath(third_party_dir))
     from inference import UnifiedInference as RoboBrainInference
 
 
@@ -107,6 +106,7 @@ class SafetyAgent:
         self.max_retries = max_retries
         self.batch_size = batch_size
         self.model_name = model_name
+        self.adapter_path = adapter_path
 
         if os.path.exists(model_name):
             self.model_type = "local"
@@ -335,16 +335,25 @@ class SafetyAgent:
                     )
 
                     for j, (item, output_text) in enumerate(zip(batch_items, output_texts)):
-                        if "</think>" in output_text:
-                            output_text = output_text.split("</think>")[-1]
-                        prediction = self._parse_json(output_text)
-                        results.append({
-                            "id": item["id"],
-                            "image_path": item["image_path"],
-                            "prediction": prediction,
-                            "raw_output": output_text,
-                            "status": "success"
-                        })
+                        if self.adapter_path is None:
+                            if "</think>" in output_text:
+                                output_text = output_text.split("</think>")[-1]
+                            prediction = self._parse_json(output_text)
+                            results.append({
+                                "id": item["id"],
+                                "image_path": item["image_path"],
+                                "prediction": prediction,
+                                "raw_output": output_text,
+                                "status": "success"
+                            })
+                        else:
+                            results.append({
+                                "id": item["id"],
+                                "image_path": item["image_path"],
+                                "prediction": None,
+                                "raw_output": output_text,
+                                "status": "success"
+                            })
                         pbar.update(1)
 
                 except Exception as e:

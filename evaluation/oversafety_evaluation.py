@@ -20,8 +20,10 @@ import numpy as np
 from tqdm import tqdm
 from typing import Dict, List
 
-from evaluation.inference import SafetyAgent, run_inference_phase
+from evaluation.inference import SafetyAgent, run_inference_phase, convert_yx_first_to_xy_first
 from evaluation.judgement import SafetyEvaluator
+from data_pipeline.utils import bbox_norm_to_pixel
+from PIL import Image
 
 
 def run_oversafety_evaluation(
@@ -102,19 +104,28 @@ def run_oversafety_evaluation(
                 })
 
         # Format predicted target_object bboxes
-        pred_target = prediction.get("target_object", [])
+        pred_target_bboxes_raw = prediction.get("target_object", [])
         pred_target_bboxes = []
 
-        for bbox in pred_target:
-            if isinstance(bbox, list) and len(bbox) == 4:
-                pred_target_bboxes.append({
-                    "label": "target",
-                    "bounding_box": bbox
-                })
+        # Convert and normalize bboxes before computing IoU
+        is_gemini_gpt = evaluator._is_gemini_gpt_model()
+        try:
+            img = Image.open(result["image_path"])
+            width, height = img.size
+        except FileNotFoundError:
+            width, height = 1000, 1000  # fallback default
+
+        if is_gemini_gpt:
+            pred_target_bboxes = [convert_yx_first_to_xy_first(bbox, width, height) for bbox in pred_target_bboxes_raw] if pred_target_bboxes_raw else []
+        else:
+            pred_target_bboxes = [bbox_norm_to_pixel(bbox, width, height) for bbox in pred_target_bboxes_raw] if pred_target_bboxes_raw else []
+
+        pred_target_bboxes_formatted = [{"label": f"bbox_{i}", "bounding_box": bbox}
+                                         for i, bbox in enumerate(pred_target_bboxes)] if pred_target_bboxes else []
 
         target_iou = None
         if gt_target_bboxes:
-            target_iou = evaluator.compute_list_iou(gt_target_bboxes, pred_target_bboxes)
+            target_iou = evaluator.compute_list_iou(gt_target_bboxes, pred_target_bboxes_formatted)
             target_ious.append(target_iou)
 
         log_entry = {
