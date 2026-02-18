@@ -309,3 +309,21 @@ def extract_principle_id(safety_principle_text: str) -> Optional[int]:
         return None
     match = re.match(r'(\d+)\.\s*', safety_principle_text.strip())
     return int(match.group(1)) if match else None
+
+# Bbox conversion utilities
+def convert_yx_first_to_xy_first(bbox_yx, width, height):
+    """
+    Convert bounding box from [y_min, x_min, y_max, x_max] to [x_min, y_min, x_max, y_max].
+    Also converts from normalized [0,1000] to pixel coordinates.
+
+    Args:
+        bbox_yx: [y_min, x_min, y_max, x_max] in normalized coordinates [0, 1000]
+        width: Image width in pixels
+        height: Image height in pixels
+
+    Returns:
+        [x_min, y_min, x_max, y_max] in pixel coordinates
+    """
+    y_min, x_min, y_max, x_max = bbox_yx
+    bbox_x_first = [x_min, y_min, x_max, y_max]
+    return bbox_norm_to_pixel(bbox_x_first, width, height)

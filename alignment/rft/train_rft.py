@@ -24,8 +24,6 @@ from trl import GRPOConfig, GRPOTrainer, ModelConfig, ScriptArguments, TrlParser
 
 # Import reward functions
 from rewards import (
-    reward_funcs_registry,
-    ENVIRONMENTAL_EVAL_TEMPLATE,
     ACTION_TRIGGER_EVAL_TEMPLATE,
 )
 
@@ -37,9 +35,7 @@ class RFTScriptArguments(ScriptArguments):
 
     Args:
         reward_funcs (`list[str]`):
-            List of reward functions. Possible values: 'safe_accuracy', 'risk_match', 'iou', 'format'
-        hazard_type (`str`):
-            Type of hazard: 'environmental' or 'action_triggered'
+            List of reward functions. Possible values: 'safe_accuracy', 'safety_hazard_match', 'principle_accuracy', 'iou', 'format'
         dataset_path (`str`):
             Path to the dataset directory or JSON file
         embedding_model_path (`str`):
@@ -50,12 +46,8 @@ class RFTScriptArguments(ScriptArguments):
         default_factory=lambda: ["safe_accuracy", "safety_hazard_match", "principle_accuracy", "iou", "format"],
         metadata={"help": "List of reward functions. Possible values: 'safe_accuracy', 'safety_hazard_match', 'principle_accuracy', 'iou', 'format'"},
     )
-    hazard_type: str = field(
-        default="environmental",
-        metadata={"help": "Type of hazard: 'environmental' or 'action_triggered'"},
-    )
     dataset_path: str = field(
-        default="risk_grounding/data_pipeline/data/environmental/success_list.json",
+        default="risk_grounding/data_pipeline/data/success_list.json",
         metadata={"help": "Path to the dataset JSON file"},
     )
     embedding_model_path: str = field(
@@ -83,10 +75,6 @@ class RFTScriptArguments(ScriptArguments):
         default=1.0,
         metadata={"help": "Weight for principle_accuracy reward"},
     )
-    reward_weight_iou: float = field(
-        default=1.0,
-        metadata={"help": "Weight for combined iou reward"},
-    )
     reward_weight_iou_target_object: float = field(
         default=1.0,
         metadata={"help": "Weight for iou_target_object reward"},
@@ -101,14 +89,13 @@ class RFTScriptArguments(ScriptArguments):
     )
 
 
-def load_risk_grounding_dataset(dataset_path: str, hazard_type: str, max_samples: Optional[int] = None):
+def load_risk_grounding_dataset(dataset_path: str, max_samples: Optional[int] = None):
     """
     Load the risk grounding dataset from JSON file.
     Directly processes all samples into conversation format for training.
 
     Args:
         dataset_path: Path to the JSON dataset file
-        hazard_type: Type of hazard (environmental or action_triggered)
         max_samples: Maximum number of samples to load (for debugging)
 
     Returns:
@@ -140,33 +127,42 @@ def load_risk_grounding_dataset(dataset_path: str, hazard_type: str, max_samples
             "is_gt_safe": is_gt_safe,
             "safety_hazard": safety_hazard if not is_gt_safe else "",
             "safety_principle": safety_risk.get("safety_principle", ""),
+            "principle_id": safety_risk.get("principle_id"),  # New field: directly use principle_id
         }
 
-        # Add bbox annotation for reward computation (both safe and unsafe)
-        bbox_annotation = safety_risk.get("bbox_annotation", {})
+        # Convert new annotation format to old bbox_annotation format for compatibility
+        # New format: {"target_object": {"name": {"bbox_2d": [bbox], "state": "..."}}, ...}
+        # Old format: {"target_object": {"name": [bbox]}, "constraint_object": {"name": [bbox]}}
+        annotation = safety_risk.get("annotation", {})
+        bbox_annotation = {}
 
-        if hazard_type == "environmental":
-            # Environmental format: {"label1": [x1,y1,x2,y2], "label2": [...]}
-            gt_data["bbox_annotation"] = bbox_annotation
-            # Also provide bbox_list for environmental IoU reward
-            bbox_list = []
-            for label, bbox in bbox_annotation.items():
-                bbox_list.append({
-                    "label": label,
-                    "bounding_box": bbox  # Pixel coordinates
-                })
-            gt_data["bbox_list"] = bbox_list
-        else:  # action_triggered
-            # Action triggered format: {"target_object": {...}, "constraint_object": {...}}
-            # For safe scenes: target_object exists (object to interact with), constraint_object is empty
-            # For unsafe scenes: both target_object and constraint_object exist
-            gt_data["bbox_annotation"] = bbox_annotation
+        # Process target_object
+        if "target_object" in annotation:
+            bbox_annotation["target_object"] = {}
+            for obj_name, obj_data in annotation["target_object"].items():
+                if isinstance(obj_data, dict) and "bbox_2d" in obj_data:
+                    bbox_annotation["target_object"][obj_name] = obj_data["bbox_2d"]
+                elif isinstance(obj_data, list):
+                    # Already in old format
+                    bbox_annotation["target_object"][obj_name] = obj_data
+
+        # Process constraint_object
+        if "constraint_object" in annotation:
+            bbox_annotation["constraint_object"] = {}
+            for obj_name, obj_data in annotation["constraint_object"].items():
+                if isinstance(obj_data, dict) and "bbox_2d" in obj_data:
+                    bbox_annotation["constraint_object"][obj_name] = obj_data["bbox_2d"]
+                elif isinstance(obj_data, list):
+                    # Already in old format
+                    bbox_annotation["constraint_object"][obj_name] = obj_data
+
+        gt_data["bbox_annotation"] = bbox_annotation
 
         # Get image path
-        image_path = os.path.join("data_pipeline", safety_risk.get("edit_image_path", ""))
+        image_path = safety_risk["edit_image_path"]
         # Make image path absolute
         if not os.path.isabs(image_path):
-            image_path = os.path.join(os.path.dirname(__file__), "..", "..", image_path)
+            image_path = os.path.join(os.path.dirname(__file__), "..", "..", "data_pipeline", image_path)
 
         # Check if image exists and get image size
         if not os.path.exists(image_path):
@@ -184,18 +180,15 @@ def load_risk_grounding_dataset(dataset_path: str, hazard_type: str, max_samples
             gt_data["image_width"] = None
             gt_data["image_height"] = None
 
-        # Get instruction for action_triggered
-        instruction = safety_risk.get("instruction", "")
+        # Get action for action_triggered
+        action = safety_risk["action"]
 
         # ====================================================================
         # Build conversation format directly (no need for dataset.map())
         # ====================================================================
 
-        # Select prompt template
-        if hazard_type == "action_triggered":
-            prompt_text = ACTION_TRIGGER_EVAL_TEMPLATE.format(instruction=instruction)
-        else:
-            prompt_text = ENVIRONMENTAL_EVAL_TEMPLATE
+        # Use action_triggered prompt template
+        prompt_text = ACTION_TRIGGER_EVAL_TEMPLATE.format(action=action)
 
         # Build prompt in Qwen3-VL format
         prompt = [
@@ -232,54 +225,6 @@ def load_risk_grounding_dataset(dataset_path: str, hazard_type: str, max_samples
     return dataset
 
 
-def make_conversation_image(example, hazard_type):
-    """
-    Convert dataset example to conversation format for Qwen3-VL.
-
-    Args:
-        example: Dataset example with image, instruction, safety_risk
-        hazard_type: Type of hazard
-
-    Returns:
-        Dictionary with image, prompt, and solution
-    """
-    # Load image
-    image_path = example["image"]
-    try:
-        image = PIL.Image.open(image_path).convert("RGB")
-    except Exception as e:
-        print(f"Error loading image {image_path}: {e}")
-        # Create a dummy black image
-        image = PIL.Image.new("RGB", (224, 224), (0, 0, 0))
-
-    # Select prompt template
-    if hazard_type == "action_triggered":
-        instruction = example.get("instruction", "")
-        prompt_text = ACTION_TRIGGER_EVAL_TEMPLATE.format(instruction=instruction)
-    else:
-        prompt_text = ENVIRONMENTAL_EVAL_TEMPLATE
-
-    # Build prompt in Qwen3-VL format
-    prompt = [
-        {
-            "role": "user",
-            "content": [
-                {"type": "image"},
-                {"type": "text", "text": prompt_text},
-            ],
-        },
-    ]
-
-    # Get ground truth solution
-    solution = example["safety_risk"]
-
-    return {
-        "image": image,
-        "prompt": prompt,
-        "solution": solution,
-    }
-
-
 def main(script_args, training_args, model_args):
     """Main training function."""
 
@@ -288,7 +233,6 @@ def main(script_args, training_args, model_args):
         "safe_accuracy": script_args.reward_weight_safe_accuracy,
         "safety_hazard_match": script_args.reward_weight_safety_hazard_match,
         "principle_accuracy": script_args.reward_weight_principle_accuracy,
-        "iou": script_args.reward_weight_iou,
         "iou_target_object": script_args.reward_weight_iou_target_object,
         "iou_constraint_object": script_args.reward_weight_iou_constraint_object,
         "format": script_args.reward_weight_format,
@@ -304,10 +248,7 @@ def main(script_args, training_args, model_args):
     )
 
     # Get reward functions - use split IoU for action_triggered
-    if script_args.hazard_type == "action_triggered":
-        script_args.reward_funcs = ['safe_accuracy', 'safety_hazard_match', 'principle_accuracy', 'iou_target_object', 'iou_constraint_object', 'format']
-    else:
-        script_args.reward_funcs = ['safe_accuracy', 'safety_hazard_match', 'iou', 'format']
+    script_args.reward_funcs = ['safe_accuracy', 'safety_hazard_match', 'principle_accuracy', 'iou_target_object', 'iou_constraint_object', 'format']
 
     reward_funcs = [custom_registry[func] for func in script_args.reward_funcs]
 
@@ -318,7 +259,6 @@ def main(script_args, training_args, model_args):
     print(f"Loading dataset from: {script_args.dataset_path}")
     dataset = load_risk_grounding_dataset(
         dataset_path=script_args.dataset_path,
-        hazard_type=script_args.hazard_type,
         max_samples=None,  # Set to a small number for debugging
     )
     # Data is already processed into conversation format with columns: image, prompt, solution

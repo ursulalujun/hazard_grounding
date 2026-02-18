@@ -6,7 +6,7 @@ export VLLM_WORKER_MULTIPROC_METHOD=spawn
 # source /mnt/shared-storage-user/luxiaoya/.bashrc
 cd /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding
 
-MODEL=/mnt/shared-storage-user/ai4good1-share/models/Qwen3-VL-235B-A22B-Thinking
+MODEL=/mnt/shared-storage-gpfs2/gpfs2-shared-public/huggingface/hub/models--Qwen--Qwen3-VL-235B-A22B-Thinking/snapshots/6664affde68449468deb7527186455c7450c13c0
 SERVED_NAME=Qwen/Qwen3-VL-235B-A22B-Thinking
 MAX_MODEL_LEN=65536
 MAX_NUM_SEQS=64

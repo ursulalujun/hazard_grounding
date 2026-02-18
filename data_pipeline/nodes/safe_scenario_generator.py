@@ -281,7 +281,7 @@ def main():
 
     args = parser.parse_args()
 
-    input = os.path.join(args.root_folder, "success_list.json")
+    input = os.path.join(args.root_folder, "success_list_with_cot.json")
     output = os.path.join(args.root_folder, "safepair", "editing_plan.json")
 
     # Load input data

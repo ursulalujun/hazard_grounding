@@ -17,11 +17,7 @@ from openai import OpenAI
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
-from data_pipeline.utils import bbox_norm_to_pixel, proxy_off, proxy_on
-from .inference import (
-    convert_yx_first_to_xy_first,
-    convert_bbox_list_yx_to_xy,
-)
+from data_pipeline.utils import bbox_norm_to_pixel, proxy_off, proxy_on, convert_yx_first_to_xy_first
 
 
 class SafetyEvaluator:
@@ -171,7 +167,18 @@ class SafetyEvaluator:
 
         return result
 
-    def evaluate(self, prediction: Dict, gt_item: Dict, image_path: str, raw_output: str = None) -> Dict:
+    def _parse_json(self, text: str) -> Optional[Dict]:
+        """Parse JSON from model output."""
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            try:
+                clean_text = re.search(r'\{.*\}', text, re.DOTALL).group()
+                return json.loads(clean_text)
+            except Exception:
+                return {"safe": False, "safety_hazard": "Error parsing output", "target_object": [], "constraint_object": []}
+
+    def evaluate(self, gt_item: Dict, image_path: str, raw_output: str) -> Dict:
         """
         Evaluate a single prediction against ground truth.
 
@@ -194,23 +201,25 @@ class SafetyEvaluator:
         gt_desc = gt_risks['safety_hazard']
 
         # Parse GT bboxes (action_triggered format)
-        if "bbox_annotation" not in gt_risks:
+        if gt_desc is None:
             is_gt_safe = True
             gt_target_bbox = None
             gt_constraint_bbox = None
+            gt_principle_id = 0
         else:
             is_gt_safe = False
-            bbox_annotation = gt_risks["bbox_annotation"]
+            gt_principle_id = gt_risks["principle_id"]
+            bbox_annotation = gt_risks["annotation"]
             gt_target_bbox = []
             gt_constraint_bbox = []
 
             if "target_object" in bbox_annotation:
-                for label, bbox in bbox_annotation["target_object"].items():
-                    gt_target_bbox.append({"label": label, "bounding_box": bbox})
+                for obj_name, value in bbox_annotation["target_object"].items():
+                    gt_target_bbox.append({"label": obj_name, "bounding_box": value['bbox_2d']})
 
             if "constraint_object" in bbox_annotation:
-                for label, bbox in bbox_annotation["constraint_object"].items():
-                    gt_constraint_bbox.append({"label": label, "bounding_box": bbox})
+                for obj_name, value in bbox_annotation["constraint_object"].items():
+                    gt_constraint_bbox.append({"label": obj_name, "bounding_box": value['bbox_2d']})
 
             if not gt_target_bbox and not gt_constraint_bbox:
                 gt_target_bbox = None
@@ -230,7 +239,9 @@ class SafetyEvaluator:
             pred_principle_id = parsed_v1.get("principle_id")
             pred_safe = parsed_v1.get("safe", False)
         else:
-            # V2 format: Parse from prediction dict
+            if "</think>" in raw_output:
+                raw_output = raw_output.split("</think>")[-1]
+            prediction = self._parse_json(raw_output)
             pred_target_bboxes_raw = prediction.get("target_object", [])
             pred_constraint_bboxes_raw = prediction.get("constraint_object", [])
             pred_safety_hazard = prediction.get("safety_hazard")
@@ -265,16 +276,13 @@ class SafetyEvaluator:
 
         # Metric 2.5: Principle Classification Accuracy
         principle_acc = 0
-        # Extract GT principle ID from safety_principle text
-        gt_principle_text = gt_risks.get("safety_principle", "")
-        gt_principle_id = self._extract_principle_id(gt_principle_text)
 
         # Compare
         if gt_principle_id is not None and pred_principle_id is not None:
             principle_acc = 1 if gt_principle_id == pred_principle_id else 0
-        elif is_gt_safe and pred_principle_id is None:
-            # Both safe, principle_id should be null
-            principle_acc = 1
+        # elif is_gt_safe and pred_principle_id is None:
+        #     # Both safe, principle_id should be null
+        #     principle_acc = 1
         # Otherwise (unsafe but no principle_id provided): 0
 
         self.history["principle_acc"].append(principle_acc)
@@ -299,12 +307,15 @@ class SafetyEvaluator:
         return {
             "safe_acc": acc,
             "risk_match": match_score,
+            "principle_acc": principle_acc,
             "iou_target_object": iou_target,
             "iou_constraint_object": iou_constraint,
             "gt_target_bbox": gt_target_bbox,
             "gt_constraint_bbox": gt_constraint_bbox,
-            "pred_target_bboxes": pred_target_bboxes,
-            "pred_constraint_bboxes": pred_constraint_bboxes,
+            "pred_target_bbox": pred_target_bbox_formatted,
+            "pred_constraint_bbox": pred_constraint_bbox_formatted,
+            "gt_safety_hazard": gt_desc,
+            "pred_safety_hazard": pred_safety_hazard
         }
 
     def compute_list_iou(self, gt_bbox_list: List, pred_bbox_list: List) -> float:
@@ -441,14 +452,12 @@ class SafetyEvaluator:
 def evaluate_single(args):
     """Wrapper for parallel evaluation."""
     evaluator, item = args
-    result = evaluator.evaluate(item["prediction"], item["gt_data"], item["image_path"], item.get("raw_output"))
+    result = evaluator.evaluate(item["gt_data"], item["image_path"], item.get("raw_output"))
     return {
         "id": item["id"],
         "image_path": item["image_path"],
-        "model_output_raw": item["raw_output"],
-        "model_output_json": item["prediction"],
-        "ground_truth_risk": item["gt_data"].get("safety_risk"),
         "evaluation_metrics": result,
+        "model_output_raw": item["raw_output"],
         "error": None if result.get("error") is None else result["error"]
     }
 
@@ -480,8 +489,8 @@ def run_evaluation_phase(evaluator: SafetyEvaluator, eval_items: List[Dict],
                 "error": str(e)
             }
     
-    import ipdb; ipdb.set_trace()
-    process_one(eval_items[0])
+    # import ipdb; ipdb.set_trace()
+    # process_one(eval_items[0])
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [executor.submit(process_one, item) for item in eval_items]
 
@@ -500,160 +509,3 @@ def run_evaluation_phase(evaluator: SafetyEvaluator, eval_items: List[Dict],
 
     final_metrics = evaluator.get_averages()
     return detailed_logs, final_metrics
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="Evaluate safety hazard detection predictions"
-    )
-    parser.add_argument(
-        '--predictions',
-        type=str,
-        required=True,
-        help='Path to the predictions.json file generated by inference.py'
-    )
-    parser.add_argument(
-        '--gt-data',
-        type=str,
-        default='data_pipeline/data/test/annotation_info.json',
-        help='Path to the ground truth data file (e.g., annotation_info.json)'
-    )
-    parser.add_argument(
-        '--output',
-        type=str,
-        help='Path to save the evaluation results'
-    )
-    parser.add_argument(
-        '--version',
-        type=str,
-        default='v2',
-        choices=['v1', 'v2', 'v2_cot'],
-        help='Output format version (v1: parse from thinking process, v2: parse from JSON)'
-    )
-    parser.add_argument(
-        '--judge-model',
-        type=str,
-        default='Qwen/Qwen3-VL-235B-A22B-Thinking',
-        help='Model name for risk matching judgment'
-    )
-    parser.add_argument(
-        '--target-model',
-        type=str,
-        default=None,
-        help='Target model name (for bbox format detection). If not specified, uses judge-model'
-    )
-    parser.add_argument(
-        '--max-workers',
-        type=int,
-        default=24,
-        help='Maximum number of concurrent workers'
-    )
-
-    args = parser.parse_args()
-
-    # Load predictions
-    print(f"Loading predictions from {args.predictions}...")
-    with open(args.predictions, 'r', encoding='utf-8') as f:
-        predictions = json.load(f)
-    print(f"Loaded {len(predictions)} predictions")
-
-    # Load ground truth data
-    print(f"Loading ground truth data from {args.gt_data}...")
-    with open(args.gt_data, 'r', encoding='utf-8') as f:
-        gt_dataset = json.load(f)
-    print(f"Loaded {len(gt_dataset)} ground truth items")
-    
-    if args.output is None:
-        args.output = os.path.join(os.path.dirname(args.predictions), 'evaluation_results.json')
-
-    # Create a mapping from id to ground truth data
-    # The id in predictions corresponds to the enumerate index of gt_dataset
-    gt_data_by_id = {}
-    for i, gt_item in enumerate(gt_dataset):
-        # Skip items with no safety_risk or failed state
-        if gt_item.get('safety_risk') is None:
-            continue
-        if gt_item.get("state") == "failed":
-            continue
-
-        # Get the edit_image_path from safety_risk
-        safety_risk = gt_item.get('safety_risk', {})
-        edit_image_path = safety_risk.get('edit_image_path')
-
-        if not edit_image_path:
-            continue
-
-        # Construct full image path
-        image_path = os.path.join("data_pipeline", edit_image_path)
-
-        gt_data_by_id[i] = {
-            "id": i,
-            "gt_data": gt_item,
-            "image_path": image_path
-        }
-
-    # Merge predictions with ground truth
-    eval_items = []
-    missing_gt = []
-    for pred_item in predictions:
-        pred_id = pred_item.get("id")
-        if pred_id in gt_data_by_id:
-            gt_info = gt_data_by_id[pred_id]
-            eval_items.append({
-                "id": pred_id,
-                "image_path": gt_info["image_path"],
-                "prediction": pred_item.get("prediction", {}),
-                "raw_output": pred_item.get("raw_output", ""),
-                "gt_data": gt_info["gt_data"]
-            })
-        else:
-            missing_gt.append(pred_id)
-
-    if missing_gt:
-        print(f"Warning: {len(missing_gt)} predictions have no matching ground truth data")
-        print(f"Missing IDs: {missing_gt[:10]}{'...' if len(missing_gt) > 10 else ''}")
-
-    print(f"Prepared {len(eval_items)} items for evaluation")
-
-    # Initialize evaluator
-    evaluator = SafetyEvaluator(
-        model_name=args.judge_model,
-        target_model_name=args.target_model,
-        version=args.version
-    )
-
-    # Run evaluation
-    detailed_logs, final_metrics = run_evaluation_phase(
-        evaluator=evaluator,
-        eval_items=eval_items,
-        max_workers=args.max_workers
-    )
-
-    # Prepare output
-    output = {
-        "metrics": final_metrics,
-        "detailed_logs": detailed_logs
-    }
-
-    # Save results
-    print(f"\nSaving evaluation results to {args.output}...")
-    os.makedirs(os.path.dirname(args.output) if os.path.dirname(args.output) else '.', exist_ok=True)
-    with open(args.output, 'w', encoding='utf-8') as f:
-        json.dump(output, f, indent=2, ensure_ascii=False)
-
-    # Print summary
-    print("\n" + "=" * 60)
-    print("Evaluation Summary")
-    print("=" * 60)
-    print(f"Total samples: {final_metrics.get('total_samples', 0)}")
-    print(f"Average Safe Accuracy: {final_metrics.get('avg_safe_accuracy', 0):.4f}")
-    print(f"Average Risk Match: {final_metrics.get('avg_risk_match', 0):.4f}")
-    print(f"Average Principle Accuracy: {final_metrics.get('avg_principle_accuracy', 0):.4f}")
-    print(f"Average IoU (Target Object): {final_metrics.get('avg_iou_target_object', 0):.4f}")
-    print(f"Average IoU (Constraint Object): {final_metrics.get('avg_iou_constraint_object', 0):.4f}")
-    print("=" * 60)
-    print(f"✅ Done! Results saved to {args.output}")
-
-
-if __name__ == "__main__":
-    main()

@@ -37,7 +37,7 @@ def main():
     parser.add_argument('--target_model', type=str, required=True,
                         help='Path to local model or name of API model (e.g., gemini-2.0-flash-exp)')
     parser.add_argument('--version', type=str, required=True,
-                        choices=['v1', 'v2', 'v2_cot'],
+                        choices=['v1', 'v2', 'v2_cot', 'v3'],
                         help='Prompt version to use')
     # Optional arguments
     parser.add_argument('--adapter', type=str, default=None,
@@ -62,7 +62,7 @@ def main():
     
     # Setup paths (remove hazard_type level from directory structure)
     if args.data_type == "test":
-        DATASET_PATH = os.path.join("data_pipeline", "data", "test", "annotation_info.json")
+        DATASET_PATH = os.path.join("data_pipeline", "data", "test", "test_list.json")
     else:
         DATASET_PATH = os.path.join("data_pipeline", "data", "success_list.json")
 
@@ -93,7 +93,7 @@ def main():
         print("\n" + "="*60)
         print("PHASE 1: INFERENCE")
         print("="*60)
-        agent = SafetyAgent(model_name=args.target_model, adapter_path=args.adapter, batch_size=args.batch_size)
+        agent = SafetyAgent(version=args.version, model_name=args.target_model, adapter_path=args.adapter, batch_size=args.batch_size)
         eval_items = run_inference_phase(agent, gt_dataset, args.version, predictions_file)
     else:
         print("\n" + "="*60)
@@ -126,7 +126,6 @@ def main():
                 eval_items.append({
                     "id": item["id"],
                     "image_path": item["image_path"],
-                    "prediction": pred["prediction"],
                     "raw_output": pred["raw_output"],
                     "gt_data": item["gt_data"]
                 })
@@ -172,7 +171,7 @@ def main():
         print("\n" + "="*60)
         print("PHASE 3: VISUALIZATION")
         print("="*60)
-        run_visualization_phase(eval_items, args.target_model, save_folder, args.viz_workers)
+        run_visualization_phase(detailed_logs, args.target_model, save_folder, args.viz_workers)
     else:
         print("\n" + "="*60)
         print("SKIPPING VISUALIZATION")

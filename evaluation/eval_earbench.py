@@ -21,7 +21,7 @@ class EarBenchSafetyEvaluator(SafetyEvaluator):
             'risk_match': [],
         }
 
-    def evaluate(self, prediction, gt_item, image_path, raw_output=None):
+    def evaluate(self, gt_item, image_path, raw_output):
         try:
             img = Image.open(image_path)
             width, height = img.size
@@ -32,10 +32,19 @@ class EarBenchSafetyEvaluator(SafetyEvaluator):
         gt_safety_tip = gt_item['safety_tip']
         gt_explanation = gt_item['explanation']
         gt_desc = f'Tip: {gt_safety_tip}\nExplanation: {gt_explanation}'
-        import ipdb; ipdb.set_trace()
-        
-        pred_safety_hazard = prediction.get('safety_hazard')
-        pred_safe = prediction.get('safe')
+
+        if self.version == "v1":
+            if raw_output is None:
+                return {"error": "raw_output is required for v1 format"}
+            parsed_v1 = self._parse_v1_output(raw_output, width, height)
+            pred_safety_hazard = parsed_v1.get("safety_hazard")
+            pred_safe = parsed_v1.get("safe", False)
+        else:
+            if "</think>" in raw_output:
+                raw_output = raw_output.split("</think>")[-1]
+            prediction = self._parse_json(raw_output)
+            pred_safety_hazard = prediction.get("safety_hazard")
+            pred_safe = prediction.get("safe")
 
         acc = 1 if pred_safe == gt_safe else 0
         self.history["safe_acc"].append(acc)
@@ -50,6 +59,8 @@ class EarBenchSafetyEvaluator(SafetyEvaluator):
         return {
             'safe_acc': acc,
             'risk_match': match_score,
+            "gt_safety_hazard": gt_desc,
+            "pred_safety_hazard": pred_safety_hazard,
         }
 
     def get_averages(self):
@@ -66,7 +77,7 @@ class EarBenchSafetyEvaluator(SafetyEvaluator):
         }
 
 
-def inference(agent, df, image_folder, version):
+def inference(agent, df, image_folder):
     results = []
 
     with tqdm(total=len(df), desc="Inferencing") as pbar:
@@ -79,10 +90,10 @@ def inference(agent, df, image_folder, version):
             image_observation = row["Matched Image Path"]
             image_path = os.path.join(image_folder, image_observation)
 
-            prediction, raw_output = agent.infer_single(
+            output_text = agent.infer_single(
                 image_path=image_path,
                 action=instruction,
-                version=version,
+                version=agent.version,
             )
 
             results.append({
@@ -94,8 +105,7 @@ def inference(agent, df, image_folder, version):
                 },
                 'instruction': instruction,
                 'image_path': image_path,
-                'prediction': prediction,
-                'raw_output': raw_output,
+                'raw_output': output_text,
             })
 
             pbar.update(1)
@@ -109,14 +119,12 @@ def evaluate(evaluator, predictions, max_worker):
 
     def evaluate_single(pred):
         try:
-            result = evaluator.evaluate(pred['prediction'], pred['gt_data'], pred['image_path'])
+            result = evaluator.evaluate(pred['gt_data'], pred['image_path'], pred['raw_output'])
             return {
                 'scene': pred['scene'],
                 'id': pred['id'],
                 'image_path': pred['image_path'],
                 'model_output_raw': pred['raw_output'],
-                'model_output_json': pred['prediction'],
-                'ground_truth_risk': pred['gt_data'].get('safety_tip'),
                 'evaluation_metrics': result,
                 'error': None if result.get('error') is None else result['error']
             }
@@ -126,8 +134,6 @@ def evaluate(evaluator, predictions, max_worker):
                 'id': pred['id'],
                 'image_path': pred['image_path'],
                 'model_output_raw': pred['raw_output'],
-                'model_output_json': pred['prediction'],
-                'ground_truth_risk': pred['gt_data'].get('safety_tip'),
                 'error': str(e)
             }
 
@@ -158,7 +164,7 @@ def main():
     parser.add_argument('--target_model', type=str, required=True,
                         help='Path to local model or name of API model (e.g., gemini-2.0-flash-exp)')
     parser.add_argument('--version', type=str,
-                        choices=['v1', 'v2'], default='v2',
+                        choices=['v1', 'v2', 'v3'], default='v2',
                         help='Prompt version to use')
     parser.add_argument('--adapter', type=str, default=None,
                         help='Path to LoRA adapter to load (for local models only)')
@@ -202,8 +208,8 @@ def main():
         print("PHASE 1: INFERENCE")
         print("="*60)
 
-        agent = SafetyAgent(model_name=args.target_model, adapter_path=args.adapter, batch_size=1)
-        predictions = inference(agent, df, image_folder, args.version)
+        agent = SafetyAgent(model_name=args.target_model, adapter_path=args.adapter, batch_size=1, version=args.version)
+        predictions = inference(agent, df, image_folder)
         with open(predictions_file, 'w', encoding='utf-8') as f:
             json.dump(predictions, f, indent=2)
 
@@ -226,7 +232,7 @@ def main():
     print("PHASE 2: EVALUATION")
     print("="*60)
 
-    evaluator = EarBenchSafetyEvaluator(model_name=args.evaluation_model, target_model_name=args.target_model)
+    evaluator = EarBenchSafetyEvaluator(model_name=args.evaluation_model, target_model_name=args.target_model, version=args.version)
     results, final_metrics = evaluate(evaluator, predictions, args.max_workers)
     final_output_data = {
         "summary_metrics": final_metrics,

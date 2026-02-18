@@ -221,7 +221,7 @@ class CoTGenerator:
         if target_objs:
             parts.append("Target Objects:")
             for name, info in target_objs.items():
-                bbox = info.get("bbox_2d", [])
+                bbox = info["bbox_norm"]
                 state = info.get("state")
                 state_str = f", state={state}" if state else ", no specific state"
                 parts.append(f"  - {name}: bbox={bbox}{state_str}")
@@ -265,7 +265,6 @@ class CoTGenerator:
         # Build prompt based on scenario_type
         if self.scenario_type == "safe":
             template = COT_GENERATION_TEMPLATE_SAFE
-            safety_hazard = "no safety hazard"
         else:
             template = COT_GENERATION_TEMPLATE_UNSAFE
 
@@ -336,6 +335,9 @@ class CoTGenerator:
         action = safety_risk.get("action", "")
         safety_hazard = safety_risk.get("safety_hazard", "")
 
+        if self.scenario_type == 'safe':
+            safety_hazard = "no safety hazard"
+            
         if not all([safety_principle, action, safety_hazard]):
             return item, "Skipped (Missing required fields)"
 
@@ -523,8 +525,12 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    input = os.path.join(args.root_folder, "success_list_annotation.json")
-    output = os.path.join(args.root_folder, "success_list_with_cot.json")
+    if args.scenario_type == "safe":
+        input = os.path.join(args.root_folder, "safepair", "success_list_annotation.json")
+        output = os.path.join(args.root_folder, "safepair", "success_list_with_cot.json")
+    else:
+        input = os.path.join(args.root_folder, "success_list_annotation.json")
+        output = os.path.join(args.root_folder, "success_list_with_cot.json")
 
     generate_cot_annotations(
         input_json_path=input,

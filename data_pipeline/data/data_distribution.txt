@@ -1,0 +1,43 @@
+Warning: Skipped 1 samples with invalid principle format
+Target: 600 samples across 33 principles
+Ideal samples per principle: 18
+
+Principle  1: selected  18 / 530 available
+Principle  2: selected  18 / 597 available
+Principle  3: selected  18 / 295 available
+Principle  4: selected  18 / 519 available
+Principle  5: selected  18 / 451 available
+Principle  6: selected  18 / 419 available
+Principle  7: selected  18 /  91 available
+Principle  8: selected  18 /  51 available
+Principle  9: selected  18 / 154 available
+Principle 10: selected  18 / 179 available
+Principle 11: selected  18 / 515 available
+Principle 12: selected  18 / 528 available
+Principle 13: selected  18 / 442 available
+Principle 14: selected  18 / 296 available
+Principle 15: selected  18 / 364 available
+Principle 16: selected  18 / 167 available
+Principle 17: selected  18 / 336 available
+Principle 18: selected  18 / 272 available
+Principle 19: selected  18 / 353 available
+Principle 20: selected  18 / 338 available
+Principle 21: selected  18 / 345 available
+Principle 22: selected  18 / 302 available
+Principle 23: selected  18 / 273 available
+Principle 24: selected  18 / 240 available
+Principle 25: selected  18 / 278 available
+Principle 26: selected  18 / 414 available
+Principle 27: selected  18 /  90 available
+Principle 28: selected  18 / 285 available
+Principle 29: selected  18 / 313 available
+Principle 30: selected  18 / 497 available
+Principle 31: selected  18 / 318 available
+Principle 32: selected  18 / 142 available
+Principle 33: selected  18 / 443 available
+
+Total selected: 594 samples
+Note: Could only select 594 samples (target was 600)
+      due to limited data in some principles.
+
+Saved 594 samples to data/test/annotation_info.json

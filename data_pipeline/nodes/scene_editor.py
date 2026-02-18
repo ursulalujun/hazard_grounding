@@ -127,6 +127,7 @@ class SceneEditor:
             return
         
         image_path = risk['pre_image_path']
+        scene_type = edited_item['scene_type']
         filename = os.path.basename(risk['pre_image_path'])
         save_path = os.path.join(save_folder, scene_type, filename)
         if os.path.exists(save_path):
@@ -141,7 +142,6 @@ class SceneEditor:
             return edited_item
         
         hazard_related_area = risk['hazard_related_area']
-        scene_type = edited_item.get('scene_type', 'default')
 
         if not os.path.exists(image_path):
             print(f"[ERROR]: {image_path} not find image!")

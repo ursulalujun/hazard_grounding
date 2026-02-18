@@ -12,12 +12,9 @@ cd /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding
 export WANDB_MODE=offline
 export WANDB_PROJECT="hazard_grounding"
 
-# Hazard type: environmental or action_triggered
-export HAZARD_TYPE="action_triggered"
-
 # Paths
 export PROJECT_ROOT="/mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner"
-export DATA_PATH="${PROJECT_ROOT}/risk_grounding/data_pipeline/data/${HAZARD_TYPE}/success_list.json"
+export DATA_PATH="${PROJECT_ROOT}/risk_grounding/data_pipeline/data/success_list_with_cot.json"
 export EMBEDDING_MODEL_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/all-MiniLM-L6-v2"
 
 # Model checkpoint (update this path to your Qwen3-VL-8B-Instruct checkpoint)
@@ -64,7 +61,8 @@ LORA_TARGET_MODULES="all-linear"
 
 REWARD_WEIGHT_SAFE_ACCURACY=0.5
 REWARD_WEIGHT_RISK_MATCH=1.0
-REWARD_WEIGHT_IOU_TARGET_OBJECT=2.0
+REWARD_WEIGHT_IOU_TARGET_OBJECT=1.0
+REWARD_WEIGHT_PRINCIPLE_ACCURACY=1.0
 REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT=1.5
 REWARD_WEIGHT_FORMAT=0.1
 
@@ -189,6 +187,7 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --reward_weight_safe_accuracy ${REWARD_WEIGHT_SAFE_ACCURACY} \
     --reward_weight_risk_match ${REWARD_WEIGHT_RISK_MATCH} \
     --reward_weight_iou_target_object ${REWARD_WEIGHT_IOU_TARGET_OBJECT} \
+    --reward_weight_principle_accuracy ${REWARD_WEIGHT_PRINCIPLE_ACCURACY} \
     --reward_weight_iou_constraint_object ${REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT} \
     --reward_weight_format ${REWARD_WEIGHT_FORMAT}
 

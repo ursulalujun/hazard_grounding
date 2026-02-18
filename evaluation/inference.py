@@ -22,64 +22,17 @@ from tqdm import tqdm
 
 from data_pipeline.utils import proxy_off, proxy_on, bbox_norm_to_pixel
 from evaluation.prompt import (
+    SAFETY_PRINCIPLES,
     ACTION_TRIGGER_EVAL_TEMPLATE_V1,
     ACTION_TRIGGER_EVAL_TEMPLATE_V2,
     ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT,
-    ACTION_TRIGGER_EVAL_TEMPLATE_V2_GEMINI,
-    ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT_GEMINI,
+    ACTION_TRIGGER_EVAL_TEMPLATE_V3
 )
 from evaluation.utils import add_sys_path
 
 third_party_dir = os.path.join(os.path.dirname(__file__), '..', 'third_party')
 with add_sys_path(os.path.join(third_party_dir, 'Robobrain2.5')):
     from inference import UnifiedInference as RoboBrainInference
-
-
-# Bbox conversion utilities
-def convert_yx_first_to_xy_first(bbox_yx, width, height):
-    """
-    Convert bounding box from [y_min, x_min, y_max, x_max] to [x_min, y_min, x_max, y_max].
-    Also converts from normalized [0,1000] to pixel coordinates.
-
-    Args:
-        bbox_yx: [y_min, x_min, y_max, x_max] in normalized coordinates [0, 1000]
-        width: Image width in pixels
-        height: Image height in pixels
-
-    Returns:
-        [x_min, y_min, x_max, y_max] in pixel coordinates
-    """
-    y_min, x_min, y_max, x_max = bbox_yx
-    bbox_x_first = [x_min, y_min, x_max, y_max]
-    return bbox_norm_to_pixel(bbox_x_first, width, height)
-
-
-def convert_bbox_list_yx_to_xy(bboxes_yx, width, height):
-    """
-    Convert a list of bounding boxes from y-first to x-first format.
-    Also converts from normalized [0,1000] to pixel coordinates.
-
-    Args:
-        bboxes_yx: List of [y_min, x_min, y_max, x_max] or dict with "bounding_box" key
-        width: Image width in pixels
-        height: Image height in pixels
-
-    Returns:
-        List of converted bboxes in same format as input
-    """
-    if not bboxes_yx:
-        return []
-    converted = []
-    for bbox_item in bboxes_yx:
-        if isinstance(bbox_item, dict):
-            converted_bbox = {
-                "label": bbox_item["label"],
-                "bounding_box": convert_yx_first_to_xy_first(bbox_item["bounding_box"], width, height)
-            }
-            converted.append(converted_bbox)
-        else:
-            converted.append(convert_yx_first_to_xy_first(bbox_item, width, height))
-    return converted
 
 class SafetyAgent:
     """
@@ -89,7 +42,7 @@ class SafetyAgent:
     Can load LoRA adapters for local models.
     """
 
-    def __init__(self, model_name: str = "Qwen/Qwen2-VL-7B-Instruct",
+    def __init__(self, version, model_name: str = "Qwen/Qwen2-VL-7B-Instruct",
                  adapter_path: Optional[str] = None,
                  device: str = "cuda", max_retries: int = 3, batch_size: int = 4):
         """
@@ -107,6 +60,7 @@ class SafetyAgent:
         self.batch_size = batch_size
         self.model_name = model_name
         self.adapter_path = adapter_path
+        self.version = version
 
         if os.path.exists(model_name):
             self.model_type = "local"
@@ -174,12 +128,17 @@ class SafetyAgent:
 
         # Always use action_triggered templates
         if version.lower() == "v2":
-            template = ACTION_TRIGGER_EVAL_TEMPLATE_V2_GEMINI if is_gemini_gpt else ACTION_TRIGGER_EVAL_TEMPLATE_V2
+            template = ACTION_TRIGGER_EVAL_TEMPLATE_V2
         elif version.lower() == "v2_cot":
-            template = ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT_GEMINI if is_gemini_gpt else ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT
+            template = ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT
+        elif version.lower() == "v3":
+            template = ACTION_TRIGGER_EVAL_TEMPLATE_V3
         else:
             raise NotImplementedError("Version Not Found")
-        prompt_text = template.format(action=action)
+        
+        prompt_text = template.format(action=action, safety_principles=SAFETY_PRINCIPLES)
+        if is_gemini_gpt:
+            prompt_text.replace('[x_min, y_min, x_max, y_max]', '[y_min, x_min, y_max, x_max]')
 
         messages = [
             {
@@ -190,6 +149,11 @@ class SafetyAgent:
                 ],
             }
         ]
+
+        if "think" in self.model_name.lower():
+            max_new_tokens = 8192
+        else:
+            max_new_tokens = 512
 
         if self.model_type == "local":
             if self.processor is not None:
@@ -203,7 +167,7 @@ class SafetyAgent:
                 inputs = inputs.to(self.model.device)
 
                 with torch.no_grad():
-                    generated_ids = self.model.generate(**inputs, max_new_tokens=512)
+                    generated_ids = self.model.generate(**inputs, max_new_tokens=max_new_tokens)
 
                 generated_ids_trimmed = [
                     out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
@@ -251,7 +215,7 @@ class SafetyAgent:
                     else:
                         return None, f"API Error: {e}"
 
-        return self._parse_json(output_text), output_text
+        return output_text
 
     def infer_batch(self, items: List[Dict]) -> List[Dict]:
         """
@@ -285,10 +249,12 @@ class SafetyAgent:
                 template = ACTION_TRIGGER_EVAL_TEMPLATE_V2
             elif version.lower() == "v2_cot":
                 template = ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT
+            elif version.lower() == "v3":
+                template = ACTION_TRIGGER_EVAL_TEMPLATE_V3
             else:
                 raise NotImplementedError("Version Not Found")
 
-            prompt_text = template.format(action=action)
+            prompt_text = template.format(action=action, safety_principles=SAFETY_PRINCIPLES)
             all_messages.append([
                 {
                     "role": "user",
@@ -309,7 +275,7 @@ class SafetyAgent:
                 batch_messages = all_messages[i:i + self.batch_size]
                 batch_items = items[i:i + self.batch_size]
                 if "think" in self.model_name.lower():
-                    max_new_tokens = 4096
+                    max_new_tokens = 8192
                 else:
                     max_new_tokens = 512
                 try:
@@ -335,32 +301,19 @@ class SafetyAgent:
                     )
 
                     for j, (item, output_text) in enumerate(zip(batch_items, output_texts)):
-                        if self.adapter_path is None:
-                            if "</think>" in output_text:
-                                output_text = output_text.split("</think>")[-1]
-                            prediction = self._parse_json(output_text)
-                            results.append({
-                                "id": item["id"],
-                                "image_path": item["image_path"],
-                                "prediction": prediction,
-                                "raw_output": output_text,
-                                "status": "success"
-                            })
-                        else:
-                            results.append({
-                                "id": item["id"],
-                                "image_path": item["image_path"],
-                                "prediction": None,
-                                "raw_output": output_text,
-                                "status": "success"
-                            })
+                        results.append({
+                            "id": item["id"],
+                            "image_path": item["image_path"],
+                            "raw_output": output_text,
+                            "status": "success"
+                        })
                         pbar.update(1)
 
                 except Exception as e:
                     print(f"Batch inference error: {e}")
                     # Fallback to single inference for this batch
                     for item in batch_items:
-                        prediction, raw_output = self.infer_single(
+                        output_text = self.infer_single(
                             item["image_path"],
                             item.get("action", ""),
                             item.get("version", "")
@@ -368,9 +321,8 @@ class SafetyAgent:
                         results.append({
                             "id": item["id"],
                             "image_path": item["image_path"],
-                            "prediction": prediction,
-                            "raw_output": raw_output,
-                            "status": "success_fallback"
+                            "raw_output": output_text,
+                            "status": "success"
                         })
                         pbar.update(1)
 
@@ -420,17 +372,6 @@ class SafetyAgent:
 
         return results
 
-    def _parse_json(self, text: str) -> Optional[Dict]:
-        """Parse JSON from model output."""
-        try:
-            return json.loads(text)
-        except json.JSONDecodeError:
-            try:
-                clean_text = re.search(r'\{.*\}', text, re.DOTALL).group()
-                return json.loads(clean_text)
-            except Exception:
-                return {"safe": False, "safety_hazard": "Error parsing output", "target_object": [], "constraint_object": []}
-
 
 def run_inference_phase(agent: SafetyAgent, dataset: List[Dict], version: str, predictions_file: str) -> List[Dict]:
     """
@@ -470,7 +411,7 @@ def run_inference_phase(agent: SafetyAgent, dataset: List[Dict], version: str, p
     print(f"Running inference on {len(valid_items)} valid samples...")
 
     results = agent.infer_batch(valid_items)
-
+    
     # Save predictions
     predictions_to_save = []
     for r in results:

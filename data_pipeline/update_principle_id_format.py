@@ -12,10 +12,10 @@ from pathlib import Path
 
 # Import ACTION_TRIGGERED_PRINCIPLES from principle_tracker.py
 # We'll read it directly from the file to avoid import issues
-PRINCIPLE_TRACKER_PATH = Path(__file__).parent / "risk_grounding/data_pipeline/nodes/principle_tracker.py"
+PRINCIPLE_TRACKER_PATH = Path(__file__).parent / "nodes/principle_tracker.py"
 
-INPUT_JSON_PATH = Path(__file__).parent / "risk_grounding/data_pipeline/data/success_list_with_cot2.json"
-OUTPUT_JSON_PATH = Path(__file__).parent / "risk_grounding/data_pipeline/data/success_list_with_cot2_updated.json"
+INPUT_JSON_PATH = Path(__file__).parent / "data_sun/unsafe_scenario_info.json"
+OUTPUT_JSON_PATH = Path(__file__).parent / "data_sun/unsafe_scenario_info.json"
 
 
 def load_principles():

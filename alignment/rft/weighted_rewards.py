@@ -1,15 +1,17 @@
 """
 Weighted reward wrapper for Risk Grounding RFT training.
 Allows applying different weights to each reward function.
+Uses batch rewards to avoid repeated parsing.
 """
 
 from typing import Callable, List, Dict
-from rewards import RiskGroundingRewards
+from rewards import BatchRewardsWrapper, format_reward
 
 
 class WeightedRewards:
     """
     Wrapper for reward functions with configurable weights.
+    Uses BatchRewardsWrapper for efficient parsing.
     """
 
     # Default reward weights
@@ -17,7 +19,6 @@ class WeightedRewards:
         "safe_accuracy": 1.0,
         "safety_hazard_match": 1.0,
         "principle_accuracy": 1.0,
-        "iou": 1.0,
         "iou_target_object": 1.0,
         "iou_constraint_object": 1.0,
         "format": 0.5,
@@ -33,7 +34,7 @@ class WeightedRewards:
             weights: Dictionary mapping reward names to weights.
                     If None, uses DEFAULT_WEIGHTS.
         """
-        self.calculator = RiskGroundingRewards()
+        self.calculator = BatchRewardsWrapper()
         self.weights = weights or self.DEFAULT_WEIGHTS
 
     def safe_accuracy_reward(self, completions, solution, **kwargs):
@@ -54,12 +55,6 @@ class WeightedRewards:
         weight = self.weights.get("principle_accuracy", 1.0)
         return [r * weight for r in base_rewards]
 
-    def iou_reward(self, completions, solution, **kwargs):
-        """IoU reward with weight applied."""
-        base_rewards = self.calculator.iou_reward(completions, solution, **kwargs)
-        weight = self.weights.get("iou", 1.0)
-        return [r * weight for r in base_rewards]
-
     def iou_target_object_reward(self, completions, solution, **kwargs):
         """Target object IoU reward with weight applied."""
         base_rewards = self.calculator.iou_target_object_reward(completions, solution, **kwargs)
@@ -74,7 +69,6 @@ class WeightedRewards:
 
     def format_reward(self, completions, **kwargs):
         """Format reward with weight applied."""
-        from rewards import format_reward
         base_rewards = format_reward(completions, **kwargs)
         weight = self.weights.get("format", 1.0)
         return [r * weight for r in base_rewards]
@@ -96,7 +90,6 @@ def get_weighted_reward_registry(embedding_model_path: str, weights: Dict[str, f
         "safe_accuracy": weighted.safe_accuracy_reward,
         "safety_hazard_match": weighted.safety_hazard_match_reward,
         "principle_accuracy": weighted.principle_accuracy_reward,
-        "iou": weighted.iou_reward,
         "iou_target_object": weighted.iou_target_object_reward,
         "iou_constraint_object": weighted.iou_constraint_object_reward,
         "format": weighted.format_reward,
@@ -112,7 +105,6 @@ SAFETY_FOCUSED_WEIGHTS = {
     "safe_accuracy": 2.0,
     "safety_hazard_match": 0.5,
     "principle_accuracy": 0.5,
-    "iou": 1.0,
     "iou_target_object": 1.0,
     "iou_constraint_object": 1.0,
     "format": 0.5,
@@ -123,7 +115,6 @@ LOCALIZATION_FOCUSED_WEIGHTS = {
     "safe_accuracy": 1.0,
     "safety_hazard_match": 0.5,
     "principle_accuracy": 0.5,
-    "iou": 2.0,
     "iou_target_object": 2.0,
     "iou_constraint_object": 2.0,
     "format": 0.5,
@@ -134,7 +125,6 @@ DESCRIPTION_FOCUSED_WEIGHTS = {
     "safe_accuracy": 1.0,
     "safety_hazard_match": 2.0,
     "principle_accuracy": 1.0,
-    "iou": 1.0,
     "iou_target_object": 1.0,
     "iou_constraint_object": 1.0,
     "format": 0.5,
@@ -145,7 +135,6 @@ PRINCIPLE_FOCUSED_WEIGHTS = {
     "safe_accuracy": 1.0,
     "safety_hazard_match": 1.0,
     "principle_accuracy": 2.0,
-    "iou": 1.0,
     "iou_target_object": 1.0,
     "iou_constraint_object": 1.0,
     "format": 0.5,
@@ -156,7 +145,6 @@ BALANCED_WEIGHTS = {
     "safe_accuracy": 1.0,
     "safety_hazard_match": 1.0,
     "principle_accuracy": 1.0,
-    "iou": 1.0,
     "iou_target_object": 1.0,
     "iou_constraint_object": 1.0,
     "format": 0.5,  # Format is less important
@@ -167,7 +155,6 @@ TARGET_OBJECT_FOCUSED_WEIGHTS = {
     "safe_accuracy": 1.0,
     "safety_hazard_match": 0.5,
     "principle_accuracy": 0.5,
-    "iou": 1.0,
     "iou_target_object": 2.0,
     "iou_constraint_object": 1.0,
     "format": 0.5,
@@ -178,7 +165,6 @@ CONSTRAINT_OBJECT_FOCUSED_WEIGHTS = {
     "safe_accuracy": 1.0,
     "safety_hazard_match": 0.5,
     "principle_accuracy": 0.5,
-    "iou": 1.0,
     "iou_target_object": 1.0,
     "iou_constraint_object": 2.0,
     "format": 0.5,

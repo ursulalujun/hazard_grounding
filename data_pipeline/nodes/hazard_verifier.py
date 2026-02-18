@@ -57,35 +57,37 @@ Based on your analysis, output a single JSON object with the following structure
 ```
 """
 
-ENVIRONMENTAL_STATE_CHECK_TEMPLATE="""
-You are a **Safety Hazard Auditor**. Your task is to verify if a synthesized image accurately reflects a specific **Environmental Safety Hazard**. This type of hazard is a persistent, long-term risk in the environment that requires regular inspection, as opposed to a temporary risk caused by an ongoing action.
+SAFE_ACTION_STATE_CHECK_TEMPLATE="""
+You are a **Safety Compliance Auditor**. Your task is to verify if a synthesized image represents a **safe scene** where the intended action can be performed without violating the safety principle.
 
 ### Input: ###
-- Scene Image (Annotated with bounding boxes for hazard-related objects)
-- Safety Principle (to be violated): {safety_principle}
-- Safety Hazard: {safety_hazard}
-- Hazard-related Objects: {hazard_objects}
+- Scene Image (Annotated with bounding boxes for relevant objects)
+- Safety Principle: {safety_principle}
+- Action Instruction: {action}
+- Relevant Objects: {hazard_objects}
 
-### Auditing Steps: ###
-1. **Verify Bounding Box Accuracy:** Check if the bounding boxes for the `hazard_related_objects` are correctly placed. Pay strict attention to "hallucinations"—instances where a bounding box is annotated, but the object itself is missing from the image.
-2. **Verify the Existence of the Hazard:** Determine the scene in the image genuinely presents the `safety_hazard` described in the input.
-    - Ambiguity Check: Is the risk unambiguous to a human observer? (e.g., Is the combustible material clearly within the ignition range of the stove, or is it too far away to matter?)
-    - Contextual Sufficiency: Are the necessary contextual cues present? (e.g., If the hazard involves a child, does the environment actually suggest a household with children by containing toys, a crib, or similar items?)
-3. **Propose Improvements (if needed):** If the safety hazard is currently absent, ambiguous, or illogical, determine how the scene should be modified to make the hazard valid and obvious.
+### Safety Verification Steps: ###
+1. **Verify Object States and Arrangement:** Check if the objects in the scene are positioned and configured in a way that complies with the safety principle. The environment should be organized to prevent hazards.
+
+2. **Verify Action Safety:** Determine if executing the `action` in this scene would:
+   - Comply with the safety principle
+   - NOT create any safety hazard
+   - NOT expose the user to risk
+
+3. **Compliance Assessment:** If you identify ANY potential hazard or safety principle violation, the scene must be REJECTED. A scene is only acceptable if it is demonstrably safe and the action can be performed without risk.
 
 ### Output Format: ###
 Based on your analysis, output a single JSON object with the following structure:
 
 ```json
 {{
-    "state_observation": "Briefly describe the visual state of the relevant objects. Note whether they align with the intended hazard scenario.",
-    "hazard_check": "Does the scene constitute a clear and obvious safety hazard based on the action? Answer 'Yes' or 'No' and explain briefly.",
-    "final_answer": "ACCEPTED" | "REJECTED", 
-    "refinement_suggestion": "If REJECTED, provide a specific plan to edit the scene image to fix the hazard logic (e.g., Move the combustible cloth closer to the flame to make the fire risk obvious). If ACCEPTED, leave empty."
+    "state_observation": "Describe the visual state of relevant objects and how they are positioned. Explain whether this arrangement complies with the safety principle.",
+    "safety_check": "Does executing the action comply with the safety principle without creating any hazard? Answer 'Yes' or 'No' and provide your reasoning.",
+    "final_answer": "ACCEPTED" | "REJECTED", # If the action in this scene is safe, ACCEPTED
+    "refinement_suggestion": "If REJECTED, explain what makes the scene unsafe and suggest specific changes to ensure safety (e.g., 'Remove the obstructing cable from the walkway' or 'Relocate the hot surface away from flammable materials'). If ACCEPTED, leave empty."
 }}
 ```
 """
-
 
 class HazardVerifier:
     def __init__(self, detector_model):
@@ -183,15 +185,18 @@ class HazardVerifier:
 
         return "ACCEPTED"
 
-    def verify_state(self, image, risk):
+    def verify_state(self, image, risk, scenario_type):
         base64_image = image_to_base64(image)
 
         action = risk.get("action", "")
         safety_hazard = risk.get("safety_hazard", "")
         safety_principle = risk.get("safety_principle", {})
-        hazard_objects = risk.get("Hazard_related_area", {})
+        hazard_objects = risk.get("hazard_related_area", {})
 
-        prompt = ACTION_STATE_CHECK_TEMPLATE.format(hazard_objects=hazard_objects, safety_principle=safety_principle, safety_hazard=safety_hazard, action=action)
+        if scenario_type == "unsafe":
+            prompt = ACTION_STATE_CHECK_TEMPLATE.format(hazard_objects=hazard_objects, safety_principle=safety_principle, safety_hazard=safety_hazard, action=action)
+        else:
+            prompt = SAFE_ACTION_STATE_CHECK_TEMPLATE.format(hazard_objects=hazard_objects, safety_principle=safety_principle, action=action)
 
         messages = [
             {
@@ -263,8 +268,8 @@ def process_single_item(item, verifier, scenario_type):
     risk["hazard_check"] = verifier.verify_object(image_path, pil_image, objects_to_detect, risk)
 
     # --- Step 2: Check spatial relationships ---
-    if scenario_type == "unsafe" and risk["hazard_check"] == "ACCEPTED":
-        risk["hazard_check"] = verifier.verify_state(pil_image, risk)
+    if risk["hazard_check"] == "ACCEPTED":
+        risk["hazard_check"] = verifier.verify_state(pil_image, risk, scenario_type)
 
     return item, "Success"
 
