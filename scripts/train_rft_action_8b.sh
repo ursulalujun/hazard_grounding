@@ -1,8 +1,8 @@
 #!/bin/bash
 # RFT Training Script for Risk Grounding - Action Triggered Hazard Detection
 # Adapted from Visual-RFT for safety hazard detection and localization
-source /mnt/shared-storage-user/luxiaoya/.bashrc
-conda activate rft
+# source /mnt/shared-storage-user/luxiaoya/.bashrc
+# conda activate rft
 cd /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding
 # ==============================================================================
 # Configuration
@@ -14,12 +14,12 @@ export WANDB_PROJECT="hazard_grounding"
 
 # Paths
 export PROJECT_ROOT="/mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner"
-export DATA_PATH="${PROJECT_ROOT}/risk_grounding/data_pipeline/data/success_list_with_cot.json"
+export DATA_PATH="${PROJECT_ROOT}/risk_grounding/data_pipeline/data/rft_training_list.json"
 export EMBEDDING_MODEL_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/all-MiniLM-L6-v2"
 
 # Model checkpoint (update this path to your Qwen3-VL-8B-Instruct checkpoint)
 # If the model is in shared storage, use the actual path
-export CKPT_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/Qwen3-VL-8B-Thinking"
+export CKPT_PATH="${PROJECT_ROOT}/risk_grounding/alignment/LlamaFactory/saves/Qwen3-VL-8B-Thinking_sft_merged"
 
 # Output directory
 # export SAVE_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/Qwen3-VL-8B-Instruct-RFT-${HAZARD_TYPE}"
@@ -52,7 +52,7 @@ REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT=2.0
 REWARD_WEIGHT_FORMAT=0.1
 EPOCH_NUM=2
 
-export RUN_NAME="Qwen3-VL-8B-Thinking-RFT-mixed-${HAZARD_TYPE}-epoch${EPOCH_NUM}-wsh${REWARD_WEIGHT_SAFETY_HAZARD_MATCH}-wp${REWARD_WEIGHT_PRINCIPLE_ACCURACY}-wit${REWARD_WEIGHT_IOU_TARGET_OBJECT}-wic${REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT}"
+export RUN_NAME="Qwen3-VL-8B-Thinking-RFT-epoch${EPOCH_NUM}-wsh${REWARD_WEIGHT_SAFETY_HAZARD_MATCH}-wp${REWARD_WEIGHT_PRINCIPLE_ACCURACY}-wit${REWARD_WEIGHT_IOU_TARGET_OBJECT}-wic${REWARD_WEIGHT_IOU_CONSTRAINT_OBJECT}"
 export SAVE_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/${RUN_NAME}"
 
 # ==============================================================================
@@ -61,7 +61,6 @@ export SAVE_PATH="${PROJECT_ROOT}/risk_grounding/checkpoints/${RUN_NAME}"
 
 echo "=========================================="
 echo "RFT Training for Risk Grounding"
-echo "Hazard Type: ${HAZARD_TYPE}"
 echo "Data Path: ${DATA_PATH}"
 echo "Model: ${CKPT_PATH}"
 echo "Output: ${SAVE_PATH}"
@@ -126,7 +125,7 @@ mkdir -p ${SAVE_PATH}
 
 # Set number of GPUs
 # NUM_GPUS=${NUM_GPUS:-8}
-NUM_GPUS=4
+NUM_GPUS=8
 
 # Run training with torchrun
 torchrun --nproc_per_node="${NUM_GPUS}" \
@@ -138,12 +137,11 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --output_dir ${SAVE_PATH} \
     --model_name_or_path ${CKPT_PATH} \
     --dataset_path ${DATA_PATH} \
-    --hazard_type ${HAZARD_TYPE} \
     --embedding_model_path ${EMBEDDING_MODEL_PATH} \
     --deepspeed ${DEEPSPEED_CONFIG} \
     --max_prompt_length 2048 \
-    --max_completion_length 4096 \
-    --per_device_train_batch_size 2 \
+    --max_completion_length 8192 \
+    --per_device_train_batch_size 1 \
     --gradient_accumulation_steps 2 \
     --num_generations 16 \
     --logging_steps 1 \
@@ -155,7 +153,7 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --min_pixels 3136 \
     --num_train_epochs ${EPOCH_NUM} \
     --run_name ${RUN_NAME} \
-    --save_steps 250 \
+    --save_steps 500 \
     --save_only_model false \
     --learning_rate 1e-6 \
     --lr_scheduler_type cosine \

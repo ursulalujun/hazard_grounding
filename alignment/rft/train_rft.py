@@ -227,7 +227,6 @@ def load_risk_grounding_dataset(dataset_path: str, max_samples: Optional[int] = 
 
 def main(script_args, training_args, model_args):
     """Main training function."""
-
     # Build reward weights from script arguments
     reward_weights = {
         "safe_accuracy": script_args.reward_weight_safe_accuracy,

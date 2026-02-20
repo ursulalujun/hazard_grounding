@@ -14,8 +14,8 @@ from pathlib import Path
 # We'll read it directly from the file to avoid import issues
 PRINCIPLE_TRACKER_PATH = Path(__file__).parent / "nodes/principle_tracker.py"
 
-INPUT_JSON_PATH = Path(__file__).parent / "data_sun/unsafe_scenario_info.json"
-OUTPUT_JSON_PATH = Path(__file__).parent / "data_sun/unsafe_scenario_info.json"
+INPUT_JSON_PATH = Path(__file__).parent / "data/sft_training_list.json"
+OUTPUT_JSON_PATH = Path(__file__).parent / "data/sft_training_list.json"
 
 
 def load_principles():

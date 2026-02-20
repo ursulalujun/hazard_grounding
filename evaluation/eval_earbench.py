@@ -124,7 +124,7 @@ def evaluate(evaluator, predictions, max_worker):
                 'scene': pred['scene'],
                 'id': pred['id'],
                 'image_path': pred['image_path'],
-                'model_output_raw': pred['raw_output'],
+                'raw_output': pred['raw_output'],
                 'evaluation_metrics': result,
                 'error': None if result.get('error') is None else result['error']
             }
@@ -133,10 +133,12 @@ def evaluate(evaluator, predictions, max_worker):
                 'scene': pred['scene'],
                 'id': pred['id'],
                 'image_path': pred['image_path'],
-                'model_output_raw': pred['raw_output'],
+                'raw_output': pred['raw_output'],
                 'error': str(e)
             }
 
+    # import ipdb; ipdb.set_trace()
+    # evaluate_single(predictions[0])
     with ThreadPoolExecutor(max_workers=max_worker) as executor:
         futures = [executor.submit(evaluate_single, pred) for pred in predictions]
         
@@ -158,6 +160,8 @@ def evaluate(evaluator, predictions, max_worker):
 
 
 def main():
+    if 'EVALUATION_API_URL' not in os.environ:
+        raise Exception("EVALUATION_API_URL Not Found")
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_path', type=str, default='third_party/data/earbench/EAIRiskDataset')
     parser.add_argument('--eval_scenes', nargs='+', type=str, default=["bathroom", "bedroom", "kitchen", "living room", "study room"])
@@ -187,7 +191,6 @@ def main():
     df = df[df['Scene'].isin(eval_scenes)]
 
     print(f"Dataset: {len(df)} samples")
-
     # Create save folder (include adapter name if provided)
     model_name = os.path.basename(args.target_model)
     if args.adapter:

@@ -127,7 +127,9 @@ class SafetyAgent:
         is_gemini_gpt = self.model_type == "api" and ("gemini" in self.model.lower() or "gpt" in self.model.lower())
 
         # Always use action_triggered templates
-        if version.lower() == "v2":
+        if version.lower() == "v1":
+            template = ACTION_TRIGGER_EVAL_TEMPLATE_V1
+        elif version.lower() == "v2":
             template = ACTION_TRIGGER_EVAL_TEMPLATE_V2
         elif version.lower() == "v2_cot":
             template = ACTION_TRIGGER_EVAL_TEMPLATE_V2_WITH_COT
@@ -138,17 +140,7 @@ class SafetyAgent:
         
         prompt_text = template.format(action=action, safety_principles=SAFETY_PRINCIPLES)
         if is_gemini_gpt:
-            prompt_text.replace('[x_min, y_min, x_max, y_max]', '[y_min, x_min, y_max, x_max]')
-
-        messages = [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "image", "image": image_path},
-                    {"type": "text", "text": prompt_text},
-                ],
-            }
-        ]
+            prompt_text = prompt_text.replace('x_min, y_min, x_max, y_max', 'y_min, x_min, y_max, x_max')
 
         if "think" in self.model_name.lower():
             max_new_tokens = 8192
@@ -156,6 +148,16 @@ class SafetyAgent:
             max_new_tokens = 512
 
         if self.model_type == "local":
+            messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image", "image": image_path},
+                        {"type": "text", "text": prompt_text},
+                    ],
+                }
+            ]
+        
             if self.processor is not None:
                 inputs = self.processor.apply_chat_template(
                     messages,
@@ -175,9 +177,6 @@ class SafetyAgent:
                 output_text = self.processor.batch_decode(
                     generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
                 )[0]
-
-                if "</think>" in output_text:
-                    output_text = output_text.split("</think>")[-1]
 
             else: 
                 output_text = self.model.inference(text=prompt_text, image=image_path, task='general')['answer']
@@ -333,7 +332,7 @@ class SafetyAgent:
         results = [None] * len(items)
 
         def infer_one(item):
-            prediction, raw_output = self.infer_single(
+            raw_output = self.infer_single(
                 item["image_path"],
                 item.get("action", ""),
                 item.get("version", ""),
@@ -341,11 +340,12 @@ class SafetyAgent:
             return {
                 "id": item["id"],
                 "image_path": item["image_path"],
-                "prediction": prediction,
                 "raw_output": raw_output,
-                "status": "success" if prediction is not None else "error"
+                "status": "success" if raw_output is not None else "error"
             }
 
+        # import ipdb; ipdb.set_trace()
+        # infer_one(items[0])
         with ThreadPoolExecutor(max_workers=24) as executor:
             future_to_idx = {
                 executor.submit(infer_one, item): item["id"]
@@ -363,7 +363,6 @@ class SafetyAgent:
                         results[idx] = {
                             "id": items[idx]["id"],
                             "image_path": items[idx]["image_path"],
-                            "prediction": None,
                             "raw_output": str(e),
                             "status": "error"
                         }
@@ -418,7 +417,6 @@ def run_inference_phase(agent: SafetyAgent, dataset: List[Dict], version: str, p
         if r["status"] == "success" or r["status"] == "success_fallback":
             predictions_to_save.append({
                 "id": r["id"],
-                "prediction": r["prediction"],
                 "raw_output": r["raw_output"]
             })
 
@@ -435,7 +433,6 @@ def run_inference_phase(agent: SafetyAgent, dataset: List[Dict], version: str, p
             eval_items.append({
                 "id": r["id"],
                 "image_path": r["image_path"],
-                "prediction": r["prediction"],
                 "raw_output": r["raw_output"],
                 "gt_data": valid_item["gt_data"]
             })

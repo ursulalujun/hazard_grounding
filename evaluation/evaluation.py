@@ -42,6 +42,7 @@ def main():
     # Optional arguments
     parser.add_argument('--adapter', type=str, default=None,
                         help='Path to LoRA adapter to load (for local models only)')
+    parser.add_argument('--scenario_type', type=str, default='unsafe', choices=['unsafe', 'safe'])
     parser.add_argument('--evaluation_model', type=str, default='Qwen/Qwen3-VL-235B-A22B-Thinking',
                         help='Model for risk matching judgment')
     parser.add_argument('--data_type', type=str, default='test',
@@ -55,16 +56,12 @@ def main():
                         help='Max workers for visualization')
     parser.add_argument('--skip_inference', action='store_true',
                         help='Skip inference phase, use existing predictions file')
+    parser.add_argument('--skip_judgement', action='store_true',
+                        help='Skip judgement phase, use existing evalution results file')
     parser.add_argument('--skip_viz', action='store_true',
                         help='Skip visualization phase')
 
     args = parser.parse_args()
-    
-    # Setup paths (remove hazard_type level from directory structure)
-    if args.data_type == "test":
-        DATASET_PATH = os.path.join("data_pipeline", "data", "test", "test_list.json")
-    else:
-        DATASET_PATH = os.path.join("data_pipeline", "data", "success_list.json")
 
     # Create save folder (include adapter name if provided)
     model_name = os.path.basename(args.target_model)
@@ -73,11 +70,22 @@ def main():
         save_folder = os.path.join("results", args.data_type, f"{model_name}+{adapter_name}_{args.version}")
     else:
         save_folder = os.path.join("results", args.data_type, f"{model_name}_{args.version}")
-    os.makedirs(save_folder, exist_ok=True)
 
+    # Setup paths (remove hazard_type level from directory structure)
+    if args.data_type == "test":
+        if args.scenario_type == "safe":
+            DATASET_PATH = os.path.join("data_pipeline", "data", "safepair", "test", "test_list.json")
+            save_folder = os.path.join(save_folder, "oversafety")
+        else:
+            DATASET_PATH = os.path.join("data_pipeline", "data", "test", "test_list.json")
+    else:
+        DATASET_PATH = os.path.join("data_pipeline", "data", "unsafe_train_list.json")
+        save_folder = os.path.join(save_folder, "training")
+
+    os.makedirs(save_folder, exist_ok=True)
     predictions_file = os.path.join(save_folder, "predictions.json")
     output_file = os.path.join(save_folder, "evaluation_results.json")
-
+    
     # Load dataset
     with open(DATASET_PATH, 'r', encoding='utf-8') as f:
         gt_dataset = json.load(f)
@@ -135,20 +143,35 @@ def main():
     # ======================================================================
     # Phase 2: Evaluation
     # ======================================================================
-    print("\n" + "="*60)
-    print("PHASE 2: EVALUATION")
-    print("="*60)
-    evaluator = SafetyEvaluator(model_name=args.evaluation_model, target_model_name=args.target_model)
-    detailed_logs, final_metrics = run_evaluation_phase(evaluator, eval_items, args.max_workers)
+    if not args.skip_judgement:
+        print("\n" + "="*60)
+        print("PHASE 2: EVALUATION")
+        print("="*60)
+        evaluator = SafetyEvaluator(model_name=args.evaluation_model, target_model_name=args.target_model)
+        detailed_logs, final_metrics = run_evaluation_phase(evaluator, eval_items, args.max_workers)
 
-    # Save results
-    final_output_data = {
-        "summary_metrics": final_metrics,
-        "details": detailed_logs
-    }
+        # Save results
+        final_output_data = {
+            "summary_metrics": final_metrics,
+            "details": detailed_logs
+        }
 
-    with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump(final_output_data, f, indent=4, ensure_ascii=False)
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(final_output_data, f, indent=4, ensure_ascii=False)
+    
+    else:
+        print("\n" + "="*60)
+        print("SKIPPING JUDGEMENT - USING EXISTING RESULTS")
+        print("="*60)
+
+        # Load existing predictions
+        with open(output_file, 'r', encoding='utf-8') as f:
+            final_output_data = json.load(f)
+
+        final_metrics = final_output_data['summary_metrics']
+        detailed_logs = final_output_data['details']
+
+        print(f"Loaded {len(detailed_logs)} results from {output_file}")
 
     print("\n" + "="*60)
     print("FINAL METRICS")

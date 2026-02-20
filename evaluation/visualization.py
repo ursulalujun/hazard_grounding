@@ -13,7 +13,7 @@ import matplotlib.patches as patches
 from PIL import Image
 from tqdm import tqdm
 
-def visualize_comparison(item: Dict, target_model_name: str, save_folder: str):
+def visualize_comparison(item: Dict, save_folder: str):
     """
     Visualize GT (green) vs Prediction (red) on the same image.
 
@@ -132,4 +132,4 @@ def run_visualization_phase(eval_items: List[Dict],
     os.makedirs(vis_folder, exist_ok=True)
 
     for item in tqdm(eval_items):
-        visualize_comparison(item, target_model_name, vis_folder)
+        visualize_comparison(item, vis_folder)
