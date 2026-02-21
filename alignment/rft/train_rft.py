@@ -171,10 +171,10 @@ def load_risk_grounding_dataset(dataset_path: str, max_samples: Optional[int] = 
 
         # Get image size for bbox coordinate conversion
         try:
-            img = PIL.Image.open(image_path)
-            img_width, img_height = img.size
-            gt_data["image_width"] = img_width
-            gt_data["image_height"] = img_height
+            with PIL.Image.open(image_path) as img:
+                img_width, img_height = img.size
+                gt_data["image_width"] = img_width
+                gt_data["image_height"] = img_height
         except Exception as e:
             print(f"Warning: Could not get image size for {image_path}: {e}")
             gt_data["image_width"] = None

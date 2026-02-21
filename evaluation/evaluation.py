@@ -147,7 +147,7 @@ def main():
         print("\n" + "="*60)
         print("PHASE 2: EVALUATION")
         print("="*60)
-        evaluator = SafetyEvaluator(model_name=args.evaluation_model, target_model_name=args.target_model)
+        evaluator = SafetyEvaluator(model_name=args.evaluation_model, target_model_name=args.target_model, version=args.version)
         detailed_logs, final_metrics = run_evaluation_phase(evaluator, eval_items, args.max_workers)
 
         # Save results

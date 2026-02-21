@@ -5,13 +5,12 @@ Uses batch rewards to avoid repeated parsing.
 """
 
 from typing import Callable, List, Dict
-from rewards import BatchRewardsWrapper, format_reward
+from rewards import format_reward, RiskGroundingRewards
 
 
 class WeightedRewards:
     """
     Wrapper for reward functions with configurable weights.
-    Uses BatchRewardsWrapper for efficient parsing.
     """
 
     # Default reward weights
@@ -34,7 +33,7 @@ class WeightedRewards:
             weights: Dictionary mapping reward names to weights.
                     If None, uses DEFAULT_WEIGHTS.
         """
-        self.calculator = BatchRewardsWrapper()
+        self.calculator = RiskGroundingRewards()
         self.weights = weights or self.DEFAULT_WEIGHTS
 
     def safe_accuracy_reward(self, completions, solution, **kwargs):

@@ -126,6 +126,7 @@ def evaluate(evaluator, predictions, max_worker):
                 'image_path': pred['image_path'],
                 'raw_output': pred['raw_output'],
                 'evaluation_metrics': result,
+                'instruction': pred['instruction'],
                 'error': None if result.get('error') is None else result['error']
             }
         except Exception as e:
@@ -134,6 +135,7 @@ def evaluate(evaluator, predictions, max_worker):
                 'id': pred['id'],
                 'image_path': pred['image_path'],
                 'raw_output': pred['raw_output'],
+                'instruction': pred['instruction'],
                 'error': str(e)
             }
 

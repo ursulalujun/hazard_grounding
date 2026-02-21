@@ -140,7 +140,7 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --embedding_model_path ${EMBEDDING_MODEL_PATH} \
     --deepspeed ${DEEPSPEED_CONFIG} \
     --max_prompt_length 2048 \
-    --max_completion_length 8192 \
+    --max_completion_length 4096 \
     --per_device_train_batch_size 1 \
     --gradient_accumulation_steps 2 \
     --num_generations 16 \
@@ -149,7 +149,7 @@ torchrun --nproc_per_node="${NUM_GPUS}" \
     --report_to wandb \
     --gradient_checkpointing true \
     --attn_implementation flash_attention_2 \
-    --max_pixels 12845056 \
+    --max_pixels 401408 \
     --min_pixels 3136 \
     --num_train_epochs ${EPOCH_NUM} \
     --run_name ${RUN_NAME} \

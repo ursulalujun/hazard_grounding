@@ -127,6 +127,7 @@ def evaluate(evaluator, predictions, max_worker):
                 'image_path': pred['image_path'],
                 'model_output_raw': pred['raw_output'],
                 'evaluation_metrics': result,
+                'instruction': pred['instruction'],
                 'error': None if result.get('error') is None else result['error']
             }
         except Exception as e:
@@ -134,6 +135,7 @@ def evaluate(evaluator, predictions, max_worker):
                 'id': pred['id'],
                 'image_path': pred['image_path'],
                 'model_output_raw': pred['raw_output'],
+                'instruction': pred['instruction'],
                 'error': str(e)
             }
 
@@ -163,7 +165,7 @@ def main():
     parser.add_argument('--target_model', type=str, required=True,
                         help='Path to local model or name of API model (e.g., gemini-2.0-flash-exp)')
     parser.add_argument('--version', type=str,
-                        choices=['v1', 'v2', 'v3'], default='v2',
+                        choices=['v1', 'v2', 'v2_cot', 'v3'], default='v2',
                         help='Prompt version to use')
     parser.add_argument('--adapter', type=str, default=None,
                         help='Path to LoRA adapter to load (for local models only)')

@@ -12,11 +12,13 @@ import os
 import torch
 import json
 import numpy as np
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple, Union
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Initialize the reward calculator. 
+os.environ["TRANSFORMERS_OFFLINE"] = "1"
+os.environ["HF_DATASETS_OFFLINE"] = "1" 
 embedding_model_path="checkpoints/all-MiniLM-L6-v2"
 embedding_model = SentenceTransformer(embedding_model_path, device="cpu")
 
@@ -26,7 +28,7 @@ class RiskGroundingRewards:
     def __init__(self):
         pass
 
-    def _parse_v1_output(self, raw_output: str, width: int = None, height: int = None) -> Dict:
+    def _parse_safety_hazard(self, raw_output: str) -> Dict:
         """
         Parse v1 format output from model.
 
@@ -38,8 +40,6 @@ class RiskGroundingRewards:
 
         Args:
             raw_output: Raw model output containing thinking process and answer
-            width: Image width for bbox conversion (not used for now)
-            height: Image height for bbox conversion (not used for now)
 
         Returns:
             Dict with keys: safe, safety_hazard, principle_id, target_object, constraint_object
@@ -47,9 +47,7 @@ class RiskGroundingRewards:
         result = {
             "safe": False,
             "safety_hazard": None,
-            "principle_id": None,
-            "target_object": [],
-            "constraint_object": []
+            "principle_id": 0
         }
 
         # Validate input
@@ -67,28 +65,6 @@ class RiskGroundingRewards:
             if not isinstance(thinking, str) or not isinstance(answer, str):
                 return result
 
-            # Parse target_object from thinking process
-            # Pattern: [target_object][object_name][x1,y1,x2,y2][object_state]
-            target_pattern = r'\[target_object\]\[([^\]]+)\]\[(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\](?:\[([^\]]+)\])?'
-            for match in re.finditer(target_pattern, thinking):
-                try:
-                    x1, y1, x2, y2 = map(int, match.groups()[1:5])
-                    result["target_object"].append([x1, y1, x2, y2])
-                except (ValueError, IndexError) as e:
-                    # Skip invalid bbox coordinates
-                    continue
-
-            # Parse constraint_object from thinking process
-            # Pattern: [constraint_object][object_name][x1,y1,x2,y2][object_state]
-            constraint_pattern = r'\[constraint_object\]\[([^\]]+)\]\[(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\](?:\[([^\]]+)\])?'
-            for match in re.finditer(constraint_pattern, thinking):
-                try:
-                    x1, y1, x2, y2 = map(int, match.groups()[1:5])
-                    result["constraint_object"].append([x1, y1, x2, y2])
-                except (ValueError, IndexError) as e:
-                    # Skip invalid bbox coordinates
-                    continue
-
             # Parse safety_hazard from answer
             # Pattern: [safety_hazard][...], violating[safety_principle][id(int)....]
             hazard_match = re.search(r'\[safety_hazard\]\[([^\]]*(?:\[[^\]]*\][^\]]*)*)\]', answer)
@@ -102,7 +78,7 @@ class RiskGroundingRewards:
                 hazard_match = re.search(r'(.*?)\s*,?\s*violating', answer)
                 if hazard_match:
                     result["safety_hazard"] = hazard_match.group(1).strip()
-
+            
             # Parse principle_id from answer
             # Pattern: [safety_principle][int] or just id(...). Example: violating safety principle 4.
             principle_patterns = [
@@ -132,21 +108,62 @@ class RiskGroundingRewards:
             pass
 
         return result
+    
+    def _parse_target_obj(self, raw_output: str):
+        target_object = []
+        if raw_output is None or not isinstance(raw_output, str):
+            return target_object
 
-    def _parse_completions_once(self, completions) -> List[Dict]:
-        """
-        Parse all completions once and return parsed results.
-        This avoids repeated parsing in each reward function.
+        # Split thinking and answer by </think>
+        if '</think>' in raw_output and raw_output.count('</think>') == 1:
+            thinking, answer = raw_output.split('</think>')
+        else:
+            return target_object
 
-        Args:
-            completions: Model generated responses
+        # Validate thinking and answer are strings
+        if not isinstance(thinking, str) or not isinstance(answer, str):
+            return target_object
+            
+        # Parse target_object from thinking process
+        # Pattern: [target_object][object_name][x1,y1,x2,y2][object_state]
+        target_pattern = r'\[target_object\]\[([^\]]+)\]\[(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\](?:\[([^\]]+)\])?'
+        for match in re.finditer(target_pattern, thinking):
+            try:
+                x1, y1, x2, y2 = map(int, match.groups()[1:5])
+                target_object.append([x1, y1, x2, y2])
+            except (ValueError, IndexError) as e:
+                # Skip invalid bbox coordinates
+                continue
 
-        Returns:
-            List of parsed result dicts
-        """
-        contents = [completion[0]["content"] for completion in completions]
-        return [self._parse_v1_output(content) for content in contents]
+        return target_object
+    
+    def _parse_constraint_obj(self, raw_output: str):
+        constraint_object = []
+        if raw_output is None or not isinstance(raw_output, str):
+            return constraint_object
 
+        # Split thinking and answer by </think>
+        if '</think>' in raw_output and raw_output.count('</think>') == 1:
+            thinking, answer = raw_output.split('</think>')
+        else:
+            return constraint_object
+
+        # Validate thinking and answer are strings
+        if not isinstance(thinking, str) or not isinstance(answer, str):
+            return constraint_object
+
+        # Parse constraint_object from thinking process
+        # Pattern: [constraint_object][object_name][x1,y1,x2,y2][object_state]
+        constraint_pattern = r'\[constraint_object\]\[([^\]]+)\]\[(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\](?:\[([^\]]+)\])?'
+        for match in re.finditer(constraint_pattern, thinking):
+            try:
+                x1, y1, x2, y2 = map(int, match.groups()[1:5])
+                constraint_object.append([x1, y1, x2, y2])
+            except (ValueError, IndexError) as e:
+                # Skip invalid bbox coordinates
+                continue
+        
+        return constraint_object
     # ========================================================================
     # 1. Safe Accuracy Reward
     # ========================================================================
@@ -166,7 +183,7 @@ class RiskGroundingRewards:
 
         for content, gt_data in zip(contents, solution):
             # Parse v1 format output
-            parsed = self._parse_v1_output(content)
+            parsed = self._parse_safety_hazard(content)
             pred_safe = parsed["safe"]
             gt_safe = gt_data.get("is_gt_safe", False)
 
@@ -198,7 +215,7 @@ class RiskGroundingRewards:
 
         for content, gt_data in zip(contents, solution):
             # Parse v1 format output
-            parsed = self._parse_v1_output(content)
+            parsed = self._parse_safety_hazard(content)
             pred_safe = parsed["safe"]
             pred_hazard = parsed["safety_hazard"]
 
@@ -259,15 +276,14 @@ class RiskGroundingRewards:
 
         for content, gt_data in zip(contents, solution):
             # Parse v1 format output
-            parsed = self._parse_v1_output(content)
+            parsed = self._parse_safety_hazard(content)
             pred_safe = parsed["safe"]
             pred_principle_id = parsed["principle_id"]
 
             gt_safe = gt_data.get("is_gt_safe", False)
 
-            # If GT is safe, principle_id should be None
             if gt_safe:
-                reward = 1.0 if pred_principle_id is None else 0.0
+                reward = 1.0 if pred_safe else 0.0
             else:
                 # GT is unsafe, check if prediction is correct
                 # If model predicted safe, principle accuracy is 0
@@ -330,8 +346,7 @@ class RiskGroundingRewards:
 
         for content, gt_data in zip(contents, solution):
             # Parse v1 format output
-            parsed = self._parse_v1_output(content)
-            pred_target_bboxes = parsed["target_object"]  # Normalized coordinates (0-1000)
+            pred_target_bboxes = self._parse_target_obj(content) # Normalized coordinates (0-1000)
 
             # Get GT target_object bboxes
             gt_target_bboxes = self._get_gt_target_bboxes(gt_data)
@@ -341,14 +356,15 @@ class RiskGroundingRewards:
             img_height = gt_data.get("image_height")
 
             # Convert predicted bboxes from normalized (0-1000) to pixel coordinates
+            # _normalized_to_pixel_bbox_list already returns the correct format
             if img_width and img_height:
-                pred_target_bboxes = self._normalized_to_pixel_bbox_list(pred_target_bboxes, img_width, img_height)
-
-            # Convert to format expected by compute_list_iou (list of dicts with label and bounding_box)
-            pred_target_bboxes_formatted = [
-                {"label": f"bbox_{i}", "bounding_box": bbox}
-                for i, bbox in enumerate(pred_target_bboxes)
-            ] if pred_target_bboxes else []
+                pred_target_bboxes_formatted = self._normalized_to_pixel_bbox_list(pred_target_bboxes, img_width, img_height)
+            else:
+                # If no image dimensions, format manually (will still be normalized coordinates)
+                pred_target_bboxes_formatted = [
+                    {"label": f"bbox_{i}", "bounding_box": bbox}
+                    for i, bbox in enumerate(pred_target_bboxes)
+                ] if pred_target_bboxes else []
 
             # Calculate IoU: target_object should ALWAYS be localized, regardless of scene safety
             if gt_target_bboxes:
@@ -358,7 +374,7 @@ class RiskGroundingRewards:
             else:
                 # GT has NO target_object bboxes
                 # Model should also NOT predict any
-                reward = 1.0 if not pred_target_bboxes else 0.0
+                reward = 1.0 if not pred_target_bboxes_formatted else 0.0
 
             rewards.append(reward)
 
@@ -381,9 +397,9 @@ class RiskGroundingRewards:
 
         for content, gt_data in zip(contents, solution):
             # Parse v1 format output
-            parsed = self._parse_v1_output(content)
+            parsed = self._parse_safety_hazard(content)
+            pred_constraint_bboxes = self._parse_constraint_obj(content) # Normalized coordinates (0-1000)
             pred_safe = parsed["safe"]
-            pred_constraint_bboxes = parsed["constraint_object"]  # Normalized coordinates (0-1000)
 
             gt_safe = gt_data.get("is_gt_safe", False)
 
@@ -395,21 +411,19 @@ class RiskGroundingRewards:
             img_height = gt_data.get("image_height")
 
             # Convert predicted bboxes from normalized (0-1000) to pixel coordinates
+            # _normalized_to_pixel_bbox_list already returns the correct format
             if img_width and img_height:
-                pred_constraint_bboxes = self._normalized_to_pixel_bbox_list(pred_constraint_bboxes, img_width, img_height)
-
-            # Convert to format expected by compute_list_iou (list of dicts with label and bounding_box)
-            pred_constraint_bboxes_formatted = [
-                {"label": f"bbox_{i}", "bounding_box": bbox}
-                for i, bbox in enumerate(pred_constraint_bboxes)
-            ] if pred_constraint_bboxes else []
+                pred_constraint_bboxes_formatted = self._normalized_to_pixel_bbox_list(pred_constraint_bboxes, img_width, img_height)
+            else:
+                # If no image dimensions, format manually (will still be normalized coordinates)
+                pred_constraint_bboxes_formatted = [
+                    {"label": f"bbox_{i}", "bounding_box": bbox}
+                    for i, bbox in enumerate(pred_constraint_bboxes)
+                ] if pred_constraint_bboxes else []
 
             # If GT is safe, constraint_object should be empty
             if gt_safe:
-                if not pred_constraint_bboxes:
-                    reward = 1.0
-                else:
-                    reward = 0.0
+                reward = 1.0 if pred_safe else 0.0
             else:
                 # GT is unsafe
                 if pred_safe:
@@ -423,7 +437,7 @@ class RiskGroundingRewards:
                     else:
                         # No GT constraint bboxes (hazard from target's own state)
                         # Model should also predict empty constraint_object
-                        reward = 1.0 if not pred_constraint_bboxes else 0.0
+                        reward = 1.0 if not pred_constraint_bboxes_formatted else 0.0
 
             rewards.append(reward)
 
@@ -646,221 +660,6 @@ def format_reward(completions, **kwargs):
             results.append(0.0)
 
     return results
-
-
-# ========================================================================
-# Batch Rewards Wrapper (caches parsed results to avoid repeated parsing)
-# ========================================================================
-class BatchRewardsWrapper:
-    """
-    Wrapper that caches parsed completions to avoid repeated parsing.
-    This is useful when multiple reward functions are called on the same completions.
-    Only caches the current batch - automatically clears when a new batch arrives.
-    """
-
-    def __init__(self):
-        """Initialize the wrapper."""
-        self.calculator = RiskGroundingRewards()
-        self._current_batch_key = None
-        self._current_parsed_results = None
-
-    def _get_cached_parsed(self, completions):
-        """
-        Get cached parsed results or parse and cache them.
-        Only caches the current batch - clears cache when a new batch arrives.
-        """
-        # Create a hashable key from completions
-        contents_key = tuple(c[0]["content"] for c in completions)
-
-        # Check if this is a new batch
-        if contents_key != self._current_batch_key:
-            # New batch - clear old cache and parse new batch
-            self._current_batch_key = contents_key
-            self._current_parsed_results = self.calculator._parse_completions_once(completions)
-
-        return self._current_parsed_results
-
-    def clear_cache(self):
-        """Manually clear the parsing cache."""
-        self._current_batch_key = None
-        self._current_parsed_results = None
-
-    def safe_accuracy_reward(self, completions, solution, **kwargs):
-        """Safe accuracy reward using cached parsed results."""
-        parsed_list = self._get_cached_parsed(completions)
-        rewards = []
-        for parsed, gt_data in zip(parsed_list, solution):
-            pred_safe = parsed["safe"]
-            gt_safe = gt_data.get("is_gt_safe", False)
-            reward = 1.0 if pred_safe == gt_safe else 0.0
-            rewards.append(reward)
-        return rewards
-
-    def safety_hazard_match_reward(self, completions, solution, **kwargs):
-        """Safety hazard match reward using cached parsed results."""
-        parsed_list = self._get_cached_parsed(completions)
-        rewards = []
-
-        for parsed, gt_data in zip(parsed_list, solution):
-            pred_safe = parsed["safe"]
-            pred_hazard = parsed["safety_hazard"]
-            gt_hazard = gt_data.get("safety_hazard", "")
-            gt_safe = gt_data.get("is_gt_safe", False)
-
-            if gt_safe:
-                reward = 1.0 if pred_safe else 0.0
-            elif not gt_safe:
-                if pred_safe or not pred_hazard:
-                    reward = 0.0
-                else:
-                    try:
-                        pred_emb = embedding_model.encode(
-                            pred_hazard,
-                            convert_to_numpy=True,
-                            show_progress_bar=False
-                        )
-                        gt_emb = embedding_model.encode(
-                            gt_hazard,
-                            convert_to_numpy=True,
-                            show_progress_bar=False
-                        )
-                        similarity = cosine_similarity(
-                            pred_emb.reshape(1, -1),
-                            gt_emb.reshape(1, -1)
-                        )[0, 0]
-                        reward = float(similarity)
-                    except Exception as e:
-                        reward = 0.0
-            else:
-                reward = 0.0
-
-            rewards.append(reward)
-
-        return rewards
-
-    def principle_accuracy_reward(self, completions, solution, **kwargs):
-        """Principle accuracy reward using cached parsed results."""
-        parsed_list = self._get_cached_parsed(completions)
-        rewards = []
-
-        for parsed, gt_data in zip(parsed_list, solution):
-            pred_safe = parsed["safe"]
-            pred_principle_id = parsed["principle_id"]
-            gt_safe = gt_data.get("is_gt_safe", False)
-
-            if gt_safe:
-                reward = 1.0 if pred_principle_id is None else 0.0
-            else:
-                if pred_safe:
-                    reward = 0.0
-                else:
-                    # Try to get principle_id directly from gt_data first (new format)
-                    gt_principle_id = gt_data.get("principle_id")
-
-                    # Fallback to parsing from safety_principle text (old format)
-                    if gt_principle_id is None:
-                        gt_principle_text = gt_data.get("safety_principle", "")
-                        gt_principle_id = self.calculator._extract_principle_id(gt_principle_text)
-
-                    if gt_principle_id is not None and pred_principle_id is not None:
-                        reward = 1.0 if gt_principle_id == pred_principle_id else 0.0
-                    else:
-                        reward = 0.0
-
-            rewards.append(reward)
-
-        return rewards
-
-    def iou_target_object_reward(self, completions, solution, **kwargs):
-        """Target object IoU reward using cached parsed results."""
-        parsed_list = self._get_cached_parsed(completions)
-        rewards = []
-
-        for parsed, gt_data in zip(parsed_list, solution):
-            pred_target_bboxes = parsed["target_object"]
-            gt_target_bboxes = self.calculator._get_gt_target_bboxes(gt_data)
-
-            img_width = gt_data.get("image_width")
-            img_height = gt_data.get("image_height")
-
-            if img_width and img_height:
-                pred_target_bboxes = self.calculator._normalized_to_pixel_bbox_list(
-                    pred_target_bboxes, img_width, img_height
-                )
-
-            pred_target_bboxes_formatted = [
-                {"label": f"bbox_{i}", "bounding_box": bbox["bounding_box"]}
-                for i, bbox in enumerate(pred_target_bboxes)
-            ] if pred_target_bboxes else []
-
-            if gt_target_bboxes:
-                iou = self.calculator.compute_list_iou(gt_target_bboxes, pred_target_bboxes_formatted)
-                reward = iou
-            else:
-                reward = 1.0 if not pred_target_bboxes else 0.0
-
-            rewards.append(reward)
-
-        return rewards
-
-    def iou_constraint_object_reward(self, completions, solution, **kwargs):
-        """Constraint object IoU reward using cached parsed results."""
-        parsed_list = self._get_cached_parsed(completions)
-        rewards = []
-
-        for parsed, gt_data in zip(parsed_list, solution):
-            pred_safe = parsed["safe"]
-            pred_constraint_bboxes = parsed["constraint_object"]
-            gt_safe = gt_data.get("is_gt_safe", False)
-            gt_constraint_bboxes = self.calculator._get_gt_constraint_bboxes(gt_data)
-
-            img_width = gt_data.get("image_width")
-            img_height = gt_data.get("image_height")
-
-            if img_width and img_height:
-                pred_constraint_bboxes = self.calculator._normalized_to_pixel_bbox_list(
-                    pred_constraint_bboxes, img_width, img_height
-                )
-
-            pred_constraint_bboxes_formatted = [
-                {"label": f"bbox_{i}", "bounding_box": bbox["bounding_box"]}
-                for i, bbox in enumerate(pred_constraint_bboxes)
-            ] if pred_constraint_bboxes else []
-
-            if gt_safe:
-                reward = 1.0 if not pred_constraint_bboxes else 0.0
-            else:
-                if pred_safe:
-                    reward = 0.0
-                else:
-                    if gt_constraint_bboxes:
-                        iou = self.calculator.compute_list_iou(gt_constraint_bboxes, pred_constraint_bboxes_formatted)
-                        reward = iou
-                    else:
-                        reward = 1.0 if not pred_constraint_bboxes else 0.0
-
-            rewards.append(reward)
-
-        return rewards
-
-
-# Global batch rewards instance
-_batch_rewards = BatchRewardsWrapper()
-
-
-def get_batch_reward_registry():
-    """
-    Get reward functions that use cached parsing to avoid repeated work.
-    Use this instead of reward_funcs_registry for better performance.
-    """
-    return {
-        "safe_accuracy": _batch_rewards.safe_accuracy_reward,
-        "safety_hazard_match": _batch_rewards.safety_hazard_match_reward,
-        "principle_accuracy": _batch_rewards.principle_accuracy_reward,
-        "iou_target_object": _batch_rewards.iou_target_object_reward,
-        "iou_constraint_object": _batch_rewards.iou_constraint_object_reward,
-        "format": format_reward,
-    }
 
 
 # ========================================================================

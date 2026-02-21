@@ -22,7 +22,7 @@ def extract_frames(data, tag, save_folder):
         step = data_i['step']
 
         sample_id = f'{tag}_{cnt:03d}'
-        image_path = f'images/{sample_id}.jpg'
+        image_path = f'{sample_id}.jpg'
         cnt += 1
 
         new_meta.append({
@@ -84,7 +84,6 @@ def main():
         save_folder = os.path.join(dataset_path, '..', 'processed')
     save_folder = os.path.abspath(save_folder)
     os.makedirs(save_folder, exist_ok=True)
-    import ipdb; ipdb.set_trace()
 
     all_new_metas = []
     meta_files = [
