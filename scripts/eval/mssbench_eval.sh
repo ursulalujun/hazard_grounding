@@ -14,6 +14,6 @@ export EVALUATION_API_KEY="bearer"
 
 # python -m evaluation.eval_mssbench --target_model checkpoints/Qwen3-VL-4B-Thinking-RFT-mixed-epoch2-wsh0.5-wp2.0-wit2.0-wic2.0 --version v1
 
-python -m evaluation.eval_mssbench --target_model checkpoints/Qwen3-VL-4B-Thinking --version v3
+python -m evaluation.eval_mssbench --target_model checkpoints/Qwen3-VL-4B-Thinking --version v1
 
-# rj -n ear_eval -i "registry.h.pjlab.org.cn/ailab-ai4good1-ai4good1_gpu/vllm:py311_torch-2.8.0-cu128_vllm-0.11.0rc2" -g 1 bash -exc /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding/scripts/eval/mssbench_eval.sh
+# rj -n mss_eval -i "registry.h.pjlab.org.cn/ailab-ai4good1-ai4good1_gpu/vllm:py311_torch-2.8.0-cu128_vllm-0.11.0rc2" -g 1 bash -exc /mnt/shared-storage-user/luxiaoya/code/EAI/SafePlanner/risk_grounding/scripts/eval/mssbench_eval.sh

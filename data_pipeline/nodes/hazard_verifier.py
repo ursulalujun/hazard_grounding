@@ -106,8 +106,6 @@ class HazardVerifier:
         """
         base64_image = image_to_base64(image)
 
-        edit_desc = risk_info["editing_plan"]
-        safety_principle = risk_info["safety_principle"]
         safety_hazard = risk_info["safety_hazard"]
         action = risk_info["action"]
         ins_context = f"\n- Action Instruction: {action}\n"
@@ -117,8 +115,6 @@ class HazardVerifier:
             try:
                 prompt = GROUNDING_PROMPT_TEMPLATE.format(
                     safety_hazard=safety_hazard, 
-                    safety_principle=safety_principle, 
-                    edit_desc=edit_desc, 
                     instruction_context=ins_context, 
                     label=label
                 )

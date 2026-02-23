@@ -198,7 +198,8 @@ class SafetyEvaluator:
             return {"error": f"Image not found: {image_path}"}
 
         gt_risks = gt_item["safety_risk"]
-        gt_desc = gt_risks['safety_hazard']
+        gt_desc = gt_risks["safety_hazard"]
+        action = gt_risks["action"]
 
         # Parse GT bboxes (action_triggered format)
         if gt_desc is None:
@@ -305,6 +306,7 @@ class SafetyEvaluator:
             "safe_acc": acc,
             "risk_match": match_score,
             "principle_acc": principle_acc,
+            "action": action,
             "iou_target_object": iou_target,
             "iou_constraint_object": iou_constraint,
             "gt_target_bbox": gt_target_bbox,

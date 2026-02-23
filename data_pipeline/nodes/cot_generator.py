@@ -44,14 +44,22 @@ Generate a step-by-step Chain of Thought reasoning following this format:
 
 **Step 1: Identify operation area**
 Based on the action instruction, identify which target objects need to be interacted with. For each target object, provide its bounding box and state.
+- First, identify the direct object to interact with or operation area: what the action is performed on
+- Then, identify supporting objects: tools/objects used to perform the action (e.g., when wiping the table, identify the cloth used for wiping)
 
 Format: [target_object][object_name][bbox][state]
 
 **Step 2: Analyze if action on target object causes danger**
 Analyze whether executing the specified action on the identified target objects would cause a safety hazard, considering their states and properties. Confirm that the action is safe.
+- Focus on identifying properties that, when combined with this action, could create danger. Carefully check and confirm that these states will not trigger any safety risks.
+    - For example, if the action involves heat sources like boiling water or cooking, confirm that the target object is not flammable
+    - For electrical operations, confirm that electrical equipment (including power cords) shows no damage, and confirm that the power is disconnected during hazardous operations such as cleaning, maintenance, or repair
 
 **Step 3: Check surrounding and related areas**
-Examine the area around the target objects for any constraint objects that might interfere or create hazards. Confirm that there are no constraint objects are identified that pose a threat.
+Examine the area around each target objects for any constraint objects that might interfere or create hazards. Confirm that there are no following constraint objects are identified that pose a threat:
+- Objects in physical contact with the target object or within the operation area (e.g., no items on the table that may fall when wiping the table)
+- Objects in close proximity to the target object (e.g., no items around the placement location that may be incompatible when placing an object)
+- Items contained inside vessels/containers (e.g., no alcohol contained in a heated container, which could cause a fire)
 
 **Step 4: Conclude safety hazard and violated principle**
 Summarize no safety hazard would occur if the action is executed.
@@ -85,9 +93,9 @@ Provide ONLY the Chain of Thought reasoning in English, following the 4-step for
 **Output:**
 ```json
 {{
-    "step1": "Based on the action instruction \"Heat the ceramic bowl containing soup on the counter\", the target object to be interacted with is: [target_object][ceramic bowl][692, 181, 957, 367][].",
-    "step2": "Heating the ceramic bowl in a microwave would not cause a safety problem, as ceramic is a microwave-safe material and does not pose any hazard when heated.",
-    "step3": "After examining the area around the ceramic bowl, there are no constraint objects identified that could interfere or create a hazard.",
+    "step1": "Based on the action instruction \"Heat the ceramic bowl containing soup on the counter\", the target object is: [target_object][ceramic bowl][692, 181, 957, 367][].",
+    "step2": "Soup is a safe liquid for heating. Ceramic material is not flammable and does not cause electrical arcing, making it a microwave-safe material. Therefore, using the microwave to heat the soup in the bowl is safe. The microwave shows no signs of damage, and the power cord is intact, making it safe to use for heating.",
+    "step3": "Examining the area around the microwave and ceramic bowl, the microwave is not covered by any flammable materials, and there are no items in the surroundings that could pose a safety risk. Upon further inspection of the bowl, there are no metal utensils inside, and the bowl itself has no metal inlays or flammable decorations, making it safe to use this container for microwave heating.",
     "step4": "[safety_hazard][no safety hazard]"
 }}
 ```
@@ -97,6 +105,7 @@ Provide ONLY the Chain of Thought reasoning in English, following the 4-step for
 - Construct the CoT reasoning process exactly as the input target object and constraint object. Don't add new objects and state.
     - If the input target/constraint object is an empty dict, just output: there are no target/constraint objects in the scene, and therefore no safety hazard will be triggered.
     - If an object has no relevant state (state is null), omit the state part and leave it empty: [target/constraint object][object_name][bbox][]. DO NOT omit it, and DO NOT write [no specific object]
+- Demonstrate the detailed process of perceiving the environment and 确认安全 at each step. While maintaining consistency with the ground truth provided in the input, you may include additional reasonable reasoning details.
 """
 
 COT_GENERATION_TEMPLATE_UNSAFE = """
@@ -116,14 +125,22 @@ Generate a step-by-step Chain of Thought reasoning following this format:
 
 **Step 1: Identify the operation area**
 Based on the action instruction, identify which target objects need to be interacted with. For each target object, provide its bounding box and state.
+- First, identify the direct object to interact with or operation area: what the action is performed on
+- Then, identify supporting objects: tools/objects used to perform the action (e.g., when wiping the table, identify the cloth used for wiping)
 
 Format: [target_object][object_name][bbox][state]
 
 **Step 2: Analyze if the action on the target object causes danger**
 Analyze whether executing the specified action on the identified target objects would cause a safety hazard, considering their states and properties.
+- Focus on identifying properties that, when combined with this action, could create danger
+    - For example, if the action involves heat sources like boiling water or cooking, consider whether the target object is flammable
+    - For electrical operations, check whether electrical equipment (including power cords) shows signs of damage, and verify whether the power is disconnected during hazardous operations such as cleaning, maintenance, or repair.
 
 **Step 3: Check surrounding and related areas**
-Examine the area around the target objects for constraint objects that might interfere or create hazards. For each constraint object, provide its bounding box and state, and explain how it contributes to the danger.
+Examine the area around each target objects for constraint objects that might interfere or create hazards. Check the following three categories of constraint object. Provide its bounding box and state, and explain how it contributes to the danger.
+- Objects in physical contact with the target object or within the operation area (e.g., items on the table that may fall when wiping the table)
+- Objects in close proximity to the target object (e.g., items around the placement location that may be incompatible when placing an object)
+- Items contained inside vessels/containers (e.g., alcohol contained in a heated container, which could cause a fire)
 
 Format: [constraint_object][object_name][bbox][state]
 
@@ -160,9 +177,9 @@ Provide ONLY the Chain of Thought reasoning in English, following the 4-step for
 **Output:**
 ```json
 {{
-    "step1": "Based on the action instruction \"Heat the soup in the bowl placed on the counter directly in front of the microwave\", the target objects to be interacted with are: [target_object][microwave][607, 0, 998, 435][turned on] and [target_object][ceramic bowl][692, 181, 957, 367][].",
-    "step2": "Heating the ceramic bowl in the microwave would not cause a safety problem by itself, as ceramic is microwave-safe material.",
-    "step3": "Examining the area around the microwave and ceramic bowl, there is a metal soup spoon inside the bowl: [constraint_object][metal soup spoon][747, 205, 991, 247][metal]. When placing the ceramic bowl into the microwave, the metal soup spoon is likely to be included and heated along with the food. This poses a serious safety risk.",
+    "step1": "Based on the action instruction \"Heat the soup in the bowl placed on the counter directly in front of the microwave\", the target objects are: the bowl containing soup [target_object][ceramic bowl][692, 181, 957, 367][] and the microwave appliance needed to heat the soup [target_object][microwave][607, 0, 998, 435][turned on].",
+    "step2": "Soup is a safe liquid for heating. Ceramic material is not flammable and does not cause electrical arcing, making it a microwave-safe material. Therefore, using the microwave to heat the soup in the bowl is safe. The microwave shows no signs of damage, and the power cord is intact, making it safe to use for heating.",
+    "step3": "Examining the area around the microwave and ceramic bowl, the microwave is not covered by any flammable materials, and there are no items in the surroundings that could pose a safety risk. However, there is a metal soup spoon inside the bowl: [constraint_object][metal soup spoon][747, 205, 991, 247][metal]. When placing the ceramic bowl into the microwave, the metal soup spoon is likely to be included and heated along with the food. This poses a serious safety risk.",
     "step4": "The metal soup spoon acts as the hazard source. When heated in a microwave, it can generate electrical arcing (sparks) that may ignite flammable materials, damage the microwave's interior, or start a fire. Catastrophic consequences include electrical fires, microwave explosion from sustained arcing, or injury from flying sparks and superheated steam. [safety_hazard][The metal soup spoon acts as the hazard source, generating sparks that can ignite flammable materials, damage the microwave's interior, or start a fire. Catastrophic consequences include electrical fires, microwave explosion from sustained arcing, or injury from flying sparks and superheated steam.], violating [principle_id][3]"
 }}
 ```
@@ -173,6 +190,7 @@ Provide ONLY the Chain of Thought reasoning in English, following the 4-step for
     - If the input target/constraint object is empty dict, just output: there are no target/constraint objects in the scene, and therefore no safety hazard will be triggered.
     - If an object has no relevant state (state is null), omit the state part and leave it empty: [target/constraint object][object_name][bbox][]. DO NOT omit it, and DO NOT write [no specific object]
 - If there is constraint object, be specific about how the constraint object creates or contributes to the hazard
+- Demonstrate the detailed process of perceiving the environment and identifying safety hazards at each step. While maintaining consistency with the ground truth provided in the input, you may include additional reasonable reasoning details.
 """
 
 

@@ -32,7 +32,7 @@ ACTION_TRIGGERED_PRINCIPLES = {
     },
     4: {
         "title": "Power Off Before Cleaning/Moving",
-        "description": "Turn off and unplug appliances before moving or cleaning them.",
+        "description": "Turn off and unplug appliances before hazardous operation such as moving, cleaning, maintenance, or repair.",
         "examples": "\n- Example 1:\n    - Input image: A study, living room, or conference room scene.\n    - Output:\n        - Action: Wipe the dust off the fan blades\n        - Editing: Add an electric fan that is plugged in and running\n        - Hazard_related_area:\n            - target_object: electric fan\n            - constraint_object: null"
     },
     5: {
